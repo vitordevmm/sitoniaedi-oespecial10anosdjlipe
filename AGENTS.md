@@ -1,0 +1,219 @@
+# 🎵 Sintonia Edição Especial 10 Anos DJ Lipe | Diretrizes e Regras do Projeto (AGENTS.md)
+
+> **REGRA FUNDAMENTAL E OBRIGATÓRIA DE AUTO-ATUALIZAÇÃO:**
+> Este arquivo `AGENTS.md` é a **fonte única da verdade (Single Source of Truth)** deste projeto.
+> O agente de IA **DEVE** consultar este arquivo em cada turno e **DEVE atualizá-lo ativamente** sempre que novas decisões de negócio, mudanças de schema, novos fluxos, novas credenciais/variáveis ou evoluções de design forem implementadas. Nunca deixe este arquivo defasado em relação ao código real.
+
+---
+
+## 1. Visão Geral e Contexto do Evento
+
+- **Nome do Evento:** Sintonia Edição Especial 10 Anos DJ Lipe
+- **Data Oficial:** 10 de Abril de 2027 (10/04/2027)
+- **Local Oficial:** Capitu, Tupaciguara - MG
+- **Porte do Evento:** Festival de grande escala com lotes e capacidade controlada (sem menção de contagem numérica fixa para manter a magnitude do evento)
+- **Objetivo Principal da Plataforma:**
+  1. **Venda de Ingressos em Alta Escala:** Venda de lotes com checkout rápido, PIX instantâneo e cartão de crédito, emissão de voucher seguro com QR Code.
+  2. **Vitrine e Experiência Imersiva:** Apresentação de impacto das atrações, contagem regressiva, setores/mapa do evento (palco frontal de grande porte; nesta edição o palco NÃO é 360°), informações essenciais e FAQ.
+  3. **Gestão e Segurança:** Prevenção absoluta contra duplicidade de ingressos (*overbooking*), concorrência no esgotamento de lotes e validação de pagamentos.
+- **Formato do Palco e Setores (Regra de Negócio Oficial do Mapa):**
+  - 🔒 **REGRA CRÍTICA DE CONFIDENCIALIDADE - NÃO DIVULGAR O MAPA VISUAL:**
+    O desenho/croqui estrutural do mapa do evento enviado pelo cliente é estritamente preliminar para fins de contexto interno de engenharia. Ele ainda contém correções e ajustes pendentes de produção. **É EXPRESSAMENTE PROIBIDO DIVULGAR OU EXIBIR O MAPA VISUAL/CROQUI DO EVENTO NO SITE** até autorização e liberação oficial das produtoras (GHVE Eventos & RL Produções).
+  - O palco **NÃO** será 360° nesta edição especial. É um palco frontal de grande porte com painéis de LED e mesa central do DJ Lipe.
+  - **Estrutura Oficial de Setores (Contexto Oficial):**
+    1. **Pista Geral & Bar Central:** Ampla arena com visão frontal de todo o show, mega Bar Central para atendimento rápido e banheiros exclusivos de pista (Destaque "Favorito do Público" com venda online direta).
+    2. **Lounge Rosa (12 Carros):** Ala lateral esquerda delimitada por gradil de segurança, valor sob consulta via WhatsApp oficial (`+55 34 9153-5921`).
+    3. **Lounge Azul (12 Carros):** Ala lateral direita delimitada por gradil de segurança, valor sob consulta via WhatsApp oficial (`+55 34 9153-5921`).
+    4. **Camarote no Palco (Apenas 4 Unidades):** Exclusivos, montados diretamente no palco ao lado da mesa do DJ Lipe, com acesso a camarim e serviço VIP de garçom, valor sob consulta via WhatsApp oficial (`+55 34 9153-5921`).
+  - **Grade de Ingressos (4 Cards Oficiais):**
+    1. **Pista (1º Lote - R$ 60,00):** Venda online direta com destaque "Favorito do Público".
+    2. **Lounge Rosa (12 Vagas):** Ala lateral esquerda para veículos, valor sob consulta via WhatsApp oficial (`+55 34 9153-5921`) com mensagem pré-configurada.
+    3. **Lounge Azul (12 Vagas):** Ala lateral direita para veículos, valor sob consulta via WhatsApp oficial (`+55 34 9153-5921`) com mensagem pré-configurada.
+    4. **Camarote no Palco (Apenas 4 Unidades):** Exclusivo no palco, valor sob consulta via WhatsApp oficial (`+55 34 9153-5921`) com mensagem pré-configurada.
+  - **Canal Oficial de Atendimento & Reservas WhatsApp:** `+55 34 9153-5921`
+- **Hierarquia de Marcas (Brand Hierarchy):**
+  - ⭐ **Estrela Principal / Foco Central:** **Especial 10 Anos DJ Lipe** (O evento celebra a década de carreira do DJ Lipe).
+  - 📢 **Marca Anunciadora / Selo:** **Sintonia** (A Sintonia é a marca/festival anunciador, sob a assinatura oficial "Sintonia Edição Especial 10 Anos DJ Lipe").
+  - 🏢 **Produtoras Oficiais:** **GHVE Eventos** e **RL Produções** (Créditos, rodapé e informações institucionais).
+  - 🏷️ **Favicon Oficial:** Ícone/Símbolo do **Especial 10 Anos DJ Lipe**.
+
+---
+
+## 2. Paleta de Cores e Identidade Visual Oficial
+
+O design deve ser ultra-premium, dark, moderno e vibrante, transmitindo a atmosfera de festival eletrônico/funk de alta categoria:
+
+| Token / Papel | Código HEX | Aplicação |
+| :--- | :--- | :--- |
+| **Gold Metallic (Gradiente Primário)** | `#c9a227` ➔ `#f5e6b8` | Acentos VIP, botões de ação primária (CTA de compra), badges de lote, luzes e reflexos dourados |
+| **Deep Midnight Navy (Contraste Nobre)**| `#0b1930` | Cards secundários, overlays atmosféricos, detalhes de iluminação e bordas de destaque |
+| **Pure Ice White (Texto Primário)** | `#f6f8fc` | Títulos, tipografia de alto contraste, preços e ícones principais |
+| **Muted Silver Slate (Texto Secundário)**| `#a8b2c3` | Subtítulos, descrições, labels, datas, linhas divisórias e ícones secundários |
+| **Obsidian Dark (Superfície de Cards)** | `#101116` | Background dos cards de ingresso, modais de checkout, accordions e dropdowns |
+| **Noir Ultra-Dark (Background Geral)** | `#07090d` | Fundo principal da página e do layout global (imersão noturna total) |
+
+---
+
+## 3. Gestão de Logos e Ativos de Marca
+
+Os arquivos vetoriais (.svg) oficiais estão alocados em `public/assets/logos/`:
+1. `logo-especial-10-anos-lipe.svg` (Destaque Principal e base para o Favicon).
+2. `logo-sintonia-360-escrita.svg` (Tipografia oficial da anunciadora).
+3. `logo-sintonia-360-simbolo.svg` (Ícone circular 360 da anunciadora).
+4. `logo-ghve-branca.svg` / `logo-ghve.svg` (Produtora GHVE Eventos - versão oficial branca para fundos escuros com viewBox equalizado).
+5. `logo-rl-producoes.svg` (Produtora RL Produções - versão oficial branca com monograma geométrico e equalizador).
+
+---
+
+## 4. Regra Rígida de Efeito Cascata (End-to-End Consistency)
+
+> **"SE ALTERAR QUALQUER COISA, TEM QUE ALTERAR TUDO QUE ENVOLVE AQUELA COISA"**
+
+Toda modificação estrutural, de campo ou de regra de negócio deve ser tratada como um **efeito cascata obrigatório**. É expressamente proibido fazer alterações parciais ou deixar arquivos órfãos com tipos desatualizados.
+
+Sempre que um modelo for criado ou alterado (Ex: `Ticket`, `Lot`, `Order`, `User`):
+1. **Tipagem TypeScript:** Atualizar as interfaces em `@/types/`.
+2. **Validação de Schemas (Zod):** Atualizar schemas de entrada e saída em `@/lib/validations/`.
+3. **Firestore & Database:** Atualizar as coleções, converters e consultas em `@/lib/firebase/`.
+4. **Regras de Segurança (`firestore.rules`):** Garantir que novos campos sejam permitidos e protegidos contra injeção ou escrita não autorizada.
+5. **APIs e Webhooks:** Atualizar as rotas do Next.js (App Router `app/api/...`), manipuladores de requisição e respostas.
+6. **Estado e Hooks:** Atualizar os hooks de consumo (`useTickets`, `useCheckout`, etc.) e estados globais/locais.
+7. **Componentes de UI:** Atualizar todos os componentes que renderizam ou interagem com esse dado (cards, formulários, modais, comprovantes).
+
+---
+
+## 5. Regras Críticas de Segurança e Concorrência
+
+Como o evento receberá **milhares de pessoas** com alta demanda simultânea, haverá forte concorrência e picos de acessos (abertura de lotes e viradas de preço):
+
+1. **Prevenção de Overbooking (Race Conditions no Firestore):**
+   - **NUNCA** decrementar estoque de ingressos com leituras e gravações soltas (`getDoc` seguido de `setDoc`).
+   - **OBRIGATÓRIO:** Utilizar transações atômicas do Firestore (`runTransaction`) para reservar e decrementar o lote de ingressos, garantindo que o limite do lote nunca seja ultrapassado.
+2. **Validação Estrita de Webhooks do Mercado Pago:**
+   - Todo webhook recebido em `/api/webhooks/mercadopago` **DEVE validar a assinatura criptográfica HMAC-SHA256** no cabeçalho `x-signature` usando o secret da aplicação.
+   - Nenhuma emissão de ingresso com QR Code pode ocorrer sem status explicitamente `approved` confirmado diretamente via API oficial do Mercado Pago.
+   - Idempotência: Registrar o `payment_id` do Mercado Pago para evitar processamento duplicado de uma mesma notificação.
+3. **Firestore Security Rules & User Architecture:**
+   - Usuários só podem ler e escrever seus próprios dados (`request.auth.uid == userId`).
+   - A coleção `/usuarios/{userId}` é obrigatoriamente indexada pelo **UID** do Firebase Authentication (`userId == auth.currentUser.uid`), eliminando dependência frágil de e-mail como ID de documento e acelerando leituras instantâneas O(1).
+   - Ingressos comprados só podem ser lidos pelo proprietário da compra.
+   - Nenhuma alteração de status de pagamento pode ser feita pelo cliente (somente via backend seguro / Admin SDK).
+4. **Proteção de Dados & Credenciais (LGPD & OWASP):**
+   - Sanitização de CPF (11 dígitos numéricos), e-mail e telefone de compradores.
+   - **Gestão de Senhas:** As senhas dos usuários permanecem gerenciadas e criptografadas exclusivamente pelo Firebase Authentication (algoritmo SCrypt oficial). Nenhuma senha é gravada em texto plano no Firestore.
+   - Credenciais de serviço (`serviceAccountKey.json`) e chaves privadas nunca são expostas ao frontend nem versionadas no repositório (`.gitignore`).
+5. **Schema Oficial do Usuário (`/usuarios/{userId}`):**
+   - `uid`: string (ID do usuário no Firebase Auth)
+   - `nome`: string (nome completo limpo e sem espaços extras)
+   - `email`: string (e-mail em minúsculas)
+   - `cpf`: string (11 dígitos numéricos limpos)
+   - `telefone`: string (apenas dígitos com DDD)
+   - `dataNascimento`: string (formato ISO `AAAA-MM-DD`)
+   - `idade`: number (idade calculada)
+   - `role`: "user" | "admin" | "staff"
+   - `createdAt`: Timestamp
+   - `updatedAt`: Timestamp
+
+---
+
+## 6. Stack Tecnológica e Habilidades (Skills) Vinculadas
+
+- **Frontend & Backend:** Next.js (App Router), React, TypeScript.
+- **Estilização & Componentes:** Tailwind CSS, Radix UI / Shadcn UI, Lucide Icons, animações fluidas e micro-interações.
+- **Banco de Dados & Autenticação:** Firebase Cloud Firestore + Firebase Authentication (preparado para migração em lote da base existente).
+- **Gateway de Pagamento:** Mercado Pago (SDK Oficial Node/JS, Checkout Transparente e Webhooks).
+- **Skills Ativas no Repositório:**
+  - `copywriting`, `marketing-psychology` (Copywriting de alta conversão, psicologia de vendas, urgência e escassez para festival/ingressos).
+  - `mp-integrate`, `mp-webhooks`, `mp-review` (Mercado Pago oficial).
+  - `firebase-firestore`, `firebase-auth-basics`, `firestore-rules-creation`, `firebase-security-rules-auditor` (Firebase oficial).
+  - `security-and-hardening`, `context-engineering` (Hardening e preservação de escopo).
+  - `ui-ux-pro-max`, `frontend-design`, `shadcn`, `web-design-guidelines` (Excelência visual e acessibilidade).
+
+---
+
+## 7. Diretrizes Estéticas Anti-Clichês de IA (Design Guardrails)
+
+Para preservar a autenticidade de grande festival eletrônico/funk e evitar a estética genérica de modelos de linguagem:
+1. **PROIBIDO:** Badges ovais com ícones de brilho/estrela (`Sparkles` ✨) e textos genéricos como "apresenta a maior comemoração da década".
+2. **PROIBIDO:** Layouts com cara de SaaS, dashboard corporativo ou landing page pré-fabricada de IA.
+3. **OBRIGATÓRIO:** Tipografia nobre e limpa (estilo pôster oficial de festival), uso imersivo e orgânico da iluminação dark & gold, e foco absoluto na força visual das marcas oficiais (**Especial 10 Anos DJ Lipe** e **Sintonia 360**).
+
+---
+
+## 8. Higiene e Organização do Workspace (Zero Scratch Bloat & Limpeza Imediata)
+
+> **REGRA PERMANENTE DE LIMPEZA E ORGANIZAÇÃO:**
+> O repositório deve se manter enxuto, profissional e livre de arquivos temporários de desenvolvimento ou scripts soltos.
+
+1. **Proibição de Pastas e Arquivos Scratch Persistentes:**
+   - **NUNCA** deixar pastas como `scratch/` ou arquivos de testes exploratórios descartáveis no repositório após concluir uma verificação (ex: `analyze_density.js`, `render_ascii.js`, `preview.html`, capturas `extracted_*.png`).
+   - Se for estritamente necessário criar um script temporário para inspecionar dados ou testar fórmulas, o arquivo deve ser executado e **imediatamente removido** antes da conclusão da tarefa.
+2. **Localização Adequada de Scripts Operacionais:**
+   - Apenas scripts com finalidade real e contínua de infraestrutura ou migração de banco de dados (como `scripts/migrate_users_to_uid.js`) podem residir no projeto, devendo ficar exclusivamente na pasta `scripts/`.
+3. **Gestão Limpa de Assets e Logos:**
+   - Nenhum arquivo de imagem ou vetor (.svg, .png, etc.) deve ficar solto na raiz do projeto.
+   - Todos os arquivos visuais oficiais pertencem obrigatoriamente a subpastas de `public/` (ex: `public/assets/logos/`), com nomes padronizados em kebab-case, sem duplicatas ou arquivos redundantes.
+   - Arquivos boilerplate padrão de frameworks que não são utilizados (ex: `file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg`) devem ser removidos para manter o bundle enxuto.
+
+---
+
+## 9. Diretrizes Jurídicas, Termos de Uso e Regulamento dos Lounges
+
+As regras operacionais e contratuais estabelecidas pelas produtoras **GHVE Eventos** e **RL Produções** governam a emissão de ingressos e a utilização dos setores:
+
+1. **Política Estrita de Não-Reembolso:**
+   - Ingressos e reservas não possuem direito a cancelamento, estorno ou devolução por desistência voluntária ou impossibilidade de comparecimento.
+   - O estorno financeiro é concedido exclusivamente na hipótese de cancelamento definitivo do festival por iniciativa da organização.
+2. **Sigilo e Responsabilidade pelo QR Code:**
+   - O voucher com QR Code é de utilização unitária, nominal e pessoal.
+   - A organização e as produtoras **NÃO se responsabilizam** caso o portador vaze, publique, tire prints ou compartilhe seu ingresso com terceiros. A entrada no sistema de catracas é autorizada estritamente para o primeiro portador que validar o código na portaria.
+3. **Regulamento Oficial dos Lounges Automotivos (Adesão Automática):**
+   - **Adesão no Pagamento:** O pagamento ou reserva de Lounge Automotivo (Lounge Rosa ou Lounge Azul) consolida aceite incondicional e irretratável às regras do contrato.
+   - **Estrutura Gradeada:** Vaga individual delimitada por gradil de segurança para 01 veículo curtir o evento com privacidade.
+   - **Valores, Pulseiras e Horários:** Valores de comercialização, lote, quantidade de pulseiras e horários de entrega antecipada do veículo são definidos e combinados diretamente com a organização/produção.
+   - **Tolerância Zero para Bebidas Externas:** Proibição absoluta de ingresso ou consumo de quaisquer bebidas trazidas de fora em garrafas, latas, caixas térmicas, coolers ou copos térmicos. Todo o consumo deve ser originado nos bares oficiais.
+   - **Revista Veicular Minuciosa:** Vistoria integral e obrigatória de todo o veículo (cabine, porta-malas, módulos e estepe), com **acompanhamento exclusivo e obrigatório do proprietário do carro** (acompanhantes aguardam fora da triagem).
+   - **Penalidade Máxima Sem Estorno:** A localização de qualquer bebida externa oculta acarreta retirada imediata do veículo do evento, devolução dos itens na saída e **PERDA TOTAL DE ESTORNO OU REEMBOLSO** por quebra de regra contratual essencial.
+   - **Imobilidade do Veículo:** Veículos devem permanecer estacionados e imóveis durante todo o festival até a liberação e orientação final da produção.
+4. **Consentimento Obrigatório no Cadastro (LGPD):**
+   - A criação de conta oficial exige marcação explícita de concordância com os Termos de Uso, Regulamento dos Lounges e Política de Privacidade de dados.
+   - Os documentos completos ficam permanentemente disponíveis no modal dedicado (`TermsModal.tsx`), no rodapé global e na rota dedicada [`/termos`](file:///src/app/termos/page.tsx).
+
+---
+
+## 10. Registro de Atualizações do Documento (Changelog)
+
+| Data | Autor | Resumo da Atualização |
+| :--- | :--- | :--- |
+| **21/10/2026** | Antigravity AI + Tulio | **LOGO / SÍMBOLO DA SINTONIA LINK PARA HOME:** O conjunto do símbolo da Sintonia e o selo dourado "APRESENTA" na navbar foram envolvidos em um link semântico com rolagem suave ao topo (`window.scrollTo({ top: 0, behavior: "smooth" })`) e retorno imediato à Home a partir de qualquer rota (incluindo `/termos`), com micro-interações de hover e active. |
+| **21/10/2026** | Antigravity AI + Tulio | **LINK TERMOS NO HEADER NAVBAR:** Adição do item de navegação `Termos` no menu superior do cabeçalho (`page.tsx`), posicionado harmonicamente ao lado de `Dúvidas` com link direto para a rota `/termos`. |
+| **21/10/2026** | Antigravity AI + Tulio | **TERMOS DE USO, REGULAMENTO DOS LOUNGES & POLÍTICA DE PRIVACIDADE:** Implementação completa da infraestrutura jurídica do festival. Criação do componente com abas interativas `@/components/legal/TermsModal.tsx` e da rota dedicada `@/app/termos/page.tsx`, abrangendo: (1) Política de não-reembolso (exceto se o evento for cancelado), (2) Isenção de responsabilidade por vazamento ou prints de QR Code pelo usuário, (3) Regulamento oficial de Lounges Automotivos adaptado do contrato (adesão automática, tolerância zero a bebidas trazidas de fora, revista veicular minuciosa com presença exclusiva do dono do carro, retirada imediata sem estorno, valores/pulseiras/horários a definir com a organização, som automotivo e responsabilidade civil), e (4) Política de Privacidade conforme a LGPD. Integração do checkbox obrigatório no modal de cadastro (`AuthModal.tsx`) e links de acesso direto no rodapé. |
+| **21/10/2026** | Antigravity AI + Tulio | **DESCRIÇÕES DOS INGRESSOS COMPLETAS & SEM CORTES:** Remoção do `line-clamp-2` nas descrições dos 4 cards de setores/ingressos (Pista, Lounge Rosa, Lounge Azul e Camarote no Palco). Padronização da altura mínima em `min-h-[52px]` com `leading-relaxed`, garantindo que 100% do texto seja exibido integralmente em todas as resoluções, mantendo o alinhamento simétrico da grade de cards e a harmonia visual. |
+| **21/10/2026** | Antigravity AI + Tulio | **DATEPICKER SMART PLACEMENT & MODAL OVERFLOW FIX:** Resolução estética definitiva para o corte inferior do calendário no modal de autenticação (`AuthModal.tsx`). O container do modal agora permite que elementos flutuantes saiam naturalmente sem corte (`overflow-visible`), com `rounded-t-2xl` na barra de brilho e suporte a rolagem no backdrop (`overflow-y-auto`). Além disso, o `@/components/ui/DatePicker.tsx` ganhou detecção automática de espaço de tela (`dropUp`), abrindo elegantemente para cima quando o espaço inferior for limitado (especialmente no mobile e laptops), garantindo 100% de visibilidade de todos os dias e dos botões "Hoje" e "Confirmar". |
+| **21/10/2026** | Antigravity AI + Tulio | **HIGIENE DO WORKSPACE & ZERO SCRATCH BLOAT:** Remoção completa da pasta temporária `scratch/` (15+ scripts e capturas de testes), eliminação de duplicatas de SVGs soltas na raiz e em `public/assets/logos/`, e deleção de arquivos boilerplate não utilizados em `public/`. Formalização da Seção 8 no `AGENTS.md` como diretriz permanente de limpeza imediata para todas as próximas iterações. |
+| **21/10/2026** | Antigravity AI + Tulio | **CALENDÁRIO ESPECIAL & RESPONSIVO (DATEPICKER):** Criação do componente customizado `@/components/ui/DatePicker.tsx` para substituir o seletor nativo do navegador (`<input type="date">`). O novo calendário possui design Dark & Gold de alta fidelidade, suporte a digitação com máscara automática em tempo real (`DD/MM/AAAA`), seletor rápido com 1 clique para saltar entre Anos (resolvendo a navegação para datas de nascimento) e Meses, grade de dias responsiva para mobile/tablet/desktop, e integração completa ao modal de autenticação. |
+| **21/10/2026** | Antigravity AI + Tulio | **INTEGRAÇÃO NATIVA FIREBASE AUTH & FIRESTORE:** Conexão nativa e transparente com a base existente de 883 usuários no Firebase Auth e 867 documentos na coleção `usuarios`. O site foi configurado para respeitar a organização original do banco de dados (documentos indexados por e-mail com `cpf`, `dataNascimento`, `email`, `idade`, `nome`, `role`, `telefone`, `uid`), implementando `AuthContext` com recuperação de perfil híbrida (e-mail e UID), `AuthModal` com design dark & gold para Login, Cadastro e Recuperação de Senha, e `firestore.rules` atualizado para proteger o acesso por proprietário via e-mail e UID. |
+| **21/10/2026** | Antigravity AI + Tulio | **FIREBASE & FIRESTORE SETUP + AUDITORIA DE USUÁRIOS:** Configuração completa do Firebase Client SDK e Firebase Admin SDK com credenciais do projeto `sintonia360-46761`. Auditoria da base existente de 883 usuários no Auth e 867 no Firestore. Criação de tipagem `@/types/user.ts`, validação de dados limpos `@/lib/validations/user.ts` (Zod) e regras de segurança `firestore.rules`. |
+| **20/10/2026** | Antigravity AI + Tulio | **LOGOS OFICIAIS GHVE & RL PRODUÇÕES:** Integração das logos oficiais em vetor (.svg) na paleta branca oficial das produtoras GHVE Eventos (`logo-ghve-branca.svg`) e RL Produções (`logo-rl-producoes.svg`). Aplicação no rodapé institucional (*Realização & Produção Oficial*) e no card de Infraestrutura/Segurança, com viewBoxes otimizados para equilíbrio de peso visual e eliminação de bordas vazias. |
+| **20/10/2026** | Antigravity AI + Tulio | **PRECIFICAÇÃO DIRETA & LIMPA (PISTA):** Remoção do preço 'de R$ 90' riscado (estética promocional) e do texto '+ Taxa de serviço'. Exibição limpa e direta do valor oficial do 1º Lote de Pista (R$ 60,00), mantendo alinhamento simétrico com os demais cards. |
+| **20/10/2026** | Antigravity AI + Tulio | **REMOÇÃO DA ÁREA VIP & DEFINIÇÃO DOS 4 SETORES OFICIAIS:** Remoção definitiva do setor 'Área VIP'. Reestruturação dos 4 cards oficiais: (1) Pista destacada como 'Favorito do Público' com venda online a R$ 60, (2) Lounge Rosa com 12 vagas de carros na ala esquerda, (3) Lounge Azul com 12 vagas de carros na ala direita e (4) Camarote no Palco com 4 unidades exclusivas. Atualização de links de WhatsApp e FAQ. |
+| **20/10/2026** | Antigravity AI + Tulio | **CONCORDÂNCIA DE GÊNERO FEMININO ('DA SINTONIA'):** Padronização de gênero gramatical de todas as referências ao evento para o feminino (*"da Sintonia Edição Especial 10 Anos DJ Lipe"*, *"à Sintonia"*), corrigindo os links de encaminhamento do WhatsApp oficial. |
+| **20/10/2026** | Antigravity AI + Tulio | **EQUALIZAÇÃO & ALINHAMENTO DOS CARDS DE INGRESSOS:** Reestruturação da grade dos 4 cards de lotes/setores com arquitetura Flexbox (`h-full`, `items-stretch`, `flex-1` nas features, blocos de preço fixados na base com `h-[78px]` e botões padronizados em `h-12`). Adição do 4º benefício no card de Pista, eliminando vazios e desníveis entre os cards. |
+| **20/10/2026** | Antigravity AI + Tulio | **REMOÇÃO DE CONTAGEM FIXA DE PÚBLICO & AJUSTE DO HERO:** Remoção de todas as menções numéricas fixas de capacidade (2.000 pessoas) no site, metadados e documentação. Atualização do texto do Hero para "milhares de pessoas vibrando na mesma sintonia!", substituição do badge de capacidade por "Ingressos: Lotes Limitados", e readequação das seções de FAQ e Estrutura com foco em conforto e lotação controlada. |
+| **20/10/2026** | Antigravity AI + Tulio | **NOVO NOME OFICIAL DA FESTA:** Atualização da denominação do evento para **Sintonia Edição Especial 10 Anos DJ Lipe** (em substituição a Sintonia 360 - Especial 10 Anos DJ Lipe). Aplicação do efeito cascata no Hero, FAQ, links de atendimento WhatsApp, rodapé, metadados SEO/OpenGraph e documentação de engenharia. |
+| **20/10/2026** | Antigravity AI + Tulio | **AJUSTE DE NOMENCLATURA DO LOCAL (CAPITU):** Atualização da nomenclatura oficial do local para **Capitu, Tupaciguara - MG** (em substituição a Parque Capitu / Parque de Exposições Capitu). Aplicação do efeito cascata no badge do Hero, FAQ, metadados SEO/OpenGraph e documentação. |
+| **20/10/2026** | Antigravity AI + Tulio | **SIMPLIFICAÇÃO DO HEADER (SÍMBOLO SINTONIA 360):** Remoção da logo com a escrita textual da Sintonia 360 no cabeçalho/navbar, mantendo exclusivamente o ícone/símbolo da marca ao lado do badge dourado "APRESENTA", garantindo uma identidade visual mais limpa, sofisticada e minimalista na barra de navegação superior. |
+| **19/10/2026** | Antigravity AI + Tulio | **GRADE DE 4 CARDS & INTEGRAÇÃO WHATSAPP:** Expansão da seção de ingressos para 4 cards oficiais: (1) Pista, (2) Área VIP Premium com destaque "Mais Recomendado", (3) Camarote no Palco (sob consulta) e (4) Lounges Automotivos (sob consulta). Os botões de Camarote e Lounges direcionam diretamente para o WhatsApp oficial `+55 34 9153-5921` com mensagem contextualizada pré-configurada identificando a origem do lead e o setor de interesse. |
+| **19/10/2026** | Antigravity AI + Tulio | **DATA & LOCAL OFICIAIS:** Definição oficial da data para **10 de Abril de 2027 (10/04/2027)** e local no **Parque de Exposições Capitu, em Tupaciguara - MG**, com capacidade confirmada para aproximadamente **2.000 pessoas**. Atualização em cascata aplicada nos badges do Hero, FAQs, metadados de SEO/OpenGraph e documentação. |
+| **19/10/2026** | Antigravity AI + Tulio | **AJUSTE DE CAPACIDADE (2.000 PESSOAS) & NOVO COPYWRITING:** Atualização da capacidade oficial para média de ~2.000 pessoas (reforçando a exclusividade, conforto e escassez real de ingressos). Redefinição completa do copywriting e da psicologia de conversão de toda a plataforma aplicando as skills `copywriting` e `marketing-psychology`, eliminando clichês de IA, estruturando ancoragem de preços nos lotes, adicionando a seção de Dúvidas Frequentes (FAQ) interativa para quebra de objeções, refinando o hook do Hero para *"com 2.000 pessoas vibrando na mesma sintonia"* em alusão à marca e reforçando gatilhos de segurança com Mercado Pago. |
+| **19/10/2026** | Antigravity AI + Tulio | **CONFIDENCIALIDADE DO MAPA:** Remoção completa e imediata do croqui visual do mapa e de qualquer imagem estrutural no site. O layout gráfico enviado pelo cliente permanece estritamente interno para alinhamento de produção (contém ajustes pendentes) e NÃO será divulgado até liberação oficial. A grade pública exibe os 3 lotes principais (Pista, Área VIP e Camarote), com chamada discreta para lounges sob consulta. |
+| **19/10/2026** | Antigravity AI + Tulio | Instalação e ativação das skills de alta conversão `copywriting` (229K+ installs) e `marketing-psychology` (160K+ installs) para redação persuasiva dos textos, chamadas para ação (CTAs) e gatilhos de compra de ingressos. |
+| **19/10/2026** | Antigravity AI + Tulio | Integração do Mapa Oficial do Evento e estruturação dos 4 setores: (1) Pista com Bar Central, (2) Área VIP Premium frente ao palco, (3) 4 Camarotes no Palco ao lado do DJ Lipe com camarim e banheiro exclusivo, e (4) Lounges Automotivos (Lounge Rosa e Lounge Azul com 12 carros de cada lado separados por gradil). |
+| **19/10/2026** | Antigravity AI + Tulio | Atualização da linha de copyright no rodapé para atribuição oficial às produtoras: `© 2026 GHVE Eventos & RL Produções. Todos os direitos reservados.` |
+| **19/10/2026** | Antigravity AI + Tulio | Regra de negócio: definição de que o palco NÃO será 360° nesta edição. Aplicação do efeito cascata em todo o projeto: atualização do subtítulo do Hero com a copy oficial fornecida, remoção de menções a "palco 360°/arena 360°" nos setores e na navegação, e renomeação dos setores para Pista, Área VIP Premium e Camarote Especial 10 Anos. |
+| **19/10/2026** | Antigravity AI + Tulio | Remoção do texto redundante "Sintonia 360 apresenta" acima da logo no Hero, mantendo a assinatura exclusivamente no header/navbar e dando foco imediato ao Especial 10 Anos DJ Lipe. |
+| **19/10/2026** | Antigravity AI + Tulio | Otimização dos viewBoxes dos SVGs da Sintonia 360 (remoção de áreas vazias/padding fantasma); ampliação visual das logos no header, aproximação imediata e estilização da tag "APRESENTA" no tom dourado principal (`#c9a227`). |
+| **19/10/2026** | Antigravity AI + Tulio | Remoção de badges clichês de IA (`Sparkles` e tags SaaS); adição da seção 7 (Diretrizes Estéticas Anti-Clichês de IA) e integração do design autêntico de festival. |
+| **19/10/2026** | Antigravity AI + Tulio | Criação inicial do `AGENTS.md` com a definição da hierarquia de marcas, paleta oficial, regra de cascata, segurança de concorrência para 4k pessoas e catálogo de logos. |
+
+

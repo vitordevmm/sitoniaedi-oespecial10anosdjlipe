@@ -1,0 +1,81 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: /usuarios/{userId}
+// Document fields:
+//   - uid: string (required, must match userId and request.auth.uid)
+//   - nome: string (required, min 2 chars)
+//   - email: string (required, valid email string)
+//   - cpf: string (required, 11 numeric digits)
+//   - telefone: string (optional/required, numeric digits)
+//   - dataNascimento: string (required, YYYY-MM-DD)
+//   - idade: number (required, >= 0)
+//   - role: string ("user" | "admin" | "staff")
+//   - createdAt: timestamp (server timestamp)
+//   - updatedAt: timestamp (server timestamp)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny for all unmatched paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(docId) {
+      return isAuthenticated() && (
+        request.auth.uid == docId ||
+        (request.auth.token.email != null && request.auth.token.email == docId) ||
+        (resource != null && resource.data.uid == request.auth.uid) ||
+        (resource != null && request.auth.token.email != null && resource.data.email == request.auth.token.email)
+      );
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.role == 'admin' || 
+         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    // User profile validator
+    function isValidUser(data) {
+      return data.uid == request.auth.uid &&
+        data.nome is string && data.nome.size() >= 2 && data.nome.size() <= 120 &&
+        data.email is string && data.email.size() >= 5 && data.email.size() <= 120 &&
+        data.cpf is string && data.cpf.size() == 11 &&
+        data.dataNascimento is string && data.dataNascimento.size() <= 10 &&
+        (!('telefone' in data) || (data.telefone is string && data.telefone.size() <= 20)) &&
+        (!('role' in data) || data.role in ['user', 'admin', 'staff']);
+    }
+
+    // Rules for /usuarios/{docId}
+    match /usuarios/{docId} {
+      // User can read their own profile, or admin can read
+      allow read: if isOwner(docId) || isAdmin();
+
+      // User can create their profile upon signup
+      allow create: if isAuthenticated() && 
+        isValidUser(request.resource.data) &&
+        (!('role' in request.resource.data) || request.resource.data.role == 'user');
+
+      // User can update their profile (cannot elevate their own role)
+      allow update: if isOwner(docId) && 
+        isValidUser(request.resource.data) &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.uid == resource.data.uid;
+
+      // Only admin can delete or change roles
+      allow delete: if isAdmin();
+    }
+  }
+}

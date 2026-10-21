@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  /* Tokens Oficiais Sintonia Edição Especial 10 Anos DJ Lipe */
+  --gold-primary: #c9a227;
+  --gold-light: #f5e6b8;
+  --midnight-navy: #0b1930;
+  --ice-white: #f6f8fc;
+  --silver-slate: #a8b2c3;
+  --obsidian-card: #101116;
+  --noir-bg: #07090d;
+
+  --background: var(--noir-bg);
+  --foreground: var(--ice-white);
+}
+
+@theme inline {
+  --color-gold-primary: var(--gold-primary);
+  --color-gold-light: var(--gold-light);
+  --color-midnight-navy: var(--midnight-navy);
+  --color-ice-white: var(--ice-white);
+  --color-silver-slate: var(--silver-slate);
+  --color-obsidian-card: var(--obsidian-card);
+  --color-noir-bg: var(--noir-bg);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background-color: var(--noir-bg);
+  color: var(--ice-white);
+  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Utilitários Dourados Oficiais */
+.gold-gradient {
+  background: linear-gradient(135deg, #c9a227 0%, #f5e6b8 100%);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #c9a227 0%, #f5e6b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-border-glow {
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  box-shadow: 0 0 25px -5px rgba(201, 162, 39, 0.15);
+}
+
