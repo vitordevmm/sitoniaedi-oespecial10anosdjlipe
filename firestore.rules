@@ -77,5 +77,17 @@ service cloud.firestore {
       // Only admin can delete or change roles
       allow delete: if isAdmin();
     }
+
+    // Rules for /ingressos/{ticketId}
+    match /ingressos/{ticketId} {
+      // User can read their own ticket by UID or email, or admin can read
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        (resource.data.userEmail != null && request.auth.token.email != null && resource.data.userEmail == request.auth.token.email) ||
+        isAdmin()
+      );
+      // Writing/creating tickets is strictly handled by the server (Admin SDK)
+      allow write: if isAdmin();
+    }
   }
 }

@@ -49,6 +49,12 @@
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "106acf230014cbb43ca34e6410371321b56ca742f9ee0442e8ec05bf02eb0384"
     },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "add02d48c58cc0e8456d9edca166d807611f88321f035ddf92e95ae543bd415c"
+    },
     "marketing-psychology": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
@@ -72,6 +78,12 @@
       "sourceType": "github",
       "skillPath": "plugins/mercadopago/skills/mp-webhooks/SKILL.md",
       "computedHash": "e3fc8c7d2557e3a1039f9206b217a97f5a0ec1139709626e6ab931ac9819d699"
+    },
+    "responsive-design": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/ui-design/skills/responsive-design/SKILL.md",
+      "computedHash": "155eff4b1bc8d867ae6bea9900c485ab1081de0b4873c1900adb66bf62466aed"
     },
     "security-and-hardening": {
       "source": "addyosmani/agent-skills",

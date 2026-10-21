@@ -265,7 +265,7 @@ export function DatePicker({
           }}
           placeholder={placeholder}
           required={required}
-          className="w-full py-2.5 pr-14 bg-transparent text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none font-medium tracking-wide"
+          className="w-full py-3 pr-14 bg-transparent text-base sm:text-sm font-mono text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none font-medium tracking-wider"
         />
 
         {/* Clear & Dropdown Icon Controls */}

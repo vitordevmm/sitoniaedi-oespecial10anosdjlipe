@@ -22,14 +22,16 @@ import {
   MessageCircle,
   User,
   LogOut,
+  QrCode,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { TermsModal, TermsTab } from "@/components/legal/TermsModal";
+import { Navbar } from "@/components/layout/Navbar";
 import Link from "next/link";
 
 export default function Home() {
-  const { user, profile, loading, logout } = useAuth();
+  const { user, profile, loading, logout, hasTicket } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<"login" | "register">("login");
   const [termsModalOpen, setTermsModalOpen] = useState(false);
@@ -74,117 +76,25 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#07090d] text-[#f6f8fc] selection:bg-[#c9a227] selection:text-[#07090d] relative overflow-hidden">
+    <div className="min-h-screen bg-[#07090d] text-[#f6f8fc] selection:bg-[#c9a227] selection:text-[#07090d] relative overflow-hidden pb-24 sm:pb-0">
       {/* Background Lighting & Atmosphere */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] bg-gradient-to-b from-[#c9a227]/15 via-[#0b1930]/40 to-transparent blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-80 right-0 w-[500px] h-[500px] bg-[#0b1930]/30 blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-96 left-0 w-[500px] h-[500px] bg-[#c9a227]/10 blur-3xl pointer-events-none -z-10" />
 
-      {/* HEADER / NAVIGATION */}
-      <header className="w-full border-b border-[#0b1930]/80 bg-[#07090d]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          {/* Brand Announcement: Sintonia 360 */}
-          <Link
-            href="/"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="flex items-center gap-2.5 sm:gap-3 group cursor-pointer transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
-            title="Voltar ao início da Sintonia"
-          >
-            {/* Sintonia 360 Symbol */}
-            <div className="relative h-12 w-9 sm:h-14 sm:w-11 flex-shrink-0">
-              <Image
-                src="/assets/logos/logo-sintonia-360-simbolo.svg"
-                alt="Símbolo Sintonia 360"
-                fill
-                className="object-contain group-hover:brightness-110 transition-all"
-                priority
-              />
-            </div>
-            {/* Apresenta Badge in Primary Gold */}
-            <span className="text-[11px] sm:text-xs font-bold tracking-[0.2em] uppercase px-2.5 py-0.5 rounded border border-[#c9a227]/40 bg-[#c9a227]/10 text-[#c9a227] shadow-[0_0_12px_rgba(201,162,39,0.15)] select-none group-hover:border-[#c9a227] group-hover:shadow-[0_0_16px_rgba(201,162,39,0.3)] transition-all">
-              Apresenta
-            </span>
-          </Link>
-
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium text-[#a8b2c3]">
-            <a href="#evento" className="hover:text-[#f5e6b8] transition-colors">
-              O Evento
-            </a>
-            <a href="#experiencia" className="hover:text-[#f5e6b8] transition-colors">
-              Experiência
-            </a>
-            <a href="#ingressos" className="hover:text-[#f5e6b8] transition-colors">
-              Ingressos
-            </a>
-            <a href="#faq" className="hover:text-[#f5e6b8] transition-colors">
-              Dúvidas
-            </a>
-            <Link href="/termos" className="hover:text-[#f5e6b8] transition-colors">
-              Termos
-            </Link>
-          </nav>
-
-          {/* Auth & Ticket CTA */}
-          <div className="flex items-center gap-3">
-            {loading ? (
-              <div className="h-9 w-20 bg-[#101116] animate-pulse rounded-full border border-[#0b1930]" />
-            ) : user ? (
-              <div className="relative group">
-                <button
-                  type="button"
-                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#101116] border border-[#c9a227]/40 text-xs font-semibold text-[#f5e6b8] hover:border-[#c9a227] transition-all"
-                >
-                  <User className="w-3.5 h-3.5 text-[#c9a227]" />
-                  <span className="max-w-[120px] truncate">
-                    {profile?.nome ? profile.nome.split(" ")[0] : user.email?.split("@")[0]}
-                  </span>
-                </button>
-                <div className="absolute right-0 top-full mt-2 w-48 py-2 rounded-xl bg-[#101116] border border-[#0b1930] shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                  <div className="px-4 py-2 border-b border-[#0b1930] text-[11px] text-[#a8b2c3]">
-                    <p className="font-semibold text-[#f6f8fc] truncate">{profile?.nome || "Minha Conta"}</p>
-                    <p className="truncate text-[10px] text-[#a8b2c3]/80">{user.email}</p>
-                  </div>
-                  <button
-                    onClick={() => logout()}
-                    type="button"
-                    className="w-full px-4 py-2 text-left text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2 transition-colors"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Sair da Conta</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthModalTab("login");
-                  setAuthModalOpen(true);
-                }}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold text-[#f6f8fc] bg-[#101116] border border-[#0b1930] hover:border-[#c9a227]/50 hover:text-[#f5e6b8] transition-all"
-              >
-                <User className="w-3.5 h-3.5 text-[#c9a227]" />
-                <span>Entrar</span>
-              </button>
-            )}
-
-            <a
-              href="#ingressos"
-              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:opacity-95 shadow-[0_0_20px_rgba(201,162,39,0.35)] transition-all hover:scale-105 active:scale-95"
-            >
-              <Ticket className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>Garantir Ingresso</span>
-            </a>
-          </div>
-        </div>
-      </header>
+      {/* HEADER / NAVIGATION UNIFICADA */}
+      <Navbar
+        onOpenAuth={(tab) => {
+          setAuthModalTab(tab);
+          setAuthModalOpen(true);
+        }}
+      />
 
       {/* HERO SECTION */}
-      <section id="evento" className="relative pt-12 pb-20 md:pt-16 md:pb-24">
+      <section id="evento" className="relative pt-10 pb-16 sm:pt-14 sm:pb-20 md:pt-16 md:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
           {/* MAIN HEADLINER LOGO: ESPECIAL 10 ANOS DJ LIPE */}
-          <div className="relative w-full max-w-[650px] h-[280px] sm:h-[380px] md:h-[440px] mb-8 flex items-center justify-center">
+          <div className="relative w-full max-w-[92vw] sm:max-w-[650px] h-[220px] sm:h-[380px] md:h-[440px] mb-6 sm:mb-8 flex items-center justify-center">
             {/* Glow halo behind main logo */}
             <div className="absolute inset-0 bg-gradient-to-b from-[#c9a227]/25 to-transparent rounded-full filter blur-2xl -z-10" />
             <Image
@@ -234,13 +144,23 @@ export default function Home() {
 
           {/* CTA Primary */}
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <a
-              href="#ingressos"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl text-base font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:opacity-95 shadow-[0_0_30px_rgba(201,162,39,0.4)] transition-all flex items-center justify-center gap-3 hover:scale-105 active:scale-95"
-            >
-              <span>GARANTIR INGRESSO NO LOTE ATUAL</span>
-              <ArrowRight className="w-5 h-5" />
-            </a>
+            {hasTicket ? (
+              <Link
+                href="/perfil?tab=ingressos"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl text-base font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] hover:opacity-95 shadow-[0_0_30px_rgba(201,162,39,0.4)] transition-all flex items-center justify-center gap-3 hover:scale-105 active:scale-95 border border-[#f5e6b8]"
+              >
+                <span>ACESSAR MEU INGRESSO (QR CODE)</span>
+                <QrCode className="w-5 h-5" />
+              </Link>
+            ) : (
+              <a
+                href="#ingressos"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl text-base font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:opacity-95 shadow-[0_0_30px_rgba(201,162,39,0.4)] transition-all flex items-center justify-center gap-3 hover:scale-105 active:scale-95"
+              >
+                <span>GARANTIR INGRESSO NO LOTE ATUAL</span>
+                <ArrowRight className="w-5 h-5" />
+              </a>
+            )}
             <a
               href="#experiencia"
               className="w-full sm:w-auto px-6 py-4 rounded-xl text-base font-semibold text-[#f6f8fc] bg-[#101116] border border-[#0b1930] hover:border-[#c9a227]/50 hover:bg-[#0b1930]/40 transition-all"
@@ -390,19 +310,31 @@ export default function Home() {
                   </div>
                   <p className="text-[11px] text-[#a8b2c3] mt-1 leading-none">1º Lote Disponível</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!user) {
-                      setAuthModalTab("register");
-                      setAuthModalOpen(true);
-                    }
-                  }}
-                  className="h-12 w-full px-4 rounded-xl text-sm font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:opacity-95 shadow-[0_0_20px_rgba(201,162,39,0.35)] transition-all flex items-center justify-center gap-2"
-                >
-                  <Ticket className="w-4 h-4 flex-shrink-0" />
-                  <span>GARANTIR PISTA</span>
-                </button>
+                {hasTicket ? (
+                  <Link
+                    href="/perfil?tab=ingressos"
+                    className="h-12 w-full px-4 rounded-xl text-sm font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] hover:opacity-95 shadow-[0_0_20px_rgba(201,162,39,0.35)] transition-all flex items-center justify-center gap-2 border border-[#f5e6b8]"
+                  >
+                    <QrCode className="w-4 h-4 flex-shrink-0" />
+                    <span>VER MEU INGRESSO</span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!user) {
+                        setAuthModalTab("register");
+                        setAuthModalOpen(true);
+                      } else {
+                        window.location.href = "/perfil?tab=ingressos";
+                      }
+                    }}
+                    className="h-12 w-full px-4 rounded-xl text-sm font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:opacity-95 shadow-[0_0_20px_rgba(201,162,39,0.35)] transition-all flex items-center justify-center gap-2"
+                  >
+                    <Ticket className="w-4 h-4 flex-shrink-0" />
+                    <span>GARANTIR PISTA</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -785,6 +717,29 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Floating Mobile Bottom Conversion Bar */}
+      <div className="sm:hidden fixed bottom-3 left-3 right-3 z-40 animate-in slide-in-from-bottom duration-300">
+        <div className="p-2 rounded-2xl bg-[#101116]/95 backdrop-blur-xl border border-[#c9a227]/40 shadow-[0_10px_30px_rgba(0,0,0,0.9)] flex items-center gap-2">
+          {hasTicket ? (
+            <Link
+              href="/perfil?tab=ingressos"
+              className="flex-1 py-3 px-4 rounded-xl text-center text-xs font-bold text-[#07090d] bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(201,162,39,0.3)] border border-[#f5e6b8]"
+            >
+              <QrCode className="w-4 h-4" />
+              <span>Ver Meu Ingresso • QR Code</span>
+            </Link>
+          ) : (
+            <a
+              href="#ingressos"
+              className="flex-1 py-3 px-4 rounded-xl text-center text-xs font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(201,162,39,0.3)]"
+            >
+              <Ticket className="w-4 h-4" />
+              <span>Garantir Ingresso • 1º Lote R$ 60</span>
+            </a>
+          )}
+        </div>
+      </div>
 
       {/* AUTHENTICATION MODAL */}
       <AuthModal

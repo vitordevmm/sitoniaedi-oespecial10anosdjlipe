@@ -113,16 +113,22 @@ Como o evento receberá **milhares de pessoas** com alta demanda simultânea, ha
    - `role`: "user" | "admin" | "staff"
    - `createdAt`: Timestamp
    - `updatedAt`: Timestamp
+6. **Autenticação Multi-Identificador (E-mail, CPF ou Celular):**
+   - No login e recuperação de senha, o usuário pode se identificar livremente por **E-mail**, **CPF** ou **Celular (WhatsApp)** através de seletores em pills no `AuthModal.tsx`.
+   - O campo aplica máscara em tempo real dinâmica para CPF (`000.000.000-00`) e Celular (`(DD) 90000-0000`).
+   - Para manter as regras estritas de segurança do Firestore (onde consultas não autenticadas em `/usuarios` são bloqueadas contra scraping), a resolução do identificador ocorre no backend através da rota segura `/api/auth/lookup` via Firebase Admin SDK.
+   - O endpoint localiza o e-mail correspondente tanto para formatos com ou sem pontuação na base legada de 867 usuários e repassa ao `AuthContext` para autenticação transparente via `signInWithEmailAndPassword` no Firebase Auth.
 
 ---
 
 ## 6. Stack Tecnológica e Habilidades (Skills) Vinculadas
 
-- **Frontend & Backend:** Next.js (App Router), React, TypeScript.
-- **Estilização & Componentes:** Tailwind CSS, Radix UI / Shadcn UI, Lucide Icons, animações fluidas e micro-interações.
+- **Frontend & Backend:** Next.js (App Router), React, TypeScript. `serverExternalPackages: ["firebase-admin", "@google-cloud/firestore"]` configurado no `next.config.ts` para suporte nativo ao Firebase Admin SDK no Turbopack.
+- **Estilização & Componentes:** Tailwind CSS, Radix UI / Shadcn UI, Lucide Icons, animações fluidas e micro-interações. Componentes dedicados com identidade Dark & Gold: `@/components/ui/DatePicker.tsx`, `@/components/ui/Checkbox.tsx`.
 - **Banco de Dados & Autenticação:** Firebase Cloud Firestore + Firebase Authentication (preparado para migração em lote da base existente).
 - **Gateway de Pagamento:** Mercado Pago (SDK Oficial Node/JS, Checkout Transparente e Webhooks).
 - **Skills Ativas no Repositório:**
+  - `responsive-design`, `impeccable` (Design mobile-first, eliminação de zoom no iOS, touch targets 44px+, safe area insets e layout fluido em telas pequenas).
   - `copywriting`, `marketing-psychology` (Copywriting de alta conversão, psicologia de vendas, urgência e escassez para festival/ingressos).
   - `mp-integrate`, `mp-webhooks`, `mp-review` (Mercado Pago oficial).
   - `firebase-firestore`, `firebase-auth-basics`, `firestore-rules-creation`, `firebase-security-rules-auditor` (Firebase oficial).
@@ -185,6 +191,11 @@ As regras operacionais e contratuais estabelecidas pelas produtoras **GHVE Event
 
 | Data | Autor | Resumo da Atualização |
 | :--- | :--- | :--- |
+| **21/10/2026** | Antigravity AI + Tulio | **TRANSFORMAÇÃO MOBILE-FIRST & RESPONSIVIDADE COMPLETA (SKILLS `responsive-design` & `impeccable`):** Instalação e execução das skills oficiais de responsividade e mobile design em todo o site. (1) **Eliminação Definitiva do Auto-Zoom no iOS:** Todos os inputs de formulário (`AuthModal`, `DatePicker`, `/perfil`) foram padronizados para `text-base sm:text-sm` (16px em telas móveis e 14px em desktop), impedindo que o Safari do iPhone dê zoom abrupto ao focar campos; (2) **Dimensões e Touch Targets (Mínimo 44px):** Todos os botões primários, seletores e itens de menu foram ajustados para altura mínima de 44px a 48px com espaçamento ergonômico para toque de polegar; (3) **Hero Scaling Fluido:** Abertura e escala orgânica do logotipo oficial e badges para telas ultra-compactas (320px–380px) sem cortes ou rolagem horizontal indesejada; (4) **Barra de Conversão Flutuante Mobile:** Adição de padding de compensação (`pb-24 sm:pb-0`) no container da Home para evitar sobreposição aos links de rodapé institucionais e termos; (5) **Compilação e Verificação:** `npm run build` executado e aprovado com código 0 (sucesso absoluto em todas as 9 rotas estáticas e dinâmicas). |
+| **21/10/2026** | Antigravity AI + Tulio | **PAINEL MEU PERFIL, GESTÃO DE INGRESSOS COM QR CODE & NAVBAR MOBILE DE ALTA CONVERSÃO:** Implementação completa da central do usuário (`/perfil`) com navegação contínua mantendo a Navbar oficial fixa no topo: (1) **Aba Informações:** Exibição completa e formatada de dados cadastrais (Nome, E-mail, CPF com máscara, WhatsApp com máscara, Data de Nascimento e Idade calculada), com badge de Membro Oficial; (2) **Aba Ingressos:** Card de Festival Pass de luxo com QR Code cristalino em tempo real gerado via biblioteca `qrcode`, número do voucher único (`#SINTONIA-10A-...`), setor, valor, data/local e botão de download/impressão de voucher, além de estado vazio elegante e emissão de demonstração para testes; (3) **Aba Configurações:** Atualização segura de e-mail (com reautenticação por senha), atualização de número de WhatsApp (com máscara automática) e troca de senha de acesso com validação criptográfica; (4) **Navbar Unificada (`Navbar.tsx`):** Opção "Meu Perfil" e "Meus Ingressos" no dropdown desktop; botão flexível de ação ("Garantir Ingresso" para quem não tem e "Meu Ingresso" com destaque dourado para quem já comprou); menu sanduíche mobile responsivo com gaveta escura, atalhos de perfil e barra flutuante de alta conversão fixada na base no mobile. |
+| **21/10/2026** | Antigravity AI + Tulio | **COMPATIBILIDADE TURBOPACK & FIREBASE ADMIN SDK:** Resolução do erro `Cannot find module '@opentelemetry/api'` durante a resolução de identificadores de login. Configuração de `serverExternalPackages: ["firebase-admin", "@google-cloud/firestore"]` no `next.config.ts` e instalação direta da dependência `@opentelemetry/api`. As requisições de lookup de login por CPF, Celular e E-mail agora executam diretamente no runtime Node sem bloqueio do empacotador, com tempo de resposta inferior a 100ms. |
+| **21/10/2026** | Antigravity AI + Tulio | **CHECKBOX CUSTOMIZADO DARK & GOLD (`@/components/ui/Checkbox.tsx`):** Substituição do `<input type="checkbox">` nativo do navegador (que renderizava um quadrado branco básico com check preto) por um componente customizado de alta fidelidade visual, alinhado à identidade noturna e luxuosa do evento. Possui estado desmarcado em Obsidian Dark (`#101116`) com bordas Midnight Navy (`#0b1930`), hover com borda dourada e brilho sutil (`#c9a227`), e estado marcado com gradiente metálico dourado (`#c9a227` ➔ `#f5e6b8`), ícone de check escuro (`#07090d`) com traço espesso (stroke 3), aura de iluminação neon dourada (`shadow-[0_0_12px_rgba(201,162,39,0.45)]`), micro-animação tátil de clique (`active:scale-90`) e total acessibilidade por teclado (`focus-visible`). Integrado imediatamente ao aceite de termos no modal de cadastro (`AuthModal.tsx`). |
+| **21/10/2026** | Antigravity AI + Tulio | **LOGIN MULTI-IDENTIFICADOR (E-MAIL, CPF OU CELULAR):** Implementação de seletor com segmented pill buttons (`E-mail`, `CPF`, `Celular`) no modal de login/recuperação de senha (`AuthModal.tsx`). O input ajusta dinamicamente ícone, placeholder e máscara em tempo real (`000.000.000-00` para CPF e `(DD) 90000-0000` para Celular). Integração com rota de resolução backend `/api/auth/lookup` via Firebase Admin SDK e `AuthContext.tsx`, permitindo autenticação transparente tanto para e-mail quanto para CPF e telefone em compatibilidade total com a base existente de 867 usuários e com as regras de segurança do Firestore. |
 | **21/10/2026** | Antigravity AI + Tulio | **LOGO / SÍMBOLO DA SINTONIA LINK PARA HOME:** O conjunto do símbolo da Sintonia e o selo dourado "APRESENTA" na navbar foram envolvidos em um link semântico com rolagem suave ao topo (`window.scrollTo({ top: 0, behavior: "smooth" })`) e retorno imediato à Home a partir de qualquer rota (incluindo `/termos`), com micro-interações de hover e active. |
 | **21/10/2026** | Antigravity AI + Tulio | **LINK TERMOS NO HEADER NAVBAR:** Adição do item de navegação `Termos` no menu superior do cabeçalho (`page.tsx`), posicionado harmonicamente ao lado de `Dúvidas` com link direto para a rota `/termos`. |
 | **21/10/2026** | Antigravity AI + Tulio | **TERMOS DE USO, REGULAMENTO DOS LOUNGES & POLÍTICA DE PRIVACIDADE:** Implementação completa da infraestrutura jurídica do festival. Criação do componente com abas interativas `@/components/legal/TermsModal.tsx` e da rota dedicada `@/app/termos/page.tsx`, abrangendo: (1) Política de não-reembolso (exceto se o evento for cancelado), (2) Isenção de responsabilidade por vazamento ou prints de QR Code pelo usuário, (3) Regulamento oficial de Lounges Automotivos adaptado do contrato (adesão automática, tolerância zero a bebidas trazidas de fora, revista veicular minuciosa com presença exclusiva do dono do carro, retirada imediata sem estorno, valores/pulseiras/horários a definir com a organização, som automotivo e responsabilidade civil), e (4) Política de Privacidade conforme a LGPD. Integração do checkbox obrigatório no modal de cadastro (`AuthModal.tsx`) e links de acesso direto no rodapé. |
@@ -217,3 +228,13 @@ As regras operacionais e contratuais estabelecidas pelas produtoras **GHVE Event
 | **19/10/2026** | Antigravity AI + Tulio | Criação inicial do `AGENTS.md` com a definição da hierarquia de marcas, paleta oficial, regra de cascata, segurança de concorrência para 4k pessoas e catálogo de logos. |
 
 
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

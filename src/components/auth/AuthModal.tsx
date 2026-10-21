@@ -17,6 +17,7 @@ import {
   IdCard,
 } from "lucide-react";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { TermsModal, TermsTab } from "@/components/legal/TermsModal";
 
 interface AuthModalProps {
@@ -43,6 +44,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const [termsInitialTab, setTermsInitialTab] = useState<TermsTab>("geral");
+
+  // Login identifier & method states
+  const [loginMethod, setLoginMethod] = useState<"email" | "cpf" | "phone">("email");
+  const [loginIdentifier, setLoginIdentifier] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -71,6 +76,46 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
     setTelefone(v);
   };
 
+  // Switch login method and reformat digits if applicable
+  const handleMethodChange = (newMethod: "email" | "cpf" | "phone") => {
+    setLoginMethod(newMethod);
+    const digits = loginIdentifier.replace(/\D/g, "");
+    if (newMethod === "cpf") {
+      let v = digits.slice(0, 11);
+      if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+      else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+      else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+      setLoginIdentifier(v);
+    } else if (newMethod === "phone") {
+      let v = digits.slice(0, 11);
+      if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+      else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+      setLoginIdentifier(v);
+    }
+  };
+
+  // Auto-masking for login identifier
+  const handleLoginIdentifierChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+
+    if (loginMethod === "cpf") {
+      let v = val.replace(/\D/g, "").slice(0, 11);
+      if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+      else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+      else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+      setLoginIdentifier(v);
+    } else if (loginMethod === "phone") {
+      let v = val.replace(/\D/g, "").slice(0, 11);
+      if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+      else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+      setLoginIdentifier(v);
+    } else {
+      setLoginIdentifier(val);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -79,10 +124,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
 
     try {
       if (tab === "login") {
-        if (!email || !password) {
-          throw new Error("Preencha e-mail e senha para entrar.");
+        if (!loginIdentifier || !password) {
+          throw new Error("Preencha seu e-mail, CPF ou telefone e sua senha para entrar.");
         }
-        await login(email, password);
+        await login(loginIdentifier, password);
         onClose();
       } else if (tab === "register") {
         if (!termsAccepted) {
@@ -111,22 +156,26 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
           onClose();
         }, 1200);
       } else if (tab === "forgot") {
-        if (!email) {
-          throw new Error("Informe o e-mail cadastrado.");
+        if (!loginIdentifier) {
+          throw new Error("Informe o e-mail, CPF ou telefone cadastrado.");
         }
-        await resetPassword(email);
-        setSuccess("Link de redefinição de senha enviado para seu e-mail!");
+        await resetPassword(loginIdentifier);
+        setSuccess("Link de redefinição de senha enviado para seu e-mail cadastrado!");
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Ocorreu um erro. Tente novamente.";
-      if (message.includes("auth/user-not-found") || message.includes("auth/wrong-password") || message.includes("auth/invalid-credential")) {
-        setError("E-mail ou senha incorretos.");
+      if (
+        message.includes("auth/user-not-found") ||
+        message.includes("auth/wrong-password") ||
+        message.includes("auth/invalid-credential")
+      ) {
+        setError("Dados de acesso ou senha incorretos.");
       } else if (message.includes("auth/email-already-in-use")) {
         setError("Este e-mail já está cadastrado. Faça login ou recupere a senha.");
       } else if (message.includes("auth/weak-password")) {
         setError("A senha escolhida é muito fraca. Use ao menos 6 dígitos.");
       } else if (message.includes("auth/invalid-email")) {
-        setError("Formato de e-mail inválido.");
+        setError("Formato de identificador inválido.");
       } else {
         setError(message);
       }
@@ -234,7 +283,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
                       placeholder="Seu nome completo"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors"
+                      className="w-full pl-10 pr-4 py-3 sm:py-2.5 min-h-[46px] rounded-xl bg-[#07090d] border border-[#0b1930] text-base sm:text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors"
                     />
                   </div>
                 </div>
@@ -253,7 +302,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                         value={cpf}
                         onChange={handleCpfChange}
                         placeholder="000.000.000-00"
-                        className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors"
+                        className="w-full pl-10 pr-3 py-3 sm:py-2.5 min-h-[46px] rounded-xl bg-[#07090d] border border-[#0b1930] text-base sm:text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors font-mono"
                       />
                     </div>
                   </div>
@@ -270,7 +319,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                         value={telefone}
                         onChange={handlePhoneChange}
                         placeholder="(34) 90000-0000"
-                        className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors"
+                        className="w-full pl-10 pr-3 py-3 sm:py-2.5 min-h-[46px] rounded-xl bg-[#07090d] border border-[#0b1930] text-base sm:text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors font-mono"
                       />
                     </div>
                   </div>
@@ -288,23 +337,100 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
               </>
             )}
 
-            {/* Email (Always required) */}
-            <div>
-              <label className="block text-[11px] uppercase tracking-wider text-[#a8b2c3] font-semibold mb-1.5">
-                E-mail *
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a8b2c3]" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seuemail@exemplo.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors"
-                />
+            {/* REGISTER: Email field */}
+            {tab === "register" && (
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider text-[#a8b2c3] font-semibold mb-1.5">
+                  E-mail *
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a8b2c3]" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seuemail@exemplo.com"
+                    className="w-full pl-10 pr-4 py-3 sm:py-2.5 min-h-[46px] rounded-xl bg-[#07090d] border border-[#0b1930] text-base sm:text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors"
+                  />
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* LOGIN & FORGOT: Multi-method identifier field (Email, CPF or Celular/WhatsApp) */}
+            {tab !== "register" && (
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#a8b2c3] font-semibold">
+                    {loginMethod === "email" ? "E-mail" : loginMethod === "cpf" ? "CPF" : "Celular (WhatsApp)"} *
+                  </label>
+
+                  {/* Method Switcher Pills */}
+                  <div className="flex items-center gap-1 bg-[#07090d] p-0.5 rounded-lg border border-[#0b1930]">
+                    <button
+                      type="button"
+                      onClick={() => handleMethodChange("email")}
+                      className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-all ${
+                        loginMethod === "email"
+                          ? "bg-[#c9a227] text-[#07090d] shadow-sm"
+                          : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+                      }`}
+                    >
+                      E-mail
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMethodChange("cpf")}
+                      className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-all ${
+                        loginMethod === "cpf"
+                          ? "bg-[#c9a227] text-[#07090d] shadow-sm"
+                          : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+                      }`}
+                    >
+                      CPF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMethodChange("phone")}
+                      className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-all ${
+                        loginMethod === "phone"
+                          ? "bg-[#c9a227] text-[#07090d] shadow-sm"
+                          : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+                      }`}
+                    >
+                      Celular
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  {loginMethod === "email" && (
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a8b2c3]" />
+                  )}
+                  {loginMethod === "cpf" && (
+                    <IdCard className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#c9a227]" />
+                  )}
+                  {loginMethod === "phone" && (
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#c9a227]" />
+                  )}
+
+                  <input
+                    type={loginMethod === "email" ? "email" : "text"}
+                    required
+                    value={loginIdentifier}
+                    onChange={handleLoginIdentifierChange}
+                    placeholder={
+                      loginMethod === "email"
+                        ? "seuemail@exemplo.com"
+                        : loginMethod === "cpf"
+                        ? "000.000.000-00"
+                        : "(34) 90000-0000"
+                    }
+                    className="w-full pl-10 pr-4 py-3 sm:py-2.5 min-h-[46px] rounded-xl bg-[#07090d] border border-[#0b1930] text-base sm:text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors font-medium font-mono"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Password (for login and register) */}
             {tab !== "forgot" && (
@@ -335,7 +461,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Sua senha"
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors"
+                    className="w-full pl-10 pr-10 py-3 sm:py-2.5 min-h-[46px] rounded-xl bg-[#07090d] border border-[#0b1930] text-base sm:text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 focus:outline-none focus:border-[#c9a227] transition-colors"
                   />
                   <button
                     type="button"
@@ -351,14 +477,14 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
             {/* Terms of Service & Privacy Policy Checkbox (Register Only) */}
             {tab === "register" && (
               <div className="pt-1">
-                <label className="flex items-start gap-2.5 p-3 rounded-xl bg-[#07090d] border border-[#0b1930] hover:border-[#c9a227]/40 transition-colors cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    required
-                    checked={termsAccepted}
-                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded border-[#0b1930] bg-[#101116] text-[#c9a227] focus:ring-[#c9a227] accent-[#c9a227] cursor-pointer flex-shrink-0"
-                  />
+                <label className="flex items-start gap-3 p-3 rounded-xl bg-[#07090d] border border-[#0b1930] hover:border-[#c9a227]/40 transition-colors cursor-pointer group">
+                  <div className="pt-0.5">
+                    <Checkbox
+                      checked={termsAccepted}
+                      onCheckedChange={(val) => setTermsAccepted(val)}
+                      required
+                    />
+                  </div>
                   <span className="text-xs text-[#a8b2c3] leading-snug select-none">
                     Declaro que li e aceito os{" "}
                     <button

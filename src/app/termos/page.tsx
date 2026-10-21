@@ -16,6 +16,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { TermsTab } from "@/components/legal/TermsModal";
+import { Navbar } from "@/components/layout/Navbar";
 
 export default function TermosPage() {
   const [activeTab, setActiveTab] = useState<TermsTab>("geral");
@@ -25,40 +26,8 @@ export default function TermosPage() {
       {/* Top Header Glow */}
       <div className="h-1.5 w-full bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] fixed top-0 left-0 right-0 z-50" />
 
-      {/* Navigation Header */}
-      <header className="sticky top-1.5 z-40 bg-[#07090d]/85 backdrop-blur-xl border-b border-[#0b1930]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-3 text-xs font-semibold text-[#a8b2c3] hover:text-[#f6f8fc] transition-colors group"
-          >
-            <div className="p-2 rounded-xl bg-[#101116] border border-[#0b1930] group-hover:border-[#c9a227]/40 transition-colors">
-              <ArrowLeft className="w-4 h-4 text-[#c9a227]" />
-            </div>
-            <span>Voltar para o Início</span>
-          </Link>
-
-          {/* Logo Brand Title */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 group hover:opacity-90 transition-opacity"
-            title="Voltar ao início da Sintonia"
-          >
-            <Image
-              src="/assets/logos/logo-sintonia-360-simbolo.svg"
-              alt="Sintonia"
-              width={28}
-              height={28}
-              className="object-contain group-hover:scale-105 transition-transform"
-              unoptimized
-            />
-            <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-[#f6f8fc] group-hover:text-[#f5e6b8] transition-colors">Sintonia Edição Especial 10 Anos DJ Lipe</p>
-              <p className="text-[10px] text-[#c9a227]">Regulamento & Políticas Oficiais</p>
-            </div>
-          </Link>
-        </div>
-      </header>
+      {/* Navigation Header Unificada */}
+      <Navbar />
 
       {/* Main Container */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
