@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const db = getAdminDb();
+    const db = await getAdminDb();
 
     // 2. CHECK AS CPF (11 digits)
     if (digits.length === 11 && (type === "auto" || type === "cpf")) {

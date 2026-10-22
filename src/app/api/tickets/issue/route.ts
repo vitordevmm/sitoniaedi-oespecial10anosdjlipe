@@ -74,8 +74,9 @@ export async function POST(req: NextRequest) {
       paymentMethod: "pix",
     };
 
+    const db = await getAdminDb();
     // Save in Firestore collection /ingressos/{ticketId}
-    await getAdminDb().collection("ingressos").doc(ticketId).set({
+    await db.collection("ingressos").doc(ticketId).set({
       ...newTicket,
       createdAt: new Date(),
     });

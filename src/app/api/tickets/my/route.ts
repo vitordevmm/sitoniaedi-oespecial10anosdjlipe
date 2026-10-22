@@ -15,7 +15,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const ticketsRef = getAdminDb().collection("ingressos");
+    const db = await getAdminDb();
+    const ticketsRef = db.collection("ingressos");
     let ticketDocs: any[] = [];
 
     if (userId) {
