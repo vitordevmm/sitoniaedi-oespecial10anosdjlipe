@@ -154,9 +154,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ identifier: trimmed }),
     });
 
-    const data = await res.json();
-    if (!res.ok || !data.email) {
-      throw new Error(data.error || "Nenhum cadastro encontrado com este CPF ou telefone.");
+    let data: any = null;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error(
+        res.status === 500
+          ? "Erro de configuração no servidor. Verifique se as variáveis da Vercel foram salvas e o redeploy foi concluído."
+          : "Falha na comunicação com o servidor. Tente novamente em instantes."
+      );
+    }
+
+    if (!res.ok || !data?.email) {
+      throw new Error(data?.error || "Nenhum cadastro encontrado com este CPF ou telefone.");
     }
 
     return String(data.email).toLowerCase();
