@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
+import { MobileSplashScreen } from "@/components/layout/MobileSplashScreen";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -88,6 +89,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#07090d" />
       </head>
       <body className="min-h-full flex flex-col bg-[#07090d] text-[#f6f8fc]">
+        <MobileSplashScreen />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
