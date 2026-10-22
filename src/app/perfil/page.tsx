@@ -349,48 +349,53 @@ function ProfileContent() {
         </div>
       </div>
 
-      {/* Profile Navigation Tabs (Informações, Ingressos, Configurações) */}
-      <div className="flex rounded-2xl bg-[#101116] p-1.5 border border-[#0b1930] mb-8 shadow-lg">
+      {/* Profile Navigation Tabs (Informações, Ingressos, Configurações) - 100% Responsivo */}
+      <div className="w-full grid grid-cols-3 gap-1 rounded-2xl bg-[#101116] p-1 sm:p-1.5 border border-[#0b1930] mb-8 shadow-xl overflow-hidden">
+        {/* TAB 1: INFORMAÇÕES / PERFIL */}
         <button
           type="button"
           onClick={() => changeTab("informacoes")}
-          className={`flex-1 py-3 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+          className={`py-2.5 sm:py-3 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-h-[44px] ${
             activeTab === "informacoes"
               ? "bg-[#0b1930] text-[#f5e6b8] shadow-md border border-[#c9a227]/40"
-              : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+              : "text-[#a8b2c3] hover:text-[#f6f8fc] border border-transparent"
           }`}
         >
-          <User className="w-4 h-4 text-[#c9a227]" />
-          <span>Informações</span>
+          <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#c9a227] flex-shrink-0" />
+          <span className="hidden sm:inline">Informações</span>
+          <span className="sm:hidden">Perfil</span>
         </button>
 
+        {/* TAB 2: INGRESSOS */}
         <button
           type="button"
           onClick={() => changeTab("ingressos")}
-          className={`flex-1 py-3 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all relative ${
+          className={`py-2.5 sm:py-3 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all relative min-h-[44px] ${
             activeTab === "ingressos"
               ? "bg-[#0b1930] text-[#f5e6b8] shadow-md border border-[#c9a227]/40"
-              : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+              : "text-[#a8b2c3] hover:text-[#f6f8fc] border border-transparent"
           }`}
         >
-          <TicketIcon className="w-4 h-4 text-[#c9a227]" />
+          <TicketIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#c9a227] flex-shrink-0" />
           <span>Ingressos</span>
           {hasTicket && (
-            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] flex-shrink-0" />
           )}
         </button>
 
+        {/* TAB 3: CONFIGURAÇÕES / AJUSTES */}
         <button
           type="button"
           onClick={() => changeTab("configuracoes")}
-          className={`flex-1 py-3 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+          className={`py-2.5 sm:py-3 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all min-h-[44px] ${
             activeTab === "configuracoes"
               ? "bg-[#0b1930] text-[#f5e6b8] shadow-md border border-[#c9a227]/40"
-              : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+              : "text-[#a8b2c3] hover:text-[#f6f8fc] border border-transparent"
           }`}
         >
-          <Settings className="w-4 h-4 text-[#c9a227]" />
-          <span>Configurações</span>
+          <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#c9a227] flex-shrink-0" />
+          <span className="hidden sm:inline">Configurações</span>
+          <span className="sm:hidden">Ajustes</span>
         </button>
       </div>
 
@@ -399,7 +404,7 @@ function ProfileContent() {
       {/* ========================================================================= */}
       {activeTab === "informacoes" && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="rounded-3xl bg-[#101116] border border-[#0b1930] p-6 sm:p-8 shadow-xl">
+          <div className="rounded-2xl sm:rounded-3xl bg-[#101116] border border-[#0b1930] p-4 sm:p-6 md:p-8 shadow-xl">
             <h3 className="text-base sm:text-lg font-bold text-[#f6f8fc] mb-6 flex items-center gap-2.5">
               <IdCard className="w-5 h-5 text-[#c9a227]" />
               <span>Dados Cadastrais Oficiais</span>
@@ -668,14 +673,14 @@ function ProfileContent() {
       {activeTab === "configuracoes" && (
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* Card 1: Alterar Telefone / WhatsApp */}
-          <div className="rounded-3xl bg-[#101116] border border-[#0b1930] p-6 sm:p-8 shadow-xl">
+          <div className="rounded-2xl sm:rounded-3xl bg-[#101116] border border-[#0b1930] p-4 sm:p-6 md:p-8 shadow-xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-[#c9a227]">
+              <div className="p-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-[#c9a227] flex-shrink-0">
                 <Phone className="w-5 h-5" />
               </div>
-              <div>
-                <h4 className="text-base font-bold text-[#f6f8fc]">Alterar Celular / WhatsApp</h4>
-                <p className="text-xs text-[#a8b2c3]">Utilizado para contato e notificações do seu pedido</p>
+              <div className="min-w-0">
+                <h4 className="text-sm sm:text-base font-bold text-[#f6f8fc] truncate">Alterar Celular / WhatsApp</h4>
+                <p className="text-[11px] sm:text-xs text-[#a8b2c3] truncate">Utilizado para contato e notificações do seu pedido</p>
               </div>
             </div>
 
@@ -687,7 +692,7 @@ function ProfileContent() {
                     : "bg-red-950/40 text-red-300 border border-red-800/40"
                 }`}
               >
-                {phoneMessage.type === "success" ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                {phoneMessage.type === "success" ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
                 <span>{phoneMessage.text}</span>
               </div>
             )}
@@ -719,14 +724,14 @@ function ProfileContent() {
           </div>
 
           {/* Card 2: Alterar E-mail */}
-          <div className="rounded-3xl bg-[#101116] border border-[#0b1930] p-6 sm:p-8 shadow-xl">
+          <div className="rounded-2xl sm:rounded-3xl bg-[#101116] border border-[#0b1930] p-4 sm:p-6 md:p-8 shadow-xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-[#c9a227]">
+              <div className="p-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-[#c9a227] flex-shrink-0">
                 <Mail className="w-5 h-5" />
               </div>
-              <div>
-                <h4 className="text-base font-bold text-[#f6f8fc]">Alterar E-mail Principal</h4>
-                <p className="text-xs text-[#a8b2c3]">O endereço onde você recebe comprovantes e notificações</p>
+              <div className="min-w-0">
+                <h4 className="text-sm sm:text-base font-bold text-[#f6f8fc] truncate">Alterar E-mail Principal</h4>
+                <p className="text-[11px] sm:text-xs text-[#a8b2c3] truncate">O endereço onde você recebe comprovantes e notificações</p>
               </div>
             </div>
 
@@ -738,7 +743,7 @@ function ProfileContent() {
                     : "bg-red-950/40 text-red-300 border border-red-800/40"
                 }`}
               >
-                {emailMessage.type === "success" ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                {emailMessage.type === "success" ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
                 <span>{emailMessage.text}</span>
               </div>
             )}
@@ -761,7 +766,7 @@ function ProfileContent() {
 
                 <div>
                   <label className="block text-xs font-semibold text-[#a8b2c3] mb-1.5 uppercase tracking-wider">
-                    Sua Senha Atual (Confirmação de Segurança)
+                    Sua Senha Atual (Confirmação)
                   </label>
                   <input
                     type="password"
@@ -786,7 +791,7 @@ function ProfileContent() {
           </div>
 
           {/* Card 3: Alterar Senha */}
-          <div className="rounded-3xl bg-[#101116] border border-[#0b1930] p-6 sm:p-8 shadow-xl">
+          <div className="rounded-2xl sm:rounded-3xl bg-[#101116] border border-[#0b1930] p-4 sm:p-6 md:p-8 shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-[#c9a227]">
                 <Lock className="w-5 h-5" />

@@ -28,6 +28,7 @@ import { useAuth } from "@/context/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { TermsModal, TermsTab } from "@/components/legal/TermsModal";
 import { Navbar } from "@/components/layout/Navbar";
+import { EventCountdown } from "@/components/home/EventCountdown";
 import Link from "next/link";
 
 export default function Home() {
@@ -107,37 +108,62 @@ export default function Home() {
           </div>
 
           {/* Subtitle / Event Hook */}
-          <p className="max-w-2xl text-base sm:text-lg md:text-xl text-[#a8b2c3] leading-relaxed mb-10">
+          <p className="max-w-2xl text-base sm:text-lg md:text-xl text-[#a8b2c3] leading-relaxed mb-6 sm:mb-8">
             Uma década de histórias, e em comemoração a isso, uma noite especial.
             Seja bem-vindo à <strong className="text-[#f6f8fc]">Sintonia Edição Especial 10 Anos DJ Lipe</strong> com{" "}
             <strong className="text-[#f5e6b8]">milhares de pessoas</strong> vibrando na mesma sintonia.
           </p>
 
-          {/* Event Quick Details Badges */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl mb-12">
-            <div className="flex items-center justify-center gap-3 p-3.5 rounded-xl bg-[#101116] border border-[#0b1930] hover:border-[#c9a227]/40 transition-colors">
-              <Calendar className="w-5 h-5 text-[#c9a227] flex-shrink-0" />
-              <div className="text-left">
-                <p className="text-[10px] uppercase tracking-wider text-[#a8b2c3]">Data Oficial</p>
-                <p className="text-xs sm:text-sm font-semibold text-[#f6f8fc]">10 de Abril de 2027</p>
-              </div>
-            </div>
+          {/* OFFICIAL EVENT COUNTDOWN (Com inteligência de ocultação de unidades e alta performance) */}
+          <EventCountdown />
 
-            <div className="flex items-center justify-center gap-3 p-3.5 rounded-xl bg-[#101116] border border-[#0b1930] hover:border-[#c9a227]/40 transition-colors">
-              <MapPin className="w-5 h-5 text-[#c9a227] flex-shrink-0" />
-              <div className="text-left">
-                <p className="text-[10px] uppercase tracking-wider text-[#a8b2c3]">Local</p>
-                <p className="text-xs sm:text-sm font-semibold text-[#f6f8fc] leading-tight">Capitu</p>
-                <p className="text-[11px] text-[#a8b2c3]">Tupaciguara - MG</p>
+          {/* Event Quick Details (Clean sem moldura externa) */}
+          <div className="w-full max-w-2xl mb-10">
+            <div className="grid grid-cols-3 divide-x divide-[#0b1930]/80 py-2 px-1 sm:px-4">
+              {/* Item 1: Data */}
+              <div className="flex flex-col items-center text-center px-1 sm:px-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#c9a227]/20 to-[#0b1930] border border-[#c9a227]/40 flex items-center justify-center text-[#f5e6b8] shadow-[0_0_12px_rgba(201,162,39,0.25)] mb-1.5 sm:mb-2 flex-shrink-0">
+                  <Calendar className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#c9a227]" />
+                </div>
+                <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#a8b2c3] font-semibold mb-0.5">
+                  Data Oficial
+                </p>
+                <p className="text-xs sm:text-sm font-bold text-[#f6f8fc] leading-tight mb-0.5">
+                  <span className="sm:hidden">10 ABR 2027</span>
+                  <span className="hidden sm:inline">10 de Abril de 2027</span>
+                </p>
+                <p className="text-[10px] sm:text-xs text-[#c9a227] font-medium truncate max-w-full">
+                  Sábado
+                </p>
               </div>
-            </div>
 
-            <div className="flex items-center justify-center gap-3 p-3.5 rounded-xl bg-[#101116] border border-[#0b1930] hover:border-[#c9a227]/40 transition-colors">
-              <Ticket className="w-5 h-5 text-[#c9a227] flex-shrink-0" />
-              <div className="text-left">
-                <p className="text-[10px] uppercase tracking-wider text-[#a8b2c3]">Ingressos</p>
-                <p className="text-xs sm:text-sm font-semibold text-[#f5e6b8]">Lotes Limitados</p>
-                <p className="text-[11px] text-[#a8b2c3]">Vendas Abertas</p>
+              {/* Item 2: Local */}
+              <div className="flex flex-col items-center text-center px-1 sm:px-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#c9a227]/20 to-[#0b1930] border border-[#c9a227]/40 flex items-center justify-center text-[#f5e6b8] shadow-[0_0_12px_rgba(201,162,39,0.25)] mb-1.5 sm:mb-2 flex-shrink-0">
+                  <MapPin className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#c9a227]" />
+                </div>
+                <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#a8b2c3] font-semibold mb-0.5">
+                  Local
+                </p>
+                <p className="text-xs sm:text-sm font-bold text-[#f6f8fc] leading-tight mb-0.5">
+                  Capitu
+                </p>
+                <p className="text-[10px] sm:text-xs text-[#a8b2c3] truncate max-w-full">
+                  Tupaciguara - MG
+                </p>
+              </div>
+
+              {/* Item 3: Ingressos */}
+              <div className="flex flex-col items-center text-center px-1 sm:px-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#c9a227]/20 to-[#0b1930] border border-[#c9a227]/40 flex items-center justify-center text-[#f5e6b8] shadow-[0_0_12px_rgba(201,162,39,0.25)] mb-1.5 sm:mb-2 flex-shrink-0">
+                  <Ticket className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#c9a227]" />
+                </div>
+                <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#a8b2c3] font-semibold mb-0.5">
+                  Ingressos
+                </p>
+                <p className="text-xs sm:text-sm font-bold text-[#f5e6b8] leading-tight">
+                  1º Lote
+                </p>
               </div>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { Ticket } from "@/types/ticket";
+import { sendTicketIssuedEmail } from "@/lib/email/resend";
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,6 +78,20 @@ export async function POST(req: NextRequest) {
     await adminDb.collection("ingressos").doc(ticketId).set({
       ...newTicket,
       createdAt: new Date(),
+    });
+
+    // Disparar o e-mail oficial com QR Code e Voucher via Resend
+    sendTicketIssuedEmail({
+      userEmail: newTicket.userEmail,
+      userName: newTicket.userName,
+      userCpf: newTicket.userCpf,
+      ticketId: newTicket.id,
+      sectorName: newTicket.sectorName,
+      lotName: newTicket.lotName,
+      price: newTicket.price,
+      qrPayload: newTicket.qrPayload,
+    }).catch((err) => {
+      console.error("[Resend] Falha assíncrona ao enviar e-mail de ingresso:", err);
     });
 
     return NextResponse.json({ success: true, ticket: newTicket });
