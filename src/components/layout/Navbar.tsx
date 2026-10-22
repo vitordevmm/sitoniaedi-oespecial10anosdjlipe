@@ -169,7 +169,7 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
                   <Link
                     href="/perfil?tab=ingressos"
                     onClick={() => setUserDropdownOpen(false)}
-                    className="w-full px-4 py-2 text-left text-xs text-[#a8b2c3] hover:bg-[#0b1930] hover:text-[#f6f8fc] flex items-center gap-2.5 transition-colors"
+                    className="w-full px-4 py-2.5 text-left text-xs font-semibold text-[#f6f8fc] hover:bg-[#0b1930] hover:text-[#f5e6b8] flex items-center gap-2.5 transition-colors"
                   >
                     <QrCode className="w-4 h-4 text-[#c9a227]" />
                     <span>Meus Ingressos</span>
@@ -182,9 +182,9 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
                   <Link
                     href="/perfil?tab=configuracoes"
                     onClick={() => setUserDropdownOpen(false)}
-                    className="w-full px-4 py-2 text-left text-xs text-[#a8b2c3] hover:bg-[#0b1930] hover:text-[#f6f8fc] flex items-center gap-2.5 transition-colors"
+                    className="w-full px-4 py-2.5 text-left text-xs font-semibold text-[#f6f8fc] hover:bg-[#0b1930] hover:text-[#f5e6b8] flex items-center gap-2.5 transition-colors"
                   >
-                    <Settings className="w-4 h-4 text-[#a8b2c3]" />
+                    <Settings className="w-4 h-4 text-[#c9a227]" />
                     <span>Configurações</span>
                   </Link>
 
@@ -197,9 +197,9 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
                       logout();
                     }}
                     type="button"
-                    className="w-full px-4 py-2 text-left text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2.5 transition-colors"
+                    className="w-full px-4 py-2.5 text-left text-xs font-semibold text-red-400 hover:bg-red-950/30 hover:text-red-300 flex items-center gap-2.5 transition-colors"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-4 h-4 text-red-400" />
                     <span>Sair da Conta</span>
                   </button>
                 </div>
