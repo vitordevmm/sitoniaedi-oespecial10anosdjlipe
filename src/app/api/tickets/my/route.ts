@@ -4,7 +4,7 @@ import { Ticket } from "@/types/ticket";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const searchParams = req.nextUrl.searchParams;
     const userId = searchParams.get("userId");
     const email = searchParams.get("email");
 
@@ -56,6 +56,15 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ tickets });
   } catch (error: unknown) {
+    // Permite que o Next.js trate o bailout de prerender de requisições dinâmicas sem logar erro
+    if (
+      error &&
+      typeof error === "object" &&
+      "digest" in error &&
+      typeof (error as Record<string, unknown>).digest === "string"
+    ) {
+      throw error;
+    }
     console.error("Error fetching user tickets:", error);
     const message = error instanceof Error ? error.message : "Erro ao carregar ingressos.";
     return NextResponse.json({ error: message }, { status: 500 });
