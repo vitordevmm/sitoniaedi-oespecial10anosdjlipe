@@ -47,8 +47,15 @@ export function TicketQRCode({ payload, size = 180, className = "" }: TicketQRCo
   if (loading || !dataUrl) {
     return (
       <div
-        style={{ width: size, height: size }}
-        className={`flex items-center justify-center bg-white rounded-xl shadow-inner ${className}`}
+        style={{
+          width: size,
+          height: size,
+          colorScheme: "light",
+          forcedColorAdjust: "none",
+          backgroundColor: "#ffffff",
+          isolation: "isolate",
+        }}
+        className={`flex items-center justify-center bg-white rounded-xl shadow-inner qr-code-shield ${className}`}
       >
         <Loader2 className="w-6 h-6 animate-spin text-[#c9a227]" />
       </div>
@@ -56,13 +63,30 @@ export function TicketQRCode({ payload, size = 180, className = "" }: TicketQRCo
   }
 
   return (
-    <div className={`p-2 bg-white rounded-xl shadow-[0_0_20px_rgba(201,162,39,0.3)] inline-block ${className}`}>
+    <div
+      style={{
+        colorScheme: "light",
+        forcedColorAdjust: "none",
+        backgroundColor: "#ffffff",
+        isolation: "isolate",
+      }}
+      className={`p-2 bg-white rounded-xl shadow-[0_0_20px_rgba(201,162,39,0.3)] inline-block qr-code-shield ${className}`}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={dataUrl}
         alt="QR Code do Ingresso Sintonia 10 Anos DJ Lipe"
         width={size}
         height={size}
+        style={{
+          colorScheme: "light",
+          forcedColorAdjust: "none",
+          backgroundColor: "#ffffff",
+          filter: "none",
+          WebkitFilter: "none",
+          mixBlendMode: "normal",
+          imageRendering: "pixelated",
+        }}
         className="block rounded-lg"
       />
     </div>

@@ -51,6 +51,8 @@ export async function generateTicketEmailHtml(data: TicketEmailData): Promise<st
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   <title>Seu Ingresso Confirmado • Sintonia Especial 10 Anos DJ Lipe</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #07090d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f6f8fc; -webkit-font-smoothing: antialiased;">
@@ -143,8 +145,8 @@ export async function generateTicketEmailHtml(data: TicketEmailData): Promise<st
                 <!-- QR Code Display Area -->
                 <tr>
                   <td align="center" style="padding: 30px 20px 20px 20px; text-align: center;">
-                    <div style="display: inline-block; padding: 14px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(201, 162, 39, 0.35);">
-                      <img src="${qrCodeDataUrl}" alt="QR Code do Ingresso" width="220" height="220" style="display: block; width: 220px; height: 220px; border: 0;" />
+                    <div style="display: inline-block; padding: 14px; background-color: #ffffff !important; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(201, 162, 39, 0.35); color-scheme: light; forced-color-adjust: none;">
+                      <img src="${qrCodeDataUrl}" alt="QR Code do Ingresso" width="220" height="220" style="display: block; width: 220px; height: 220px; border: 0; background-color: #ffffff !important; color-scheme: light;" />
                     </div>
 
                     <!-- Ticket ID Voucher -->

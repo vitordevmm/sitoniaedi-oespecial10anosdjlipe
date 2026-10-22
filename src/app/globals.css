@@ -12,6 +12,10 @@
 
   --background: var(--noir-bg);
   --foreground: var(--ice-white);
+
+  /* Trava o esquema de cores estritamente em dark, desativando auto-inversão de navegadores */
+  color-scheme: dark only;
+  forced-color-adjust: none;
 }
 
 @theme inline {
@@ -28,26 +32,95 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  color-scheme: dark only;
+  forced-color-adjust: none;
+  background-color: #07090d;
+}
+
 body {
+  color-scheme: dark only;
   background-color: var(--noir-bg);
   color: var(--ice-white);
   font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Utilitários Dourados Oficiais */
+/* Utilitários Dourados Oficiais com proteção de contraste */
 .gold-gradient {
   background: linear-gradient(135deg, #c9a227 0%, #f5e6b8 100%);
+  forced-color-adjust: none;
 }
 
 .gold-gradient-text {
   background: linear-gradient(135deg, #c9a227 0%, #f5e6b8 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+  forced-color-adjust: none;
 }
 
 .gold-border-glow {
   border: 1px solid rgba(201, 162, 39, 0.35);
   box-shadow: 0 0 25px -5px rgba(201, 162, 39, 0.15);
+  forced-color-adjust: none;
 }
+
+/* Blindagem absoluta para elementos e gradientes dourados contra alteração de contraste ou clareamento */
+[class*="from-[#c9a227]"],
+[class*="to-[#f5e6b8]"],
+[class*="text-[#f5e6b8]"],
+[class*="text-[#c9a227]"],
+[class*="bg-[#f5e6b8]"],
+[class*="border-[#c9a227]"] {
+  forced-color-adjust: none !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Blindagem absoluta do QR Code contra qualquer inversão de modo escuro de navegadores */
+.qr-code-shield {
+  color-scheme: light !important;
+  forced-color-adjust: none !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  isolation: isolate !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+.qr-code-shield img,
+.qr-code-shield canvas {
+  color-scheme: light !important;
+  forced-color-adjust: none !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  isolation: isolate !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+  mix-blend-mode: normal !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+/* Impressão com contraste 100% fiel */
+@media print {
+  body {
+    background-color: #07090d !important;
+    color: #f6f8fc !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .qr-code-shield {
+    background-color: #ffffff !important;
+    color-scheme: light !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
 
