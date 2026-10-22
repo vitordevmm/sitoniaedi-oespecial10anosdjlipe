@@ -21,7 +21,7 @@ export async function generateTicketEmailHtml(data: TicketEmailData): Promise<st
     lotName,
     price,
     qrPayload,
-    appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sintonia10anos.com.br",
+    appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sintoniaedicaoespecial.online",
   } = data;
 
   // Generate QR Code data URL (PNG)

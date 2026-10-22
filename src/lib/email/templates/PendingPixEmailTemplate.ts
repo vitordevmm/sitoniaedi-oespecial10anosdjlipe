@@ -16,7 +16,7 @@ export function generatePendingPixEmailHtml(data: PendingPixEmailData): string {
     lotName = "1º Lote Oficial",
     price = 60.0,
     pixCopiaECola = "",
-    paymentUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://sintonia10anos.com.br"}/#ingressos`,
+    paymentUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://sintoniaedicaoespecial.online"}/#ingressos`,
     expiresInMinutes = 15,
   } = data;
 

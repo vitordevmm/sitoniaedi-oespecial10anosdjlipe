@@ -29,7 +29,8 @@ export const resend = new Proxy({} as Resend, {
   },
 });
 
-const DEFAULT_FROM = process.env.RESEND_FROM_EMAIL || "Sintonia Especial 10 Anos <onboarding@resend.dev>";
+const DEFAULT_FROM =
+  process.env.RESEND_FROM_EMAIL || "Sintonia Especial 10 Anos <ingressos@sintoniaedicaoespecial.online>";
 
 export interface SendTicketParams {
   userEmail: string;
