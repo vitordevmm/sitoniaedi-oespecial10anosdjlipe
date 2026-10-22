@@ -43,6 +43,7 @@ function ProfileContent() {
     hasTicket,
     loading,
     ticketsLoading,
+    updateUserProfile,
     updateUserEmail,
     updateUserPhone,
     updateUserPassword,
@@ -56,6 +57,7 @@ function ProfileContent() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   // Settings form states
+  const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [emailCurrentPassword, setEmailCurrentPassword] = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
@@ -81,8 +83,11 @@ function ProfileContent() {
     }
   }, [searchParams]);
 
-  // Pre-fill phone in settings
+  // Pre-fill name and phone in settings
   useEffect(() => {
+    if (profile?.nome && !newName) {
+      setNewName(profile.nome);
+    }
     if (profile?.telefone && !newPhone) {
       let p = profile.telefone.replace(/\D/g, "");
       if (p.length === 11) {
@@ -174,21 +179,27 @@ function ProfileContent() {
     }
   };
 
-  // Handle Phone Update
-  const handlePhoneSubmit = async (e: React.FormEvent) => {
+  // Handle Personal Data Update (Name & Phone)
+  const handlePersonalDataSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPhoneMessage(null);
     try {
       setPhoneLoading(true);
-      await updateUserPhone(newPhone);
-      setPhoneMessage({ type: "success", text: "Número de WhatsApp/telefone atualizado com sucesso!" });
+      await updateUserProfile({
+        nome: newName.trim(),
+        telefone: newPhone,
+      });
+      setPhoneMessage({ type: "success", text: "Dados cadastrais atualizados com sucesso!" });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Erro ao atualizar telefone.";
+      const message = err instanceof Error ? err.message : "Erro ao atualizar dados cadastrais.";
       setPhoneMessage({ type: "error", text: message });
     } finally {
       setPhoneLoading(false);
     }
   };
+
+  // Backward-compatibility alias
+  const handlePhoneSubmit = handlePersonalDataSubmit;
 
   // Handle Password Update
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -672,15 +683,15 @@ function ProfileContent() {
       {/* ========================================================================= */}
       {activeTab === "configuracoes" && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          {/* Card 1: Alterar Telefone / WhatsApp */}
+          {/* Card 1: Alterar Dados Cadastrais (Nome Completo & Celular / WhatsApp) */}
           <div className="rounded-2xl sm:rounded-3xl bg-[#101116] border border-[#0b1930] p-4 sm:p-6 md:p-8 shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-[#c9a227] flex-shrink-0">
-                <Phone className="w-5 h-5" />
+                <User className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <h4 className="text-sm sm:text-base font-bold text-[#f6f8fc] truncate">Alterar Celular / WhatsApp</h4>
-                <p className="text-[11px] sm:text-xs text-[#a8b2c3] truncate">Utilizado para contato e notificações do seu pedido</p>
+                <h4 className="text-sm sm:text-base font-bold text-[#f6f8fc] truncate">Alterar Dados Pessoais</h4>
+                <p className="text-[11px] sm:text-xs text-[#a8b2c3] truncate">Nome completo e celular vinculados aos seus ingressos e avisos</p>
               </div>
             </div>
 
@@ -697,19 +708,37 @@ function ProfileContent() {
               </div>
             )}
 
-            <form onSubmit={handlePhoneSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-[#a8b2c3] mb-1.5 uppercase tracking-wider">
-                  Novo Número de Celular / WhatsApp
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newPhone}
-                  onChange={handlePhoneChange}
-                  placeholder="(34) 90000-0000"
-                  className="w-full h-12 px-4 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-[#c9a227] focus:ring-1 focus:ring-[#c9a227] text-base sm:text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 outline-none transition-all font-mono"
-                />
+            <form onSubmit={handlePersonalDataSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[#a8b2c3] mb-1.5 uppercase tracking-wider">
+                    Nome Completo do Titular
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="Seu nome completo"
+                    className="w-full h-12 px-4 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-[#c9a227] focus:ring-1 focus:ring-[#c9a227] text-base sm:text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 outline-none transition-all"
+                  />
+                  <p className="text-[11px] text-[#a8b2c3]/60 mt-1">Impresso nos vouchers nominais para entrada no festival</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#a8b2c3] mb-1.5 uppercase tracking-wider">
+                    Celular / WhatsApp
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newPhone}
+                    onChange={handlePhoneChange}
+                    placeholder="(34) 90000-0000"
+                    className="w-full h-12 px-4 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-[#c9a227] focus:ring-1 focus:ring-[#c9a227] text-base sm:text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 outline-none transition-all font-mono"
+                  />
+                  <p className="text-[11px] text-[#a8b2c3]/60 mt-1">Contato para confirmação de compras e avisos de portaria</p>
+                </div>
               </div>
 
               <button
@@ -718,7 +747,7 @@ function ProfileContent() {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-bold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:opacity-95 active:scale-95 transition-all disabled:opacity-50"
               >
                 {phoneLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                <span>Atualizar Número de Telefone</span>
+                <span>Salvar Dados Cadastrais</span>
               </button>
             </form>
           </div>

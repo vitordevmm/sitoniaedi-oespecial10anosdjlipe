@@ -41,6 +41,11 @@ interface AuthContextType {
   resetPassword: (identifier: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
   refreshTickets: () => Promise<void>;
+  updateUserProfile: (updates: {
+    nome?: string;
+    telefone?: string;
+    dataNascimento?: string;
+  }) => Promise<void>;
   updateUserEmail: (newEmail: string, currentPass: string) => Promise<void>;
   updateUserPhone: (newPhone: string) => Promise<void>;
   updateUserPassword: (currentPass: string, newPass: string) => Promise<void>;
@@ -62,21 +67,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const email = firebaseUser.email?.toLowerCase();
       let profileData: UserProfile | null = null;
 
-      // 1. Try finding by email (matches the 862 existing documents)
-      if (email) {
+      // 1. Try finding by UID first (modern O(1) format)
+      const uidDocRef = doc(db, "usuarios", firebaseUser.uid);
+      const uidSnap = await getDoc(uidDocRef);
+      if (uidSnap.exists()) {
+        profileData = uidSnap.data() as UserProfile;
+      }
+
+      // 2. Fallback to finding by email (legacy 862 records format)
+      if (!profileData && email) {
         const emailDocRef = doc(db, "usuarios", email);
         const emailSnap = await getDoc(emailDocRef);
         if (emailSnap.exists()) {
           profileData = emailSnap.data() as UserProfile;
-        }
-      }
-
-      // 2. If not found by email, try finding by UID (matches UID-based docs)
-      if (!profileData) {
-        const uidDocRef = doc(db, "usuarios", firebaseUser.uid);
-        const uidSnap = await getDoc(uidDocRef);
-        if (uidSnap.exists()) {
-          profileData = uidSnap.data() as UserProfile;
         }
       }
 
@@ -226,6 +229,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await sendPasswordResetEmail(auth, targetEmail);
   };
 
+  // Profile update: Personal Data (Nome, Telefone, Data de Nascimento)
+  const updateUserProfile = async (updates: {
+    nome?: string;
+    telefone?: string;
+    dataNascimento?: string;
+  }) => {
+    if (!user) throw new Error("Usuário não autenticado.");
+
+    const token = await user.getIdToken();
+    const res = await fetch("/api/user/update", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updates),
+    });
+
+    let resData: any = null;
+    try {
+      resData = await res.json();
+    } catch {
+      throw new Error("Falha na comunicação com o servidor.");
+    }
+
+    if (!res.ok) {
+      throw new Error(resData?.error || "Erro ao atualizar dados cadastrais.");
+    }
+
+    await refreshProfile();
+  };
+
+  // Profile update: Phone helper
+  const updateUserPhone = async (newPhone: string) => {
+    await updateUserProfile({ telefone: newPhone });
+  };
+
   // Profile update: Email
   const updateUserEmail = async (newEmail: string, currentPass: string) => {
     if (!user || !user.email) throw new Error("Usuário não autenticado.");
@@ -239,52 +279,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 2. Update email in Auth
     await updateEmail(user, cleanNewEmail);
 
-    // 3. Update in Firestore
-    const oldEmail = user.email.toLowerCase();
-    const docRefOld = doc(db, "usuarios", oldEmail);
-    const docSnapOld = await getDoc(docRefOld);
+    // 3. Update in Firestore via secure backend API
+    const token = await user.getIdToken(true);
+    const res = await fetch("/api/user/update-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        newEmail: cleanNewEmail,
+        oldEmail: user.email.toLowerCase(),
+      }),
+    });
 
-    if (docSnapOld.exists()) {
-      const data = docSnapOld.data();
-      // Write to new email docId and keep UID
-      await setDoc(doc(db, "usuarios", cleanNewEmail), {
-        ...data,
-        email: cleanNewEmail,
-        updatedAt: serverTimestamp(),
-      });
-    } else {
-      // If was UID-based
-      await setDoc(
-        doc(db, "usuarios", user.uid),
-        { email: cleanNewEmail, updatedAt: serverTimestamp() },
-        { merge: true }
-      );
+    let resData: any = null;
+    try {
+      resData = await res.json();
+    } catch {
+      throw new Error("Falha ao registrar e-mail no servidor.");
     }
 
-    await refreshProfile();
-  };
-
-  // Profile update: Phone
-  const updateUserPhone = async (newPhone: string) => {
-    if (!user) throw new Error("Usuário não autenticado.");
-    const cleanPhone = sanitizePhone(newPhone);
-    if (cleanPhone.length < 10) {
-      throw new Error("Telefone inválido. Informe DDD + número completo.");
+    if (!res.ok) {
+      throw new Error(resData?.error || "Erro ao atualizar e-mail no cadastro.");
     }
-
-    const email = user.email?.toLowerCase();
-    if (email) {
-      await setDoc(
-        doc(db, "usuarios", email),
-        { telefone: cleanPhone, updatedAt: serverTimestamp() },
-        { merge: true }
-      );
-    }
-    await setDoc(
-      doc(db, "usuarios", user.uid),
-      { telefone: cleanPhone, updatedAt: serverTimestamp() },
-      { merge: true }
-    );
 
     await refreshProfile();
   };
@@ -343,6 +361,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         resetPassword,
         refreshProfile,
         refreshTickets,
+        updateUserProfile,
         updateUserEmail,
         updateUserPhone,
         updateUserPassword,
