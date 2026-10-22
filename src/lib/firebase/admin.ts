@@ -1,9 +1,10 @@
-import admin from "firebase-admin";
-import { getApps, getApp, cert, type App } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
+import { initializeApp, getApps, getApp, cert, type App } from "firebase-admin/app";
+import { getAuth, type Auth } from "firebase-admin/auth";
+import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
 let _adminApp: App | null = null;
+let _adminAuth: Auth | null = null;
+let _adminDb: Firestore | null = null;
 
 export function getAdminApp(): App {
   if (getApps().length > 0) {
@@ -19,6 +20,7 @@ export function getAdminApp(): App {
   let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
   if (privateKey) {
+    privateKey = privateKey.trim();
     // Remove aspas externas se inserido com aspas na Vercel
     if (
       (privateKey.startsWith('"') && privateKey.endsWith('"')) ||
@@ -36,7 +38,7 @@ export function getAdminApp(): App {
     );
   }
 
-  _adminApp = admin.initializeApp({
+  _adminApp = initializeApp({
     credential: cert({
       projectId,
       clientEmail,
@@ -47,32 +49,41 @@ export function getAdminApp(): App {
   return _adminApp;
 }
 
-export function getAdminAuth() {
-  return getAuth(getAdminApp());
+export function getAdminAuth(): Auth {
+  if (!_adminAuth) {
+    _adminAuth = getAuth(getAdminApp());
+  }
+  return _adminAuth;
 }
 
-export function getAdminDb() {
-  return getFirestore(getAdminApp());
+export function getAdminDb(): Firestore {
+  if (!_adminDb) {
+    _adminDb = getFirestore(getAdminApp());
+  }
+  return _adminDb;
 }
 
-// Proxies lazy para compatibilidade total sem quebrar em tempo de módulo
+// Proxies com bind correto de métodos para o receptor original
 export const adminApp = new Proxy({} as App, {
   get(_target, prop) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (getAdminApp() as any)[prop];
+    const app = getAdminApp();
+    const val = (app as any)[prop];
+    return typeof val === "function" ? val.bind(app) : val;
   },
 });
 
-export const adminAuth = new Proxy({} as ReturnType<typeof getAuth>, {
+export const adminAuth = new Proxy({} as Auth, {
   get(_target, prop) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (getAdminAuth() as any)[prop];
+    const auth = getAdminAuth();
+    const val = (auth as any)[prop];
+    return typeof val === "function" ? val.bind(auth) : val;
   },
 });
 
-export const adminDb = new Proxy({} as ReturnType<typeof getFirestore>, {
+export const adminDb = new Proxy({} as Firestore, {
   get(_target, prop) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (getAdminDb() as any)[prop];
+    const db = getAdminDb();
+    const val = (db as any)[prop];
+    return typeof val === "function" ? val.bind(db) : val;
   },
 });

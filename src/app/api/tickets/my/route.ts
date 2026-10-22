@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { Ticket } from "@/types/ticket";
 
 export async function GET(req: NextRequest) {
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const ticketsRef = adminDb.collection("ingressos");
+    const ticketsRef = getAdminDb().collection("ingressos");
     let ticketDocs: any[] = [];
 
     if (userId) {

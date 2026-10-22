@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { Ticket } from "@/types/ticket";
 import { sendTicketIssuedEmail } from "@/lib/email/resend";
 
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     };
 
     // Save in Firestore collection /ingressos/{ticketId}
-    await adminDb.collection("ingressos").doc(ticketId).set({
+    await getAdminDb().collection("ingressos").doc(ticketId).set({
       ...newTicket,
       createdAt: new Date(),
     });

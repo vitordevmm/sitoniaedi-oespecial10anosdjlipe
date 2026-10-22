@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase/admin";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,13 +31,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const db = getAdminDb();
+
     // 2. CHECK AS CPF (11 digits)
     if (digits.length === 11 && (type === "auto" || type === "cpf")) {
       const cleanCpf = digits;
       const formattedCpf = `${cleanCpf.slice(0, 3)}.${cleanCpf.slice(3, 6)}.${cleanCpf.slice(6, 9)}-${cleanCpf.slice(9, 11)}`;
 
       // Search by clean or formatted CPF
-      const cpfSnap = await adminDb
+      const cpfSnap = await db
         .collection("usuarios")
         .where("cpf", "in", [cleanCpf, formattedCpf])
         .limit(1)
@@ -82,7 +84,7 @@ export async function POST(req: NextRequest) {
       // Filter unique candidates up to 10 for Firestore 'in' query limit
       const uniqueCandidates = Array.from(new Set(phoneCandidates)).slice(0, 10);
 
-      const phoneSnap = await adminDb
+      const phoneSnap = await db
         .collection("usuarios")
         .where("telefone", "in", uniqueCandidates)
         .limit(1)
