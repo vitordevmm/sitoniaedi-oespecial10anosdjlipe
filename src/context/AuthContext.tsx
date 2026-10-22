@@ -41,11 +41,6 @@ interface AuthContextType {
   resetPassword: (identifier: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
   refreshTickets: () => Promise<void>;
-  updateUserProfile: (updates: {
-    nome?: string;
-    telefone?: string;
-    dataNascimento?: string;
-  }) => Promise<void>;
   updateUserEmail: (newEmail: string, currentPass: string) => Promise<void>;
   updateUserPhone: (newPhone: string) => Promise<void>;
   updateUserPassword: (currentPass: string, newPass: string) => Promise<void>;
@@ -229,12 +224,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await sendPasswordResetEmail(auth, targetEmail);
   };
 
-  // Profile update: Personal Data (Nome, Telefone, Data de Nascimento)
-  const updateUserProfile = async (updates: {
-    nome?: string;
-    telefone?: string;
-    dataNascimento?: string;
-  }) => {
+  // Profile update: Phone
+  const updateUserPhone = async (newPhone: string) => {
     if (!user) throw new Error("Usuário não autenticado.");
 
     const token = await user.getIdToken();
@@ -244,7 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(updates),
+      body: JSON.stringify({ telefone: newPhone }),
     });
 
     let resData: any = null;
@@ -255,15 +246,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!res.ok) {
-      throw new Error(resData?.error || "Erro ao atualizar dados cadastrais.");
+      throw new Error(resData?.error || "Erro ao atualizar número de telefone.");
     }
 
     await refreshProfile();
-  };
-
-  // Profile update: Phone helper
-  const updateUserPhone = async (newPhone: string) => {
-    await updateUserProfile({ telefone: newPhone });
   };
 
   // Profile update: Email
@@ -361,7 +347,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         resetPassword,
         refreshProfile,
         refreshTickets,
-        updateUserProfile,
         updateUserEmail,
         updateUserPhone,
         updateUserPassword,

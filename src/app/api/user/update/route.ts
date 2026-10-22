@@ -2,19 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb, getAdminAuth } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 
-function calculateAge(birthDateIso: string): number | null {
-  if (!birthDateIso || !/^\d{4}-\d{2}-\d{2}$/.test(birthDateIso)) return null;
-  const [year, month, day] = birthDateIso.split("-").map(Number);
-  const birth = new Date(year, month - 1, day);
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-    age--;
-  }
-  return age;
-}
-
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization") || "";
@@ -41,60 +28,37 @@ export async function POST(req: NextRequest) {
     const authEmail = decodedToken.email?.toLowerCase();
 
     const body = await req.json();
-    const { nome, telefone, dataNascimento } = body;
+    const { telefone, nome, cpf, dataNascimento } = body;
 
-    const updates: Record<string, unknown> = {};
-
-    // 1. Validate Nome if provided
-    if (nome !== undefined) {
-      const cleanNome = String(nome).trim();
-      if (cleanNome.length < 2 || cleanNome.length > 120) {
-        return NextResponse.json(
-          { error: "O nome completo deve conter entre 2 e 120 caracteres." },
-          { status: 400 }
-        );
-      }
-      updates.nome = cleanNome;
-    }
-
-    // 2. Validate Telefone if provided
-    if (telefone !== undefined) {
-      const cleanPhone = String(telefone).replace(/\D/g, "");
-      if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-        return NextResponse.json(
-          { error: "Número de celular/WhatsApp inválido. Informe DDD + 8 ou 9 dígitos." },
-          { status: 400 }
-        );
-      }
-      updates.telefone = cleanPhone;
-    }
-
-    // 3. Validate Data de Nascimento if provided
-    if (dataNascimento !== undefined) {
-      const cleanBirth = String(dataNascimento).trim();
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanBirth)) {
-        return NextResponse.json(
-          { error: "Data de nascimento inválida. Use o formato AAAA-MM-DD." },
-          { status: 400 }
-        );
-      }
-      const age = calculateAge(cleanBirth);
-      if (age === null || age < 0 || age > 120) {
-        return NextResponse.json(
-          { error: "Data de nascimento inconsistente." },
-          { status: 400 }
-        );
-      }
-      updates.dataNascimento = cleanBirth;
-      updates.idade = age;
-    }
-
-    if (Object.keys(updates).length === 0) {
+    // Regra de Negócio Oficial: Nome, CPF e Data de Nascimento são estritamente inalteráveis
+    if (nome !== undefined || cpf !== undefined || dataNascimento !== undefined) {
       return NextResponse.json(
-        { error: "Nenhum dado informado para alteração." },
+        {
+          error:
+            "Por diretriz de segurança e emissão nominal de ingressos, o Nome Completo, CPF e Data de Nascimento são inalteráveis após o cadastro.",
+        },
         { status: 400 }
       );
     }
+
+    if (telefone === undefined) {
+      return NextResponse.json(
+        { error: "Informe o novo número de celular/WhatsApp." },
+        { status: 400 }
+      );
+    }
+
+    const cleanPhone = String(telefone).replace(/\D/g, "");
+    if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+      return NextResponse.json(
+        { error: "Número de celular/WhatsApp inválido. Informe DDD + 8 ou 9 dígitos." },
+        { status: 400 }
+      );
+    }
+
+    const updates: Record<string, unknown> = {
+      telefone: cleanPhone,
+    };
 
     updates.updatedAt = FieldValue.serverTimestamp();
 
