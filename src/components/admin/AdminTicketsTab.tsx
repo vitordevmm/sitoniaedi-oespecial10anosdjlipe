@@ -15,7 +15,13 @@ import {
   Copy,
   Check,
   User,
+  Layers,
+  Music2,
+  Car,
+  Crown,
 } from "lucide-react";
+import { CustomDropdown, DropdownOption } from "@/components/ui/CustomDropdown";
+import { GlowBadge } from "@/components/ui/GlowBadge";
 
 interface TicketItem {
   id: string;
@@ -76,6 +82,23 @@ export function AdminTicketsTab({
   const [targetEmail, setTargetEmail] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sectorFilter, setSectorFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const sectorOptions: DropdownOption[] = [
+    { value: "all", label: "Todos os Setores", icon: <Layers className="w-3.5 h-3.5 text-[#c9a227]" /> },
+    { value: "pista", label: "Pista Geral & Bar Central", icon: <Music2 className="w-3.5 h-3.5 text-[#f5e6b8]" /> },
+    { value: "lounge_rosa", label: "Lounge Rosa (12 Vagas)", icon: <Car className="w-3.5 h-3.5 text-pink-400" />, badge: "Rosa", badgeColor: "bg-pink-500/20 text-pink-300 border border-pink-500/40" },
+    { value: "lounge_azul", label: "Lounge Azul (12 Vagas)", icon: <Car className="w-3.5 h-3.5 text-blue-400" />, badge: "Azul", badgeColor: "bg-blue-500/20 text-blue-300 border border-blue-500/40" },
+    { value: "camarote", label: "Camarote no Palco", icon: <Crown className="w-3.5 h-3.5 text-[#c9a227]" />, badge: "VIP", badgeColor: "bg-[#c9a227]/20 text-[#f5e6b8] border border-[#c9a227]/40" },
+  ];
+
+  const statusOptions: DropdownOption[] = [
+    { value: "all", label: "Todos os Status", icon: <Filter className="w-3.5 h-3.5 text-[#a8b2c3]" /> },
+    { value: "approved", label: "Aprovados / Válidos", icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> },
+    { value: "used", label: "Já Validados (Catraca)", icon: <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" /> },
+    { value: "cancelled", label: "Revogados / Cancelados", icon: <XCircle className="w-3.5 h-3.5 text-red-400" /> },
+  ];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,27 +168,30 @@ export function AdminTicketsTab({
         {/* Filtros e Scanner */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Filtro Setor */}
-          <select
-            onChange={(e) => onSectorFilterChange(e.target.value)}
-            className="px-3 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-xs text-[#f6f8fc] focus:outline-none focus:border-[#c9a227]"
-          >
-            <option value="all">Todos os Setores</option>
-            <option value="pista">Pista</option>
-            <option value="lounge_rosa">Lounge Rosa</option>
-            <option value="lounge_azul">Lounge Azul</option>
-            <option value="camarote">Camarote</option>
-          </select>
+          <CustomDropdown
+            value={sectorFilter}
+            onChange={(val) => {
+              setSectorFilter(val);
+              onSectorFilterChange(val);
+            }}
+            options={sectorOptions}
+            size="md"
+            className="w-full sm:w-auto"
+            buttonClassName="rounded-xl min-w-[200px]"
+          />
 
           {/* Filtro Status */}
-          <select
-            onChange={(e) => onStatusFilterChange(e.target.value)}
-            className="px-3 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-xs text-[#f6f8fc] focus:outline-none focus:border-[#c9a227]"
-          >
-            <option value="all">Todos os Status</option>
-            <option value="approved">Aprovados / Válidos</option>
-            <option value="used">Já Validados (Catraca)</option>
-            <option value="cancelled">Revogados</option>
-          </select>
+          <CustomDropdown
+            value={statusFilter}
+            onChange={(val) => {
+              setStatusFilter(val);
+              onStatusFilterChange(val);
+            }}
+            options={statusOptions}
+            size="md"
+            className="w-full sm:w-auto"
+            buttonClassName="rounded-xl min-w-[200px]"
+          />
 
           {/* Botão Scanner Portaria */}
           <button
@@ -266,9 +292,9 @@ export function AdminTicketsTab({
                     {/* Valor */}
                     <td className="py-3.5 px-4 font-bold whitespace-nowrap">
                       {t.isCourtesy ? (
-                        <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px]">
+                        <GlowBadge variant="amber" size="xs">
                           CORTESIA
-                        </span>
+                        </GlowBadge>
                       ) : (
                         <span className="text-[#f5e6b8]">
                           {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(t.price)}
@@ -279,22 +305,32 @@ export function AdminTicketsTab({
                     {/* Status */}
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       {t.status === "used" && (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30 flex items-center gap-1 w-max">
-                          <CheckCircle2 className="w-3 h-3" />
+                        <GlowBadge
+                          variant="blue"
+                          size="sm"
+                          icon={<CheckCircle2 className="w-3 h-3" />}
+                        >
                           Utilizado na Entrada
-                        </span>
+                        </GlowBadge>
                       )}
                       {t.status === "approved" && (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 w-max">
-                          <CheckCircle2 className="w-3 h-3" />
+                        <GlowBadge
+                          variant="emerald"
+                          size="sm"
+                          pulse
+                          icon={<CheckCircle2 className="w-3 h-3" />}
+                        >
                           Aprovado / Válido
-                        </span>
+                        </GlowBadge>
                       )}
                       {t.status === "cancelled" && (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-500/15 text-red-400 border border-red-500/30 flex items-center gap-1 w-max">
-                          <XCircle className="w-3 h-3" />
+                        <GlowBadge
+                          variant="red"
+                          size="sm"
+                          icon={<XCircle className="w-3 h-3" />}
+                        >
                           Revogado
-                        </span>
+                        </GlowBadge>
                       )}
                     </td>
 

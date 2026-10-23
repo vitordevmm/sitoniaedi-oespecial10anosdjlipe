@@ -15,6 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { EventConfig, LotConfig, DEFAULT_EVENT_CONFIG } from "@/types/config";
+import { CustomDropdown, DropdownOption } from "@/components/ui/CustomDropdown";
 
 interface AdminSettingsTabProps {
   initialConfig: EventConfig | null;
@@ -238,10 +239,9 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
                   <label className="text-[10px] font-bold uppercase tracking-wider text-[#a8b2c3] block mb-1">
                     Setor do Evento:
                   </label>
-                  <select
+                  <CustomDropdown
                     value={lot.sector}
-                    onChange={(e) => {
-                      const newSector = e.target.value as any;
+                    onChange={(newSector) => {
                       const names: Record<string, string> = {
                         pista: "Pista Geral & Bar Central",
                         lounge_rosa: "Lounge Rosa (Ala Esquerda)",
@@ -251,13 +251,16 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
                       handleUpdateLot(idx, "sector", newSector);
                       handleUpdateLot(idx, "sectorName", names[newSector] || lot.sectorName);
                     }}
-                    className="w-full px-3 py-1.5 rounded-lg bg-[#101116] border border-[#0b1930] focus:border-[#c9a227] text-xs font-semibold text-[#f6f8fc] focus:outline-none"
-                  >
-                    <option value="pista">Pista Geral</option>
-                    <option value="lounge_rosa">Lounge Rosa</option>
-                    <option value="lounge_azul">Lounge Azul</option>
-                    <option value="camarote">Camarote no Palco</option>
-                  </select>
+                    options={[
+                      { value: "pista", label: "Pista Geral" },
+                      { value: "lounge_rosa", label: "Lounge Rosa" },
+                      { value: "lounge_azul", label: "Lounge Azul" },
+                      { value: "camarote", label: "Camarote no Palco" },
+                    ]}
+                    size="sm"
+                    className="w-full"
+                    buttonClassName="w-full rounded-lg bg-[#101116] border-[#0b1930]"
+                  />
                 </div>
 
                 {/* Valor em R$ */}

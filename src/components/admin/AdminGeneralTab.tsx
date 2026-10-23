@@ -12,6 +12,8 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { GlowBadge } from "@/components/ui/GlowBadge";
 
 interface AdminMetrics {
   totalSoldTickets: number;
@@ -63,7 +65,7 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
       {/* 4 CARDS PRINCIPAIS DE KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Valor Arrecadado */}
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-[#101116] via-[#0b1930]/40 to-[#101116] border border-[#c9a227]/40 shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden group">
+        <GlassCard variant="gold" className="p-5 group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#c9a227]/10 rounded-full blur-2xl -z-10 group-hover:bg-[#c9a227]/20 transition-all" />
           <div className="flex items-center justify-between mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#a8b2c3]">
@@ -76,14 +78,15 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
           <p className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] tracking-tight">
             {formatCurrency(metrics.totalRevenue)}
           </p>
-          <p className="text-[11px] text-[#a8b2c3] mt-1.5 flex items-center gap-1">
-            <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-emerald-400 font-semibold">{metrics.totalSoldTickets}</span> ingressos pagos
-          </p>
-        </div>
+          <div className="mt-2.5">
+            <GlowBadge variant="emerald" size="xs" pulse icon={<TrendingUp className="w-3 h-3 text-emerald-400" />}>
+              {metrics.totalSoldTickets} ingressos pagos
+            </GlowBadge>
+          </div>
+        </GlassCard>
 
         {/* Card 2: Ingressos Vendidos */}
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-[#101116] via-[#0b1930]/40 to-[#101116] border border-[#0b1930] shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden group">
+        <GlassCard variant="default" className="p-5 group">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#a8b2c3]">
               Ingressos Vendidos
@@ -95,14 +98,15 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
           <p className="text-2xl sm:text-3xl font-extrabold text-[#f6f8fc] tracking-tight">
             {metrics.totalSoldTickets}
           </p>
-          <p className="text-[11px] text-[#a8b2c3] mt-1.5 flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{metrics.totalUsed} já validados na portaria</span>
-          </p>
-        </div>
+          <div className="mt-2.5">
+            <GlowBadge variant="blue" size="xs" icon={<CheckCircle2 className="w-3 h-3 text-sky-400" />}>
+              {metrics.totalUsed} validados na catraca
+            </GlowBadge>
+          </div>
+        </GlassCard>
 
-        {/* Card 3: Usuários Cadastrados */}
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-[#101116] via-[#0b1930]/40 to-[#101116] border border-[#0b1930] shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden group">
+        {/* Card 3: Base de Usuários */}
+        <GlassCard variant="default" className="p-5 group">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#a8b2c3]">
               Base de Usuários
@@ -114,13 +118,15 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
           <p className="text-2xl sm:text-3xl font-extrabold text-[#f6f8fc] tracking-tight">
             {metrics.totalUsers}
           </p>
-          <p className="text-[11px] text-[#a8b2c3] mt-1.5">
-            Cadastros oficiais no banco
-          </p>
-        </div>
+          <div className="mt-2.5">
+            <GlowBadge variant="purple" size="xs">
+              Cadastros Oficiais
+            </GlowBadge>
+          </div>
+        </GlassCard>
 
         {/* Card 4: Cortesias */}
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-[#101116] via-[#0b1930]/40 to-[#101116] border border-[#0b1930] shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden group">
+        <GlassCard variant="default" className="p-5 group">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#a8b2c3]">
               Cortesias VIPs
@@ -132,16 +138,17 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
           <p className="text-2xl sm:text-3xl font-extrabold text-[#f5e6b8] tracking-tight">
             {metrics.totalCourtesies}
           </p>
-          <p className="text-[11px] text-[#a8b2c3] mt-1.5 flex items-center gap-1.5">
+          <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+            <GlowBadge variant="amber" size="xs">
+              VIP Oficial
+            </GlowBadge>
             {metrics.totalCancelled > 0 && (
-              <>
-                <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                <span className="text-red-400 font-semibold">{metrics.totalCancelled} cancelados</span>
-              </>
+              <GlowBadge variant="red" size="xs" icon={<AlertTriangle className="w-3 h-3 text-red-400" />}>
+                {metrics.totalCancelled} cancelados
+              </GlowBadge>
             )}
-            {metrics.totalCancelled === 0 && <span>Cortesias da produção</span>}
-          </p>
-        </div>
+          </div>
+        </GlassCard>
       </div>
 
       {/* GRÁFICO DE VENDAS DIÁRIAS COMPLETO */}

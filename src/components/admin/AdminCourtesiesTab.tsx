@@ -13,7 +13,12 @@ import {
   ChevronRight,
   ShieldCheck,
   AlertCircle,
+  Music2,
+  Crown,
+  Car,
 } from "lucide-react";
+import { CustomDropdown, DropdownOption } from "@/components/ui/CustomDropdown";
+import { GlowBadge } from "@/components/ui/GlowBadge";
 
 interface CourtesyItem {
   id: string;
@@ -61,6 +66,13 @@ export function AdminCourtesiesTab({
   const [note, setNote] = useState("");
   const [issuing, setIssuing] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const courtesySectorOptions: DropdownOption[] = [
+    { value: "pista", label: "Pista Geral & Bar Central", icon: <Music2 className="w-3.5 h-3.5 text-[#f5e6b8]" /> },
+    { value: "camarote", label: "Camarote no Palco Oficial", icon: <Crown className="w-3.5 h-3.5 text-[#c9a227]" />, badge: "VIP", badgeColor: "bg-[#c9a227]/20 text-[#f5e6b8] border border-[#c9a227]/40" },
+    { value: "lounge_rosa", label: "Lounge Rosa (Ala Esquerda)", icon: <Car className="w-3.5 h-3.5 text-pink-400" />, badge: "Rosa", badgeColor: "bg-pink-500/20 text-pink-300 border border-pink-500/40" },
+    { value: "lounge_azul", label: "Lounge Azul (Ala Direita)", icon: <Car className="w-3.5 h-3.5 text-blue-400" />, badge: "Azul", badgeColor: "bg-blue-500/20 text-blue-300 border border-blue-500/40" },
+  ];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,22 +235,32 @@ export function AdminCourtesiesTab({
 
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       {c.status === "used" && (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30 flex items-center gap-1 w-max">
-                          <CheckCircle2 className="w-3 h-3" />
+                        <GlowBadge
+                          variant="blue"
+                          size="sm"
+                          icon={<CheckCircle2 className="w-3 h-3" />}
+                        >
                           Utilizada na Entrada
-                        </span>
+                        </GlowBadge>
                       )}
                       {c.status === "approved" && (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1 w-max">
-                          <CheckCircle2 className="w-3 h-3" />
+                        <GlowBadge
+                          variant="amber"
+                          size="sm"
+                          pulse
+                          icon={<CheckCircle2 className="w-3 h-3" />}
+                        >
                           Válida / Cortesia VIP
-                        </span>
+                        </GlowBadge>
                       )}
                       {c.status === "cancelled" && (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-500/15 text-red-400 border border-red-500/30 flex items-center gap-1 w-max">
-                          <XCircle className="w-3 h-3" />
+                        <GlowBadge
+                          variant="red"
+                          size="sm"
+                          icon={<XCircle className="w-3 h-3" />}
+                        >
                           Revogada
-                        </span>
+                        </GlowBadge>
                       )}
                     </td>
 
@@ -348,16 +370,14 @@ export function AdminCourtesiesTab({
                 <label className="text-xs font-semibold text-[#a8b2c3] block mb-1.5">
                   Setor da Cortesia:
                 </label>
-                <select
+                <CustomDropdown
                   value={sector}
-                  onChange={(e) => setSector(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-amber-400 text-xs text-[#f6f8fc] focus:outline-none"
-                >
-                  <option value="pista">Pista Geral & Bar Central</option>
-                  <option value="camarote">Camarote no Palco Oficial</option>
-                  <option value="lounge_rosa">Lounge Rosa</option>
-                  <option value="lounge_azul">Lounge Azul</option>
-                </select>
+                  onChange={(val) => setSector(val)}
+                  options={courtesySectorOptions}
+                  size="md"
+                  className="w-full"
+                  buttonClassName="w-full rounded-xl"
+                />
               </div>
 
               <div>

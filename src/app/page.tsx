@@ -31,6 +31,8 @@ import { TermsModal, TermsTab } from "@/components/legal/TermsModal";
 import { Navbar } from "@/components/layout/Navbar";
 import { EventCountdown } from "@/components/home/EventCountdown";
 import { EventConfig, DEFAULT_EVENT_CONFIG } from "@/types/config";
+import { ScrollToTop } from "@/components/ui/ScrollToTop";
+import { GlowBadge } from "@/components/ui/GlowBadge";
 import Link from "next/link";
 
 export default function Home() {
@@ -358,12 +360,12 @@ export default function Home() {
                 Favorito do Público
               </div>
               <div className="flex justify-between items-center h-7 mb-4">
-                <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded bg-[#c9a227]/20 text-[#f5e6b8] border border-[#c9a227]/30">
+                <GlowBadge variant="gold" size="sm">
                   {activePistaLot.name}
-                </span>
-                <span className="text-xs text-[#f5e6b8] flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#c9a227] animate-pulse" /> Últimas unidades
-                </span>
+                </GlowBadge>
+                <GlowBadge variant="gold" size="xs" pulse>
+                  Últimas unidades
+                </GlowBadge>
               </div>
               <h3 className="text-xl font-bold text-[#f6f8fc] mb-2 min-h-[28px] flex items-center">Pista</h3>
               <p className="text-xs text-[#a8b2c3] mb-6 min-h-[52px] leading-relaxed">
@@ -831,6 +833,9 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      {/* FLOATING QUICK ACTIONS */}
+      <ScrollToTop />
 
       {/* AUTHENTICATION MODAL */}
       <AuthModal
