@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { EventConfig, LotConfig, DEFAULT_EVENT_CONFIG } from "@/types/config";
 import { CustomDropdown, DropdownOption } from "@/components/ui/CustomDropdown";
+import { NumberInput } from "@/components/ui/NumberInput";
 
 interface AdminSettingsTabProps {
   initialConfig: EventConfig | null;
@@ -268,19 +269,16 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
                   <label className="text-[10px] font-bold uppercase tracking-wider text-[#a8b2c3] block mb-1">
                     Valor (R$):
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#c9a227]">
-                      R$
-                    </span>
-                    <input
-                      type="number"
-                      step="5"
-                      min="0"
-                      value={lot.price}
-                      onChange={(e) => handleUpdateLot(idx, "price", parseFloat(e.target.value) || 0)}
-                      className="w-full pl-8 pr-2.5 py-1.5 rounded-lg bg-[#101116] border border-[#0b1930] focus:border-[#c9a227] text-xs font-bold text-[#f5e6b8] focus:outline-none"
-                    />
-                  </div>
+                  <NumberInput
+                    value={lot.price}
+                    step={5}
+                    min={0}
+                    prefixText="R$"
+                    size="sm"
+                    onChange={(val) => handleUpdateLot(idx, "price", val)}
+                    containerClassName="bg-[#101116] rounded-lg border-[#0b1930]"
+                    className="font-bold text-[#f5e6b8]"
+                  />
                 </div>
 
                 {/* Toggle Ativo / Esgotado */}
@@ -336,18 +334,18 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
               <label className="text-xs font-bold text-[#a8b2c3] block mb-2">
                 Quantidade Total de Ingressos à Venda:
               </label>
-              <input
-                type="number"
-                min="100"
-                step="50"
+              <NumberInput
                 value={config.ingressos.totalAvailable}
-                onChange={(e) =>
+                min={100}
+                step={50}
+                size="md"
+                onChange={(val) =>
                   setConfig({
                     ...config,
-                    ingressos: { totalAvailable: parseInt(e.target.value, 10) || 0 },
+                    ingressos: { totalAvailable: val },
                   })
                 }
-                className="w-full px-4 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-[#c9a227] text-sm font-bold text-[#f6f8fc] focus:outline-none"
+                containerClassName="bg-[#07090d] rounded-xl border-[#0b1930]"
               />
               <p className="text-[11px] text-[#a8b2c3]/60 mt-1.5">
                 * Quando a soma de ingressos vendidos atingir este número, a venda é pausada automaticamente.
@@ -380,19 +378,23 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
                   Idade Mínima para Entrar Desacompanhado (Anos):
                 </label>
                 <div className="flex items-center gap-3">
-                  <input
-                    type="number"
-                    min="14"
-                    max="21"
-                    value={config.idade.minAgeUnaccompanied}
-                    onChange={(e) =>
-                      setConfig({
-                        ...config,
-                        idade: { minAgeUnaccompanied: parseInt(e.target.value, 10) || 17 },
-                      })
-                    }
-                    className="w-32 px-4 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-[#c9a227] text-lg font-extrabold text-[#f5e6b8] text-center focus:outline-none"
-                  />
+                  <div className="w-36">
+                    <NumberInput
+                      value={config.idade.minAgeUnaccompanied}
+                      min={14}
+                      max={21}
+                      step={1}
+                      size="md"
+                      onChange={(val) =>
+                        setConfig({
+                          ...config,
+                          idade: { minAgeUnaccompanied: val || 17 },
+                        })
+                      }
+                      containerClassName="bg-[#07090d] rounded-xl border-[#0b1930]"
+                      className="text-center font-extrabold text-[#f5e6b8] text-base"
+                    />
+                  </div>
                   <span className="text-xs text-[#a8b2c3] font-semibold">Anos completos</span>
                 </div>
               </div>
@@ -474,18 +476,18 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
               <label className="text-xs font-bold text-[#a8b2c3] block mb-2">
                 Quantidade de Cortesias Disponíveis:
               </label>
-              <input
-                type="number"
-                min="0"
-                step="10"
+              <NumberInput
                 value={config.cortesias.totalAvailable}
-                onChange={(e) =>
+                min={0}
+                step={10}
+                size="md"
+                onChange={(val) =>
                   setConfig({
                     ...config,
-                    cortesias: { totalAvailable: parseInt(e.target.value, 10) || 0 },
+                    cortesias: { totalAvailable: val },
                   })
                 }
-                className="w-full px-4 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-amber-400 text-sm font-bold text-[#f6f8fc] focus:outline-none"
+                containerClassName="bg-[#07090d] rounded-xl border-[#0b1930]"
               />
               <p className="text-[11px] text-[#a8b2c3]/60 mt-1.5">
                 * A aba Cortesias respeita esse limite para impedir emissões em excesso.
