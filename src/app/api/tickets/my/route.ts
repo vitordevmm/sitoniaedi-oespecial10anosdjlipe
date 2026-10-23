@@ -34,24 +34,37 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const tickets: Ticket[] = ticketDocs.map((doc) => {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sintoniaedicaoespecial.online";
+
+    const tickets: Ticket[] = ticketDocs.map((doc, idx) => {
       const data = doc.data();
+      const num = data.ticketNumber || idx + 1;
+      const numFormatted = data.ticketNumberFormatted || `#${String(num).padStart(4, "0")}`;
+      const validationUrl = `${baseUrl}/validar/${doc.id}`;
+
       return {
         id: doc.id,
+        ticketNumber: num,
+        ticketNumberFormatted: numFormatted,
         userId: data.userId || "",
         userEmail: data.userEmail || "",
         userName: data.userName || "",
         userCpf: data.userCpf || "",
+        userAge: data.userAge,
+        userBirthDate: data.userBirthDate,
         sector: data.sector || "pista",
         sectorName: data.sectorName || "Pista Geral & Bar Central",
         lot: data.lot || 1,
         lotName: data.lotName || "1º Lote Oficial",
-        price: data.price || 60,
+        price: data.price !== undefined ? data.price : 60,
         status: data.status || "approved",
-        qrPayload: data.qrPayload || doc.id,
+        qrPayload: data.qrPayload?.startsWith("http") ? data.qrPayload : validationUrl,
         purchaseDate: data.purchaseDate || new Date().toISOString(),
         paymentId: data.paymentId,
         paymentMethod: data.paymentMethod || "pix",
+        isCourtesy: data.isCourtesy || data.price === 0,
+        checkedInAt: data.checkedInAt,
+        checkedInBy: data.checkedInBy,
       };
     });
 

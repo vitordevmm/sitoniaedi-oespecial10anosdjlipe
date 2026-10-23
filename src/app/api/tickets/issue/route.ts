@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { Ticket } from "@/types/ticket";
 import { sendTicketIssuedEmail } from "@/lib/email/resend";
+import { getNextTicketSequence } from "@/lib/firebase/ticketsCounter";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,7 +16,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate unique Ticket ID
+    const db = await getAdminDb();
+
+    // 1. Gera numeração sequencial atômica (#0001, #0002...)
+    const seq = await getNextTicketSequence(db);
+
+    // 2. Busca dados cadastrais do titular (idade, nascimento)
+    let userAge: number | undefined;
+    let userBirthDate: string | undefined;
+
+    const userSnap = await db.collection("usuarios").doc(userId).get();
+    if (userSnap.exists) {
+      const uData = userSnap.data();
+      userAge = uData?.idade;
+      userBirthDate = uData?.dataNascimento;
+    } else {
+      const emailSnap = await db.collection("usuarios").doc(userEmail.toLowerCase().trim()).get();
+      if (emailSnap.exists) {
+        const uData = emailSnap.data();
+        userAge = uData?.idade;
+        userBirthDate = uData?.dataNascimento;
+      }
+    }
+
+    // 3. Gera ID de voucher único
     const randomHex = Math.random().toString(36).substring(2, 8).toUpperCase();
     const timestampSec = Math.floor(Date.now() / 1000).toString().slice(-4);
     const ticketId = `SINTONIA-10A-${timestampSec}${randomHex}`;
@@ -46,23 +70,20 @@ export async function POST(req: NextRequest) {
 
     const sectorInfo = sectorMap[sector] || sectorMap.pista;
 
-    // Secure payload for QR verification at gate
-    const qrPayload = JSON.stringify({
-      code: ticketId,
-      event: "Sintonia 10 Anos DJ Lipe",
-      date: "2027-04-10",
-      uid: userId,
-      cpf: userCpf || "",
-      sector: sectorInfo.name,
-      issuedAt: new Date().toISOString(),
-    });
+    // URL oficial de validação que o porteiro abre na câmera
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sintoniaedicaoespecial.online";
+    const qrPayload = `${baseUrl}/validar/${ticketId}`;
 
     const newTicket: Ticket = {
       id: ticketId,
+      ticketNumber: seq.number,
+      ticketNumberFormatted: seq.formatted,
       userId,
       userEmail: userEmail.toLowerCase().trim(),
       userName: userName || "Portador do Ingresso",
       userCpf: userCpf || "",
+      userAge,
+      userBirthDate,
       sector: sector as any,
       sectorName: sectorInfo.name,
       lot: 1,
@@ -74,7 +95,6 @@ export async function POST(req: NextRequest) {
       paymentMethod: "pix",
     };
 
-    const db = await getAdminDb();
     // Save in Firestore collection /ingressos/{ticketId}
     await db.collection("ingressos").doc(ticketId).set({
       ...newTicket,
@@ -87,6 +107,7 @@ export async function POST(req: NextRequest) {
       userName: newTicket.userName,
       userCpf: newTicket.userCpf,
       ticketId: newTicket.id,
+      ticketNumberFormatted: newTicket.ticketNumberFormatted,
       sectorName: newTicket.sectorName,
       lotName: newTicket.lotName,
       price: newTicket.price,

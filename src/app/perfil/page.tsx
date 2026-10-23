@@ -608,24 +608,35 @@ function ProfileContent() {
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-center">
                     {/* Left & Middle: Ticket Specs */}
                     <div className="lg:col-span-2 space-y-4">
-                      {/* Sector & Lot Highlight */}
+                      {/* Sector, Ticket Number & Value Highlight */}
                       <div>
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-[#c9a227]">
-                          Setor Confirmado
-                        </span>
+                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                          <span className="px-3 py-1 rounded-full text-xs font-black tracking-wider bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-[0_0_15px_rgba(201,162,39,0.35)] font-mono">
+                            {ticket.ticketNumberFormatted || `#${String(idx + 1).padStart(4, "0")}`}
+                          </span>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-[#a8b2c3] px-2.5 py-0.5 rounded-full bg-[#07090d] border border-[#0b1930]">
+                            {ticket.lotName || "1º Lote Oficial"}
+                          </span>
+                        </div>
+
                         <h4 className="text-xl sm:text-2xl font-black text-[#f6f8fc] tracking-tight">
                           {ticket.sectorName}
                         </h4>
-                        <p className="text-xs text-[#a8b2c3] mt-0.5">
-                          {ticket.lotName} • Valor pago:{" "}
-                          <strong className="text-[#f5e6b8]">R$ {ticket.price.toFixed(2).replace(".", ",")}</strong>
+
+                        <p className="text-sm text-[#a8b2c3] mt-1">
+                          Valor do Ingresso:{" "}
+                          <strong className="text-base font-black text-[#f5e6b8]">
+                            {ticket.isCourtesy || ticket.price === 0
+                              ? "Cortesia VIP (R$ 0,00)"
+                              : `R$ ${ticket.price.toFixed(2).replace(".", ",")}`}
+                          </strong>
                         </p>
                       </div>
 
                       {/* Details Grid */}
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
                         <div className="p-3 rounded-xl bg-[#07090d] border border-[#0b1930]">
-                          <span className="text-[10px] uppercase text-[#a8b2c3] block">Titular</span>
+                          <span className="text-[10px] uppercase text-[#a8b2c3] block">Titular do Ingresso</span>
                           <span className="text-xs font-bold text-[#f6f8fc] truncate block">
                             {ticket.userName || profile?.nome || "Titular Oficial"}
                           </span>
@@ -639,52 +650,59 @@ function ProfileContent() {
                         </div>
 
                         <div className="p-3 rounded-xl bg-[#07090d] border border-[#0b1930]">
-                          <span className="text-[10px] uppercase text-[#a8b2c3] block">Código do Ingresso</span>
+                          <span className="text-[10px] uppercase text-[#a8b2c3] block">Número do Ingresso</span>
                           <span className="text-xs font-bold text-[#c9a227] font-mono truncate block">
-                            {ticket.id}
+                            {ticket.ticketNumberFormatted || `#${String(idx + 1).padStart(4, "0")}`}
                           </span>
                         </div>
 
                         <div className="p-3 rounded-xl bg-[#07090d] border border-[#0b1930]">
-                          <span className="text-[10px] uppercase text-[#a8b2c3] block">Data do Show</span>
-                          <span className="text-xs font-bold text-[#f6f8fc] block">10/04/2027</span>
+                          <span className="text-[10px] uppercase text-[#a8b2c3] block">Data do Evento</span>
+                          <span className="text-xs font-bold text-[#f6f8fc] block">10 de Abril de 2027</span>
                         </div>
 
                         <div className="p-3 rounded-xl bg-[#07090d] border border-[#0b1930]">
                           <span className="text-[10px] uppercase text-[#a8b2c3] block">Local</span>
-                          <span className="text-xs font-bold text-[#f6f8fc] block">Capitu, Tupaciguara</span>
+                          <span className="text-xs font-bold text-[#f6f8fc] block">Capitu, Tupaciguara - MG</span>
                         </div>
 
                         <div className="p-3 rounded-xl bg-[#07090d] border border-[#0b1930]">
-                          <span className="text-[10px] uppercase text-[#a8b2c3] block">Status</span>
-                          <span className="text-xs font-bold text-emerald-400 block">Confirmado (PIX)</span>
+                          <span className="text-[10px] uppercase text-[#a8b2c3] block">Status da Catraca</span>
+                          <span
+                            className={`text-xs font-bold block ${
+                              ticket.status === "used" ? "text-amber-400" : "text-emerald-400"
+                            }`}
+                          >
+                            {ticket.status === "used" ? "Entrada Validada" : "Pronto para Entrada"}
+                          </span>
                         </div>
                       </div>
 
                       {/* Warning Notice */}
                       <div className="p-3.5 rounded-xl bg-[#07090d] border border-[#0b1930] text-[11px] text-[#a8b2c3] leading-relaxed">
-                        🔒 <strong className="text-[#f6f8fc]">Segurança do Voucher:</strong> Este código QR é de uso único e pessoal. A catraca só permitirá a primeira leitura na portaria. Nunca envie fotos ou prints deste voucher para terceiros.
+                        🔒 <strong className="text-[#f6f8fc]">Segurança do Voucher:</strong> Apresente este código QR diretamente na portaria do Capitu. O leitor óptico do fiscal validará sua entrada instantaneamente.
                       </div>
                     </div>
 
                     {/* Right Column: QR Code & Download Action */}
                     <div className="flex flex-col items-center justify-center p-4 sm:p-6 rounded-2xl bg-[#07090d] border border-[#0b1930] text-center">
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#c9a227] mb-3">
-                        Apresente na Catraca
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#c9a227] mb-2 flex items-center gap-1.5">
+                        <QrCode className="w-3.5 h-3.5" />
+                        <span>Apresente na Catraca</span>
                       </span>
 
                       {/* High-Fidelity QR Code */}
                       <TicketQRCode payload={ticket.qrPayload || ticket.id} size={180} />
 
-                      <p className="text-[10px] font-mono text-[#a8b2c3] mt-3 tracking-widest">
-                        {ticket.id}
+                      <p className="text-[11px] font-mono text-[#f5e6b8] font-bold mt-3 tracking-wider">
+                        {ticket.ticketNumberFormatted || `#${String(idx + 1).padStart(4, "0")}`}
                       </p>
 
                       {/* Download Button */}
                       <button
                         type="button"
                         onClick={handleDownloadTicket}
-                        className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:opacity-95 active:scale-95 transition-all shadow-[0_0_15px_rgba(201,162,39,0.3)]"
+                        className="mt-4 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-[#07090d] bg-gradient-to-r from-[#c9a227] via-[#e2bd44] to-[#f5e6b8] hover:opacity-95 active:scale-95 transition-all shadow-[0_0_20px_rgba(201,162,39,0.35)]"
                       >
                         <Download className="w-4 h-4" />
                         <span>Fazer Download do Ingresso</span>

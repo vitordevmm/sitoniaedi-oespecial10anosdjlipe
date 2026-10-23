@@ -37,6 +37,7 @@ export interface SendTicketParams {
   userName: string;
   userCpf?: string;
   ticketId: string;
+  ticketNumberFormatted?: string;
   sectorName: string;
   lotName: string;
   price: number;
@@ -66,11 +67,12 @@ export async function sendTicketIssuedEmail(params: SendTicketParams) {
     }
 
     const html = await generateTicketEmailHtml(params);
+    const numDisplay = params.ticketNumberFormatted || `#${params.ticketId}`;
 
     const { data, error } = await client.emails.send({
       from: DEFAULT_FROM,
       to: [params.userEmail],
-      subject: `🎟️ Seu Ingresso Confirmado! Sintonia Especial 10 Anos DJ Lipe (Voucher #${params.ticketId})`,
+      subject: `🎟️ Seu Ingresso Confirmado (${numDisplay})! Sintonia Especial 10 Anos DJ Lipe`,
       html,
     });
 

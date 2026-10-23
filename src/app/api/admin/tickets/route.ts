@@ -57,12 +57,18 @@ export async function GET(req: NextRequest) {
         return;
       }
 
+      const num = data.ticketNumber || 1;
+      const ticketNumberFormatted = data.ticketNumberFormatted || `#${String(num).padStart(4, "0")}`;
+
       allTickets.push({
         id: ticketId,
+        ticketNumber: num,
+        ticketNumberFormatted,
         userId: data.userId || "",
         userName: data.userName || "Não informado",
         userEmail: data.userEmail || "",
         userCpf: data.userCpf || "",
+        userAge: data.userAge,
         sector: data.sector || "pista",
         sectorName: data.sectorName || "Pista Geral & Bar Central",
         lot: data.lot || 1,

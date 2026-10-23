@@ -10,6 +10,13 @@ export interface AuthenticatedAdmin {
   role: "admin";
 }
 
+export interface AuthenticatedStaffOrAdmin {
+  uid: string;
+  email: string;
+  name: string;
+  role: "admin" | "staff";
+}
+
 /**
  * Valida a sessão de um administrador através do Bearer ID Token do Firebase.
  * Retorna os dados do Admin autenticado ou lança um erro com a mensagem explicativa.
@@ -83,3 +90,64 @@ export async function verifyAdminRequest(req: NextRequest): Promise<Authenticate
     role: "admin",
   };
 }
+
+/**
+ * Valida a requisição autenticada garantindo que o usuário possua papel de 'admin' OU 'staff'.
+ * Ideal para rotas de portaria e check-in de ingressos.
+ */
+export async function verifyStaffOrAdminRequest(req: NextRequest): Promise<AuthenticatedStaffOrAdmin> {
+  const authHeader = req.headers.get("authorization") || "";
+  if (!authHeader.startsWith("Bearer ")) {
+    throw new Error("Token de autorização não fornecido ou inválido.");
+  }
+
+  const idToken = authHeader.replace("Bearer ", "").trim();
+  if (!idToken) {
+    throw new Error("Token de autorização vazio.");
+  }
+
+  const adminAuth = await getAdminAuth();
+  const decoded = await adminAuth.verifyIdToken(idToken);
+  const email = (decoded.email || "").toLowerCase().trim();
+  const uid = decoded.uid;
+
+  const db = await getAdminDb();
+
+  // Master Admin tem acesso irrestrito
+  if (email === MASTER_ADMIN_EMAIL.toLowerCase()) {
+    return {
+      uid,
+      email,
+      name: decoded.name || "Administrador Master",
+      role: "admin",
+    };
+  }
+
+  // Consulta papel no Firestore
+  const userDocRef = db.collection("usuarios").doc(uid);
+  const snap = await userDocRef.get();
+
+  let userRole = snap.exists ? snap.data()?.role : null;
+  let userName = snap.exists ? snap.data()?.nome : decoded.name || "Equipe Portaria";
+
+  if (!userRole && email) {
+    const emailDocRef = db.collection("usuarios").doc(email);
+    const emailSnap = await emailDocRef.get();
+    if (emailSnap.exists) {
+      userRole = emailSnap.data()?.role;
+      userName = emailSnap.data()?.nome || userName;
+    }
+  }
+
+  if (userRole !== "admin" && userRole !== "staff") {
+    throw new Error("Acesso negado: Apenas administradores e equipe de portaria (staff) podem validar ingressos.");
+  }
+
+  return {
+    uid,
+    email,
+    name: userName,
+    role: userRole as "admin" | "staff",
+  };
+}
+

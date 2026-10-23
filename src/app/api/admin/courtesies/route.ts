@@ -3,6 +3,7 @@ import { getAdminDb } from "@/lib/firebase/admin";
 import { verifyAdminRequest } from "@/lib/auth/adminAuth";
 import { sendTicketIssuedEmail } from "@/lib/email/resend";
 import { DEFAULT_EVENT_CONFIG, EventConfig } from "@/types/config";
+import { getNextTicketSequence } from "@/lib/firebase/ticketsCounter";
 
 export async function POST(req: NextRequest) {
   try {
@@ -74,28 +75,25 @@ export async function POST(req: NextRequest) {
     };
     const sectorName = sectorMap[sector] || "Pista Geral & Bar Central";
 
-    // 4. Gera código de voucher cortesia único
+    // 4. Gera código de voucher cortesia único e número sequencial
+    const seq = await getNextTicketSequence(db);
     const randomHex = Math.random().toString(36).substring(2, 7).toUpperCase();
     const timestampSec = Math.floor(Date.now() / 1000).toString().slice(-4);
     const ticketId = `SINTONIA-VIP-${timestampSec}${randomHex}`;
 
-    const qrPayload = JSON.stringify({
-      code: ticketId,
-      event: "Sintonia 10 Anos DJ Lipe - Cortesia Oficial",
-      date: "2027-04-10",
-      uid: targetUser.uid || targetUser.email,
-      cpf: targetUser.cpf || "",
-      sector: sectorName,
-      issuedAt: new Date().toISOString(),
-      type: "CORTESIA_VIP",
-    });
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sintoniaedicaoespecial.online";
+    const qrPayload = `${baseUrl}/validar/${ticketId}`;
 
     const courtesyTicket = {
       id: ticketId,
+      ticketNumber: seq.number,
+      ticketNumberFormatted: seq.formatted,
       userId: targetUser.uid || targetUser.email,
       userEmail: targetUser.email,
       userName: targetUser.nome,
       userCpf: targetUser.cpf,
+      userAge: targetUser.idade,
+      userBirthDate: targetUser.dataNascimento,
       sector,
       sectorName,
       lot: 0,
@@ -119,6 +117,7 @@ export async function POST(req: NextRequest) {
       userName: targetUser.nome,
       userCpf: targetUser.cpf,
       ticketId,
+      ticketNumberFormatted: courtesyTicket.ticketNumberFormatted,
       sectorName,
       lotName: "Cortesia Oficial VIP",
       price: 0,

@@ -19,6 +19,8 @@ import {
 
 interface TicketItem {
   id: string;
+  ticketNumber?: number;
+  ticketNumberFormatted?: string;
   userId: string;
   userName: string;
   userEmail: string;
@@ -219,10 +221,13 @@ export function AdminTicketsTab({
               <tbody className="divide-y divide-[#0b1930]/50">
                 {tickets.map((t) => (
                   <tr key={t.id} className="hover:bg-white/[0.02] transition-colors">
-                    {/* Código / Voucher */}
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#f5e6b8] whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <span>{t.id}</span>
+                    {/* Código / Voucher com Número Sequencial */}
+                    <td className="py-3.5 px-4 font-mono font-bold whitespace-nowrap">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-sm">
+                          {t.ticketNumberFormatted || `#${String(t.ticketNumber || 1).padStart(4, "0")}`}
+                        </span>
+                        <span className="text-xs text-[#f5e6b8]">{t.id}</span>
                         <button
                           type="button"
                           onClick={() => handleCopy(t.id)}

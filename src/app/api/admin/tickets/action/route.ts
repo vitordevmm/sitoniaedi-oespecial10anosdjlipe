@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase/admin";
-import { verifyAdminRequest } from "@/lib/auth/adminAuth";
+import { verifyStaffOrAdminRequest } from "@/lib/auth/adminAuth";
 import { sendTicketIssuedEmail } from "@/lib/email/resend";
 
 export async function POST(req: NextRequest) {
   try {
-    const admin = await verifyAdminRequest(req);
+    const userAuth = await verifyStaffOrAdminRequest(req);
     const body = await req.json();
 
     const { ticketId, action, targetUserEmail } = body;
@@ -14,6 +14,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "ticketId e action ('revoke' | 'validate' | 'transfer') são obrigatórios." },
         { status: 400 }
+      );
+    }
+
+    if ((action === "revoke" || action === "transfer") && userAuth.role !== "admin") {
+      return NextResponse.json(
+        { error: "Apenas administradores podem revogar ou transferir ingressos." },
+        { status: 403 }
       );
     }
 
@@ -37,7 +44,7 @@ export async function POST(req: NextRequest) {
       await ticketRef.update({
         status: "cancelled",
         cancelledAt: new Date().toISOString(),
-        cancelledBy: admin.email,
+        cancelledBy: userAuth.email,
         updatedAt: new Date(),
       });
 
@@ -73,7 +80,7 @@ export async function POST(req: NextRequest) {
       await ticketRef.update({
         status: "used",
         checkedInAt,
-        checkedInBy: admin.email,
+        checkedInBy: userAuth.email,
         updatedAt: new Date(),
       });
 
@@ -141,7 +148,7 @@ export async function POST(req: NextRequest) {
           previousUserEmail: ticketData.userEmail,
           previousUserName: ticketData.userName,
           transferredAt: new Date().toISOString(),
-          transferredBy: admin.email,
+          transferredBy: userAuth.email,
         },
         updatedAt: new Date(),
       });

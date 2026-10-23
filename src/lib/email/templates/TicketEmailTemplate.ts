@@ -5,6 +5,7 @@ interface TicketEmailData {
   userEmail: string;
   userCpf?: string;
   ticketId: string;
+  ticketNumberFormatted?: string;
   sectorName: string;
   lotName: string;
   price: number;
@@ -17,6 +18,7 @@ export async function generateTicketEmailHtml(data: TicketEmailData): Promise<st
     userName,
     userCpf,
     ticketId,
+    ticketNumberFormatted,
     sectorName,
     lotName,
     price,
@@ -152,10 +154,13 @@ export async function generateTicketEmailHtml(data: TicketEmailData): Promise<st
                     <!-- Ticket ID Voucher -->
                     <div style="margin-top: 18px;">
                       <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #a8b2c3; display: block; margin-bottom: 4px;">
-                        Código do Voucher Único
+                        Número do Ingresso Oficial
                       </span>
-                      <span style="display: inline-block; font-family: 'Courier New', Courier, monospace; font-size: 15px; font-weight: 800; color: #f5e6b8; background-color: #101116; border: 1px solid #0b1930; padding: 6px 14px; border-radius: 8px; letter-spacing: 1px;">
-                        #${ticketId}
+                      <span style="display: inline-block; font-family: 'Courier New', Courier, monospace; font-size: 18px; font-weight: 900; color: #f5e6b8; background-color: #101116; border: 1px solid #c9a227; padding: 6px 16px; border-radius: 8px; letter-spacing: 1px;">
+                        ${ticketNumberFormatted || "#" + ticketId}
+                      </span>
+                      <span style="font-size: 10px; color: #a8b2c3; display: block; margin-top: 4px; font-family: monospace;">
+                        Código: ${ticketId}
                       </span>
                     </div>
                   </td>
