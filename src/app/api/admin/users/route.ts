@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { verifyAdminRequest, MASTER_ADMIN_EMAIL } from "@/lib/auth/adminAuth";
+import { calculateAge } from "@/lib/validations/user";
 
 export async function GET(req: NextRequest) {
   try {
@@ -25,6 +26,17 @@ export async function GET(req: NextRequest) {
       const key = email || uid;
 
       if (!usersMap.has(key)) {
+        const rawBirth = data.dataNascimento || "";
+        let idade = typeof data.idade === "number" && data.idade > 0 ? data.idade : 0;
+        if (!idade && rawBirth) {
+          try {
+            const parsedAge = calculateAge(rawBirth);
+            if (parsedAge >= 0 && parsedAge < 120) {
+              idade = parsedAge;
+            }
+          } catch {}
+        }
+
         usersMap.set(key, {
           id: doc.id,
           uid,
@@ -32,8 +44,8 @@ export async function GET(req: NextRequest) {
           nome: data.nome || "Não informado",
           cpf: data.cpf || "",
           telefone: data.telefone || "",
-          dataNascimento: data.dataNascimento || "",
-          idade: data.idade || 0,
+          dataNascimento: rawBirth,
+          idade,
           role: email === MASTER_ADMIN_EMAIL.toLowerCase() ? "admin" : data.role || "user",
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt || "",
         });

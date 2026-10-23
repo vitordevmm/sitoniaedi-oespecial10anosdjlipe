@@ -94,6 +94,26 @@ export function AdminUsersTab({
     }
   };
 
+  const getUserAge = (u: UserItem) => {
+    if (typeof u.idade === "number" && u.idade > 0) return u.idade;
+    if (u.dataNascimento) {
+      try {
+        const [y, m, d] = u.dataNascimento.split("T")[0].split("-").map(Number);
+        if (y && m && d) {
+          const birth = new Date(y, m - 1, d);
+          const today = new Date();
+          let age = today.getFullYear() - birth.getFullYear();
+          const monthDiff = today.getMonth() - birth.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            age--;
+          }
+          if (age >= 0 && age < 120) return age;
+        }
+      } catch {}
+    }
+    return null;
+  };
+
   const handleRoleChange = async (user: UserItem, newRole: "user" | "admin" | "staff") => {
     if (user.role === newRole) return;
     if (
@@ -219,9 +239,21 @@ export function AdminUsersTab({
                     {/* Nascimento & Idade */}
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       <span className="text-[#f6f8fc] block">{formatDateDisplay(u.dataNascimento)}</span>
-                      <span className="text-[10px] text-[#c9a227] font-semibold">
-                        {u.idade > 0 ? `${u.idade} anos` : "Idade calculada no login"}
-                      </span>
+                      {(() => {
+                        const age = getUserAge(u);
+                        if (age !== null) {
+                          return (
+                            <span className="text-[10px] text-[#c9a227] font-semibold">
+                              {age} anos
+                            </span>
+                          );
+                        }
+                        return (
+                          <span className="text-[10px] text-[#a8b2c3]/50 italic">
+                            Não informada
+                          </span>
+                        );
+                      })()}
                     </td>
 
                     {/* Role / Seletor de Cargo */}
