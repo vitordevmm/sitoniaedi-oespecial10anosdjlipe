@@ -1,6 +1,6 @@
 "use client";
-
-import { useState } from "react";
+ 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   Calendar,
@@ -23,12 +23,14 @@ import {
   User,
   LogOut,
   QrCode,
+  AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { TermsModal, TermsTab } from "@/components/legal/TermsModal";
 import { Navbar } from "@/components/layout/Navbar";
 import { EventCountdown } from "@/components/home/EventCountdown";
+import { EventConfig, DEFAULT_EVENT_CONFIG } from "@/types/config";
 import Link from "next/link";
 
 export default function Home() {
@@ -38,6 +40,41 @@ export default function Home() {
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const [termsInitialTab, setTermsInitialTab] = useState<TermsTab>("geral");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // Toast divertido de bloqueio de acesso não autorizado a /admin
+  const [espertinhoToast, setEspertinhoToast] = useState(false);
+
+  // Configurações dinâmicas de lotes e preços do evento
+  const [eventConfig, setEventConfig] = useState<EventConfig>(DEFAULT_EVENT_CONFIG);
+
+  useEffect(() => {
+    // 1. Detecta redirecionamento de tentativa de acesso não autorizada a /admin
+    if (typeof window !== "undefined" && window.location.search.includes("toast=espertinho")) {
+      setEspertinhoToast(true);
+      window.history.replaceState({}, "", "/");
+      const timer = setTimeout(() => setEspertinhoToast(false), 5500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  useEffect(() => {
+    // 2. Carrega configurações ativas do evento para atualizar lotes e preços
+    fetch("/api/admin/config")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.config) {
+          setEventConfig(data.config);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Lote ativo da pista
+  const activePistaLot =
+    eventConfig.lotes.find((l) => l.sector === "pista" && l.active) || {
+      name: "1º Lote",
+      price: 60,
+    };
 
   const toggleFaq = (index: number) => {
     setOpenFaq((prev) => (prev === index ? null : index));
@@ -78,6 +115,30 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#07090d] text-[#f6f8fc] selection:bg-[#c9a227] selection:text-[#07090d] relative overflow-hidden pb-24 sm:pb-0">
+      {/* TOAST DIVERTIDO: TENTOU SER ESPERTINHO NÉ? */}
+      {espertinhoToast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92vw] p-4 rounded-2xl bg-[#101116]/95 border-2 border-[#c9a227] shadow-[0_10px_40px_rgba(201,162,39,0.5)] backdrop-blur-xl flex items-center gap-3.5 animate-in slide-in-from-top-6 duration-300">
+          <div className="w-11 h-11 rounded-xl bg-[#c9a227]/20 border border-[#c9a227]/40 flex items-center justify-center text-2xl flex-shrink-0 shadow-[0_0_15px_rgba(201,162,39,0.3)]">
+            😏
+          </div>
+          <div className="flex-1 text-left">
+            <h4 className="text-sm font-extrabold text-[#f5e6b8] tracking-tight">
+              Tentou ser espertinho, né?
+            </h4>
+            <p className="text-xs text-[#a8b2c3] mt-0.5 leading-tight">
+              O Painel Administrativo é restrito e monitorado exclusivamente pela produção oficial.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setEspertinhoToast(false)}
+            className="text-[#a8b2c3] hover:text-[#f6f8fc] text-sm font-bold p-1 transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Background Lighting & Atmosphere */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] bg-gradient-to-b from-[#c9a227]/15 via-[#0b1930]/40 to-transparent blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-80 right-0 w-[500px] h-[500px] bg-[#0b1930]/30 blur-3xl pointer-events-none -z-10" />
@@ -296,7 +357,7 @@ export default function Home() {
               </div>
               <div className="flex justify-between items-center h-7 mb-4">
                 <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded bg-[#c9a227]/20 text-[#f5e6b8] border border-[#c9a227]/30">
-                  1º Lote
+                  {activePistaLot.name}
                 </span>
                 <span className="text-xs text-[#f5e6b8] flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#c9a227] animate-pulse" /> Últimas unidades
@@ -331,10 +392,10 @@ export default function Home() {
                   <span className="text-xs text-[#a8b2c3] uppercase tracking-wider font-medium leading-none">Valor Oficial</span>
                   <div className="flex items-baseline gap-1 mt-1">
                     <span className="text-sm font-semibold text-[#f5e6b8]">R$</span>
-                    <span className="text-3xl sm:text-4xl font-extrabold text-[#f5e6b8] leading-none">60</span>
+                    <span className="text-3xl sm:text-4xl font-extrabold text-[#f5e6b8] leading-none">{activePistaLot.price}</span>
                     <span className="text-xs text-[#f5e6b8]">,00</span>
                   </div>
-                  <p className="text-[11px] text-[#a8b2c3] mt-1 leading-none">1º Lote Disponível</p>
+                  <p className="text-[11px] text-[#a8b2c3] mt-1 leading-none">{activePistaLot.name} Disponível</p>
                 </div>
                 {hasTicket ? (
                   <Link
@@ -761,7 +822,7 @@ export default function Home() {
               className="flex-1 py-3 px-4 rounded-xl text-center text-xs font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(201,162,39,0.3)]"
             >
               <Ticket className="w-4 h-4" />
-              <span>Garantir Ingresso • 1º Lote R$ 60</span>
+              <span>Garantir Ingresso • {activePistaLot.name} R$ {activePistaLot.price}</span>
             </a>
           )}
         </div>

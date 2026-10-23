@@ -89,5 +89,13 @@ service cloud.firestore {
       // Writing/creating tickets is strictly handled by the server (Admin SDK)
       allow write: if isAdmin();
     }
+
+    // Rules for /configuracoes/{configId}
+    match /configuracoes/{configId} {
+      // Public read so the frontend (Home, Profile) can display active lots and age policy
+      allow read: if true;
+      // Writing configuration is strictly restricted to authenticated Admins
+      allow write: if isAdmin();
+    }
   }
 }

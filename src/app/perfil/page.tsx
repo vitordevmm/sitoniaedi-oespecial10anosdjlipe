@@ -27,13 +27,16 @@ import {
   MapPin,
   Clock,
   Car,
+  FileText,
+  AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/layout/Navbar";
 import { TicketQRCode } from "@/components/tickets/TicketQRCode";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { MinorAuthorizationContract } from "@/components/legal/MinorAuthorizationContract";
 
-type ProfileTab = "informacoes" | "ingressos" | "configuracoes";
+type ProfileTab = "informacoes" | "ingressos" | "configuracoes" | "autorizacao";
 
 function ProfileContent() {
   const {
@@ -72,11 +75,32 @@ function ProfileContent() {
   const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const [demoTicketLoading, setDemoTicketLoading] = useState(false);
+  const [minAgeRequired, setMinAgeRequired] = useState(17);
+
+  // Carrega a idade mínima configurada pelo Painel Admin
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const res = await fetch("/api/admin/config");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.config?.minAgeUnaccompanied) {
+            setMinAgeRequired(data.config.minAgeUnaccompanied);
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao carregar configuração de idade mínima:", err);
+      }
+    }
+    loadConfig();
+  }, []);
+
+  const isMinor = Boolean(profile?.idade && profile.idade < minAgeRequired);
 
   // Sync tab with URL query parameter
   useEffect(() => {
     const tabParam = searchParams.get("tab") as ProfileTab | null;
-    if (tabParam && ["informacoes", "ingressos", "configuracoes"].includes(tabParam)) {
+    if (tabParam && ["informacoes", "ingressos", "configuracoes", "autorizacao"].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
@@ -349,8 +373,8 @@ function ProfileContent() {
         </div>
       </div>
 
-      {/* Profile Navigation Tabs (Informações, Ingressos, Configurações) - 100% Responsivo */}
-      <div className="w-full grid grid-cols-3 gap-1 rounded-2xl bg-[#101116] p-1 sm:p-1.5 border border-[#0b1930] mb-8 shadow-xl overflow-hidden">
+      {/* Profile Navigation Tabs (Informações, Ingressos, Configurações, Autorização) - 100% Responsivo */}
+      <div className={`w-full grid ${isMinor ? "grid-cols-4" : "grid-cols-3"} gap-1 rounded-2xl bg-[#101116] p-1 sm:p-1.5 border border-[#0b1930] mb-8 shadow-xl overflow-hidden`}>
         {/* TAB 1: INFORMAÇÕES / PERFIL */}
         <button
           type="button"
@@ -397,7 +421,52 @@ function ProfileContent() {
           <span className="hidden sm:inline">Configurações</span>
           <span className="sm:hidden">Ajustes</span>
         </button>
+
+        {/* TAB 4: AUTORIZAÇÃO (MENORES DE IDADE) */}
+        {isMinor && (
+          <button
+            type="button"
+            onClick={() => changeTab("autorizacao")}
+            className={`py-2.5 sm:py-3 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all relative min-h-[44px] ${
+              activeTab === "autorizacao"
+                ? "bg-[#0b1930] text-[#f5e6b8] shadow-md border border-[#c9a227]/40"
+                : "text-amber-400/90 hover:text-amber-300 border border-transparent"
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 flex-shrink-0" />
+            <span className="hidden sm:inline">Autorização</span>
+            <span className="sm:hidden">Termo</span>
+            <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] flex-shrink-0" />
+          </button>
+        )}
       </div>
+
+      {/* Banner de Aviso de Menor de Idade se não estiver na aba de autorização */}
+      {isMinor && activeTab !== "autorizacao" && (
+        <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 flex-shrink-0">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-[#f5e6b8]">
+                Entrada com Autorização Obrigatória (Menor de {minAgeRequired} Anos)
+              </p>
+              <p className="text-[11px] sm:text-xs text-[#a8b2c3] mt-0.5">
+                Por ter {profile?.idade} anos, você deve levar o Termo de Autorização impresso e assinado pelo seu responsável legal.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => changeTab("autorizacao")}
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-xs font-bold text-[#f5e6b8] flex items-center justify-center gap-1.5 transition-all"
+          >
+            <FileText className="w-3.5 h-3.5 text-amber-400" />
+            <span>Emitir Termo</span>
+          </button>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* TAB 1: INFORMAÇÕES DA CONTA                                               */}
@@ -880,6 +949,19 @@ function ProfileContent() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 4: AUTORIZAÇÃO DE MENOR (SOMENTE PARA QUEM TEM MENOS QUE A IDADE)     */}
+      {/* ========================================================================= */}
+      {activeTab === "autorizacao" && isMinor && (
+        <MinorAuthorizationContract
+          minorName={profile?.nome || ""}
+          minorCpf={profile?.cpf || ""}
+          minorBirthDate={profile?.dataNascimento || ""}
+          minorAge={profile?.idade || 0}
+          minAgeRequired={minAgeRequired}
+        />
       )}
     </div>
   );
