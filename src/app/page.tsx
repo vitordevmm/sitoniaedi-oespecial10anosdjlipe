@@ -315,6 +315,7 @@ export default function Home() {
                   width={110}
                   height={32}
                   className="object-contain max-h-8 w-auto"
+                  style={{ width: "auto", height: "auto" }}
                   unoptimized
                 />
                 <span className="text-xs text-[#a8b2c3]/30 font-light select-none">|</span>
@@ -324,6 +325,7 @@ export default function Home() {
                   width={44}
                   height={36}
                   className="object-contain max-h-9 w-auto"
+                  style={{ width: "auto", height: "auto" }}
                   unoptimized
                 />
               </div>
@@ -738,6 +740,7 @@ export default function Home() {
                   width={128}
                   height={38}
                   className="object-contain max-h-9 w-auto"
+                  style={{ width: "auto", height: "auto" }}
                   unoptimized
                 />
               </div>
@@ -752,6 +755,7 @@ export default function Home() {
                   width={52}
                   height={42}
                   className="object-contain max-h-10 w-auto"
+                  style={{ width: "auto", height: "auto" }}
                   unoptimized
                 />
               </div>

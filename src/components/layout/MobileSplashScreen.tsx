@@ -180,6 +180,7 @@ export function MobileSplashScreen() {
               width={100}
               height={32}
               className="object-contain max-h-7 sm:max-h-8 w-auto opacity-85 brightness-110 drop-shadow-[0_0_10px_rgba(255,255,255,0.15)]"
+              style={{ width: "auto", height: "auto" }}
               unoptimized
             />
           </div>
@@ -194,6 +195,7 @@ export function MobileSplashScreen() {
               width={48}
               height={36}
               className="object-contain max-h-8 sm:max-h-9 w-auto opacity-85 brightness-110 drop-shadow-[0_0_10px_rgba(255,255,255,0.15)]"
+              style={{ width: "auto", height: "auto" }}
               unoptimized
             />
           </div>
