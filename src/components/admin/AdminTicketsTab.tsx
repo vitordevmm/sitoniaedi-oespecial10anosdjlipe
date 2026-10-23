@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { CustomDropdown, DropdownOption } from "@/components/ui/CustomDropdown";
 import { GlowBadge } from "@/components/ui/GlowBadge";
+import { UserSearchAutocomplete } from "@/components/admin/UserSearchAutocomplete";
+import { AutocompleteUserItem } from "@/app/api/admin/users/search/route";
 
 interface TicketItem {
   id: string;
@@ -80,6 +82,7 @@ export function AdminTicketsTab({
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<TicketItem | null>(null);
   const [targetEmail, setTargetEmail] = useState("");
+  const [selectedTransferUser, setSelectedTransferUser] = useState<AutocompleteUserItem | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [sectorFilter, setSectorFilter] = useState("all");
@@ -138,6 +141,7 @@ export function AdminTicketsTab({
       setTransferModalOpen(false);
       setSelectedTicket(null);
       setTargetEmail("");
+      setSelectedTransferUser(null);
     }
   };
 
@@ -145,21 +149,24 @@ export function AdminTicketsTab({
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* BARRA SUPERIOR: BUSCA, FILTROS E SCANNER DE PORTARIA */}
       <div className="p-4 sm:p-5 rounded-2xl bg-[#101116] border border-[#c9a227]/30 shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-        {/* Formulário de Busca */}
+        {/* Formulário de Busca com Autocomplete */}
         <form onSubmit={handleSearchSubmit} className="flex-1 flex items-center gap-2 max-w-xl">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-[#a8b2c3] absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Buscar por código, nome, e-mail ou CPF..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-[#c9a227] text-xs text-[#f6f8fc] placeholder:text-[#a8b2c3]/50 focus:outline-none transition-all"
-            />
-          </div>
+          <UserSearchAutocomplete
+            value={searchInput}
+            onChange={(val) => setSearchInput(val)}
+            placeholder="Buscar por código, nome, e-mail ou CPF..."
+            onSelectUser={(selectedUser: AutocompleteUserItem) => {
+              const targetCpf = selectedUser.cpfFormatted || selectedUser.cpf || selectedUser.nome;
+              setSearchInput(targetCpf);
+              onSearchChange(targetCpf);
+            }}
+            onSubmitSearch={(val) => onSearchChange(val)}
+            onClear={() => onSearchChange("")}
+            size="md"
+          />
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-xl text-xs font-bold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:brightness-110 transition-all active:scale-95"
+            className="px-4 py-2.5 rounded-xl text-xs font-bold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:brightness-110 transition-all active:scale-95 flex-shrink-0"
           >
             Buscar
           </button>
@@ -566,25 +573,50 @@ export function AdminTicketsTab({
             <form onSubmit={handleTransferSubmit} className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-[#a8b2c3] block mb-1.5">
-                  E-mail do Novo Titular (deve ter conta criada no site):
+                  Buscar Novo Titular por CPF, Nome ou E-mail:
                 </label>
-                <input
-                  type="email"
-                  required
+                <UserSearchAutocomplete
                   value={targetEmail}
-                  onChange={(e) => setTargetEmail(e.target.value)}
-                  placeholder="exemplo@gmail.com"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-[#c9a227] text-xs text-[#f6f8fc] focus:outline-none"
+                  onChange={(val) => {
+                    setTargetEmail(val);
+                    if (!val) setSelectedTransferUser(null);
+                  }}
+                  placeholder="Comece a digitar CPF, nome ou e-mail..."
+                  onSelectUser={(selectedUser: AutocompleteUserItem) => {
+                    setTargetEmail(selectedUser.email);
+                    setSelectedTransferUser(selectedUser);
+                  }}
+                  size="md"
                 />
-                <p className="text-[10px] text-[#a8b2c3]/60 mt-1">
-                  * O QR Code será regerado no nome da nova pessoa e o voucher será enviado automaticamente para o e-mail dela.
-                </p>
+
+                {/* Card de Confirmação do Usuário Selecionado */}
+                {selectedTransferUser ? (
+                  <div className="mt-2.5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs animate-in fade-in">
+                    <div>
+                      <p className="font-bold text-[#f6f8fc]">{selectedTransferUser.nome}</p>
+                      <p className="text-[11px] text-emerald-400 font-mono">
+                        CPF: {selectedTransferUser.cpfFormatted || selectedTransferUser.cpf || "Não informado"}
+                      </p>
+                      <p className="text-[10px] text-[#a8b2c3]">{selectedTransferUser.email}</p>
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                      ✓ Selecionado
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-[#a8b2c3]/60 mt-1">
+                    * Digite o CPF ou nome do usuário cadastrado e selecione com Enter ou clique. O QR Code será regerado no nome dele.
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setTransferModalOpen(false)}
+                  onClick={() => {
+                    setTransferModalOpen(false);
+                    setSelectedTransferUser(null);
+                  }}
                   className="px-4 py-2 rounded-xl text-xs font-semibold text-[#a8b2c3] hover:text-white"
                 >
                   Cancelar
