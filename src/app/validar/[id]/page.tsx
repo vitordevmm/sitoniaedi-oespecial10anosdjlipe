@@ -15,9 +15,9 @@ import {
   Ticket as TicketIcon,
   Clock,
   Sparkles,
-  ArrowLeft,
   Lock,
   Mail,
+  Phone,
   AlertOctagon,
   RefreshCw,
 } from "lucide-react";
@@ -104,9 +104,11 @@ function triggerVibration(type: "success" | "error") {
   }
 }
 
+const MASTER_ADMIN_EMAIL = "vitorhugonascimentosique@gmail.com";
+
 function ValidarContent({ ticketId }: { ticketId: string }) {
 
-  const { user, profile, loading: authLoading, login } = useAuth();
+  const { user, profile, loading: authLoading, login, logout } = useAuth();
 
   const [ticket, setTicket] = useState<TicketValidationData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -117,11 +119,51 @@ function ValidarContent({ ticketId }: { ticketId: string }) {
   const [validationSuccess, setValidationSuccess] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  // Estados do formulário de login para portaria
-  const [staffEmail, setStaffEmail] = useState("");
+  // Estados do formulário de login para portaria (Multi-Identificador)
+  const [loginMethod, setLoginMethod] = useState<"cpf" | "email" | "phone">("cpf");
+  const [staffIdentifier, setStaffIdentifier] = useState("");
   const [staffPassword, setStaffPassword] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Alterna método e formata dígitos se aplicável
+  const handleMethodChange = (newMethod: "email" | "cpf" | "phone") => {
+    setLoginMethod(newMethod);
+    const digits = staffIdentifier.replace(/\D/g, "");
+    if (newMethod === "cpf") {
+      let v = digits.slice(0, 11);
+      if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+      else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+      else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+      setStaffIdentifier(v);
+    } else if (newMethod === "phone") {
+      let v = digits.slice(0, 11);
+      if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+      else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+      setStaffIdentifier(v);
+    }
+  };
+
+  // Aplica máscara automática conforme método selecionado
+  const handleIdentifierChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (loginMethod === "cpf") {
+      let v = val.replace(/\D/g, "").slice(0, 11);
+      if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+      else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+      else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+      setStaffIdentifier(v);
+    } else if (loginMethod === "phone") {
+      let v = val.replace(/\D/g, "").slice(0, 11);
+      if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+      else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+      setStaffIdentifier(v);
+    } else {
+      setStaffIdentifier(val);
+    }
+  };
 
   // Carrega dados do ingresso
   const fetchTicket = async () => {
@@ -159,16 +201,20 @@ function ValidarContent({ ticketId }: { ticketId: string }) {
     }
   }, [user, authLoading, ticketId]);
 
-  // Login direto para equipe de portaria
+  // Login direto para equipe de portaria (aceita CPF, E-mail ou Celular)
   const handleStaffLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!staffIdentifier.trim() || !staffPassword) {
+      setLoginError("Preencha seu identificador (CPF, e-mail ou celular) e sua senha.");
+      return;
+    }
     setLoginLoading(true);
     setLoginError(null);
     try {
-      await login(staffEmail.trim(), staffPassword);
+      await login(staffIdentifier.trim(), staffPassword);
     } catch (err: any) {
       console.error(err);
-      setLoginError("Credenciais de portaria inválidas. Verifique seu e-mail e senha.");
+      setLoginError(err?.message || "Credenciais de portaria inválidas. Verifique os dados digitados.");
     } finally {
       setLoginLoading(false);
     }
@@ -300,19 +346,69 @@ function ValidarContent({ ticketId }: { ticketId: string }) {
           )}
 
           <form onSubmit={handleStaffLogin} className="space-y-4">
+            {/* Seletor de Tipo de Identificador (Pills Segmentadas) */}
+            <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[#07090d] border border-[#0b1930]">
+              <button
+                type="button"
+                onClick={() => handleMethodChange("cpf")}
+                className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                  loginMethod === "cpf"
+                    ? "bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-[0_0_12px_rgba(201,162,39,0.3)]"
+                    : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+                }`}
+              >
+                CPF
+              </button>
+              <button
+                type="button"
+                onClick={() => handleMethodChange("email")}
+                className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                  loginMethod === "email"
+                    ? "bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-[0_0_12px_rgba(201,162,39,0.3)]"
+                    : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+                }`}
+              >
+                E-mail
+              </button>
+              <button
+                type="button"
+                onClick={() => handleMethodChange("phone")}
+                className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                  loginMethod === "phone"
+                    ? "bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-[0_0_12px_rgba(201,162,39,0.3)]"
+                    : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+                }`}
+              >
+                Celular
+              </button>
+            </div>
+
             <div>
               <label className="block text-xs font-semibold text-[#a8b2c3] mb-1.5 uppercase tracking-wider">
-                E-mail Autorizado
+                {loginMethod === "cpf"
+                  ? "CPF Cadastrado"
+                  : loginMethod === "phone"
+                  ? "WhatsApp / Celular"
+                  : "E-mail Autorizado"}
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-[#a8b2c3] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                {loginMethod === "email" && <Mail className="w-4 h-4 text-[#a8b2c3] absolute left-3.5 top-1/2 -translate-y-1/2" />}
+                {loginMethod === "cpf" && <IdCard className="w-4 h-4 text-[#c9a227] absolute left-3.5 top-1/2 -translate-y-1/2" />}
+                {loginMethod === "phone" && <Phone className="w-4 h-4 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />}
+
                 <input
-                  type="email"
+                  type={loginMethod === "email" ? "email" : "text"}
                   required
-                  value={staffEmail}
-                  onChange={(e) => setStaffEmail(e.target.value)}
-                  placeholder="equipe@sintonia.com"
-                  className="w-full h-12 pl-10 pr-4 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-[#c9a227] text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 outline-none transition-all"
+                  value={staffIdentifier}
+                  onChange={handleIdentifierChange}
+                  placeholder={
+                    loginMethod === "cpf"
+                      ? "000.000.000-00"
+                      : loginMethod === "phone"
+                      ? "(00) 90000-0000"
+                      : "equipe@sintonia.com"
+                  }
+                  className="w-full h-12 pl-10 pr-4 rounded-xl bg-[#07090d] border border-[#0b1930] focus:border-[#c9a227] text-sm text-[#f6f8fc] placeholder-[#a8b2c3]/40 outline-none transition-all font-medium"
                 />
               </div>
             </div>
@@ -354,8 +450,9 @@ function ValidarContent({ ticketId }: { ticketId: string }) {
     );
   }
 
-  // 3. Verificação de Permissão: Apenas Admin ou Staff
-  const isAuthorized = profile?.role === "admin" || profile?.role === "staff";
+  // 3. Verificação de Permissão: Apenas Admin, Staff ou Master Admin
+  const isMaster = (user?.email || "").toLowerCase().trim() === MASTER_ADMIN_EMAIL.toLowerCase();
+  const isAuthorized = profile?.role === "admin" || profile?.role === "staff" || isMaster;
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#07090d] text-[#f6f8fc] flex items-center justify-center p-4">
@@ -363,15 +460,22 @@ function ValidarContent({ ticketId }: { ticketId: string }) {
           <div className="w-16 h-16 rounded-2xl bg-red-950/40 border border-red-800/40 text-red-400 flex items-center justify-center mx-auto mb-4">
             <AlertOctagon className="w-8 h-8" />
           </div>
-          <h2 className="text-xl font-bold text-[#f6f8fc]">Acesso Não Autorizado</h2>
+          <h2 className="text-xl font-bold text-[#f6f8fc]">Acesso Restrito à Portaria</h2>
           <p className="text-xs text-[#a8b2c3] mt-2 leading-relaxed">
-            Sua conta (<span className="text-[#f6f8fc] font-bold">{user.email}</span>) não possui permissão de
+            Sua conta atual (<span className="text-[#f6f8fc] font-bold">{user.email}</span>) não possui permissão de
             equipe de portaria (<code className="text-[#c9a227]">staff</code>) ou administrador (<code className="text-[#c9a227]">admin</code>) para realizar a validação óptica de catracas.
           </p>
-          <div className="mt-6 flex flex-col gap-2">
+          <div className="mt-6 flex flex-col gap-2.5">
+            <button
+              type="button"
+              onClick={() => logout()}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-xs font-bold text-[#07090d] hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(201,162,39,0.3)]"
+            >
+              Trocar de Conta (Entrar como Staff / Admin)
+            </button>
             <Link
               href="/"
-              className="w-full py-3 rounded-xl bg-[#0b1930] hover:bg-[#0b1930]/80 text-xs font-bold text-[#f5e6b8] transition-all"
+              className="w-full py-3 rounded-xl bg-[#0b1930] hover:bg-[#0b1930]/80 text-xs font-bold text-[#a8b2c3] hover:text-white transition-all text-center"
             >
               Ir para a Página Inicial
             </Link>

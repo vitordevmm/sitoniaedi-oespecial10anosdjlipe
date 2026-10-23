@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminDb, getAdminAuth } from "@/lib/firebase/admin";
+import { getAdminDb } from "@/lib/firebase/admin";
+import { safeVerifyFirebaseToken } from "@/lib/auth/adminAuth";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function POST(req: NextRequest) {
@@ -13,10 +14,9 @@ export async function POST(req: NextRequest) {
     }
 
     const token = authHeader.split(" ")[1];
-    const adminAuth = await getAdminAuth();
     let decodedToken;
     try {
-      decodedToken = await adminAuth.verifyIdToken(token);
+      decodedToken = await safeVerifyFirebaseToken(token);
     } catch {
       return NextResponse.json(
         { error: "Sessão expirada ou inválida. Faça login novamente." },
