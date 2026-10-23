@@ -308,12 +308,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await updatePassword(user, newPass);
   };
 
-  // Demo ticket generation helper for testing
+  // Demo ticket generation helper for testing (exclusivo para admins)
   const issueDemoTicket = async (sector: string = "pista"): Promise<Ticket> => {
     if (!user) throw new Error("Faça login para emitir o ingresso.");
+    const token = await user.getIdToken(true);
     const res = await fetch("/api/tickets/issue", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
         userId: user.uid,
         userEmail: user.email,

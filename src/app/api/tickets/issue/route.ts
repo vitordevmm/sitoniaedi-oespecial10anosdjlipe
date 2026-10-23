@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase/admin";
+import { verifyAdminRequest } from "@/lib/auth/adminAuth";
 import { Ticket } from "@/types/ticket";
 import { sendTicketIssuedEmail } from "@/lib/email/resend";
 import { getNextTicketSequence } from "@/lib/firebase/ticketsCounter";
 
 export async function POST(req: NextRequest) {
   try {
+    // Trava de segurança essencial: Apenas contas de administrador podem emitir ingressos diretos de teste/demonstração
+    await verifyAdminRequest(req);
+
     const body = await req.json();
     const { userId, userEmail, userName, userCpf, sector = "pista" } = body;
 
@@ -118,8 +122,16 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, ticket: newTicket });
   } catch (error: unknown) {
+    if (error && typeof error === "object" && "digest" in error) {
+      throw error;
+    }
     console.error("Error issuing ticket:", error);
     const message = error instanceof Error ? error.message : "Erro ao emitir ingresso.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const status = message.includes("Token") || message.includes("não fornecido")
+      ? 401
+      : message.includes("Acesso negado")
+      ? 403
+      : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

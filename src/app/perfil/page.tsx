@@ -38,6 +38,8 @@ import { MinorAuthorizationContract } from "@/components/legal/MinorAuthorizatio
 
 type ProfileTab = "informacoes" | "ingressos" | "configuracoes" | "autorizacao";
 
+const MASTER_ADMIN_EMAIL = "vitorhugonascimentosique@gmail.com";
+
 function ProfileContent() {
   const {
     user,
@@ -54,6 +56,9 @@ function ProfileContent() {
 
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const isMaster = (user?.email || "").toLowerCase().trim() === MASTER_ADMIN_EMAIL.toLowerCase();
+  const isAdmin = profile?.role === "admin" || isMaster;
 
   const [activeTab, setActiveTab] = useState<ProfileTab>("informacoes");
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -245,15 +250,20 @@ function ProfileContent() {
     }
   };
 
-  // Handle Demo Ticket Generation
+  // Handle Demo Ticket Generation (Apenas Admins)
   const handleIssueDemoTicket = async () => {
+    if (!isAdmin) {
+      alert("Apenas administradores podem emitir ingressos de teste.");
+      return;
+    }
     try {
       setDemoTicketLoading(true);
       await issueDemoTicket("pista");
       changeTab("ingressos");
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
-      alert("Não foi possível gerar o ingresso de teste.");
+      const message = err instanceof Error ? err.message : "Não foi possível gerar o ingresso de teste.";
+      alert(message);
     } finally {
       setDemoTicketLoading(false);
     }
@@ -735,19 +745,25 @@ function ProfileContent() {
                   <span>Garantir Meu Ingresso Agora (1º Lote R$ 60)</span>
                 </Link>
 
-                <button
-                  type="button"
-                  onClick={handleIssueDemoTicket}
-                  disabled={demoTicketLoading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-full text-xs font-semibold text-[#f5e6b8] bg-[#0b1930] border border-[#c9a227]/40 hover:border-[#c9a227] active:scale-95 transition-all disabled:opacity-50"
-                >
-                  {demoTicketLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-[#c9a227]" />
-                  ) : (
-                    <QrCode className="w-4 h-4 text-[#c9a227]" />
-                  )}
-                  <span>Emitir Ingresso de Teste (Demonstração)</span>
-                </button>
+                {/* Botão de Emissão de Teste: Exclusivo para administradores */}
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={handleIssueDemoTicket}
+                    disabled={demoTicketLoading}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-full text-xs font-semibold text-[#f5e6b8] bg-[#0b1930] border border-[#c9a227]/40 hover:border-[#c9a227] active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    {demoTicketLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-[#c9a227]" />
+                    ) : (
+                      <QrCode className="w-4 h-4 text-[#c9a227]" />
+                    )}
+                    <span>Emitir Ingresso de Teste (Demonstração)</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#c9a227]/20 text-[#f5e6b8] font-bold border border-[#c9a227]/40 ml-1">
+                      Admin
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
           )}
