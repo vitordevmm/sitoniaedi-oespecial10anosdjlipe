@@ -109,25 +109,30 @@ function ProfileContent() {
 
   const isMinor = Boolean(profile?.idade && profile.idade < minAgeRequired);
 
-  // Sync tab with URL query parameter & auto-refresh tickets
+  const lastParamRef = React.useRef<string | null>(null);
+
+  // Sync tab with URL query parameter & auto-refresh tickets once on transition
   useEffect(() => {
     const tabParam = searchParams.get("tab") as ProfileTab | null;
     if (tabParam && ["informacoes", "ingressos", "configuracoes", "autorizacao"].includes(tabParam)) {
       setActiveTab(tabParam);
-      if (tabParam === "ingressos") {
+      if (tabParam === "ingressos" && lastParamRef.current !== "ingressos") {
         refreshTickets();
       }
+      lastParamRef.current = tabParam;
     }
   }, [searchParams, refreshTickets]);
 
-  // Recarrega os ingressos ao focar a aba/janela do navegador
+  // Recarrega os ingressos ao focar a aba/janela do navegador apenas se estiver na aba de ingressos
   useEffect(() => {
     const handleFocus = () => {
-      refreshTickets();
+      if (activeTab === "ingressos") {
+        refreshTickets();
+      }
     };
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
-  }, [refreshTickets]);
+  }, [activeTab, refreshTickets]);
 
   // Pre-fill phone in settings
   useEffect(() => {

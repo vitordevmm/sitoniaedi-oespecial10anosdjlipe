@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import {
   User,
   onAuthStateChanged,
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Helper to fetch user tickets
-  const fetchTickets = async (firebaseUser: User): Promise<Ticket[]> => {
+  const fetchTickets = useCallback(async (firebaseUser: User): Promise<Ticket[]> => {
     try {
       setTicketsLoading(true);
       const res = await fetch(
@@ -105,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setTicketsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -123,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [fetchTickets]);
 
   const refreshProfile = async () => {
     if (user) {
@@ -132,12 +132,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const refreshTickets = async () => {
-    if (user) {
-      const userTickets = await fetchTickets(user);
+  const refreshTickets = useCallback(async () => {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const userTickets = await fetchTickets(currentUser);
       setTickets(userTickets);
     }
-  };
+  }, [fetchTickets]);
 
   // Helper to resolve an identifier (email, CPF or phone) to the user's registered email
   const resolveEmail = async (identifier: string): Promise<string> => {
