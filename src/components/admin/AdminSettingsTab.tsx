@@ -17,6 +17,7 @@ import {
 import { EventConfig, LotConfig, DEFAULT_EVENT_CONFIG } from "@/types/config";
 import { CustomDropdown, DropdownOption } from "@/components/ui/CustomDropdown";
 import { NumberInput } from "@/components/ui/NumberInput";
+import { useConfirm } from "@/context/ConfirmContext";
 
 interface AdminSettingsTabProps {
   initialConfig: EventConfig | null;
@@ -31,6 +32,8 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
   const [config, setConfig] = useState<EventConfig>(initialConfig || DEFAULT_EVENT_CONFIG);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const { confirm } = useConfirm();
 
   useEffect(() => {
     if (initialConfig) {
@@ -89,8 +92,21 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
     setConfig({ ...config, lotes: [...config.lotes, newLot] });
   };
 
-  const handleRemoveLot = (index: number) => {
-    if (confirm("Deseja remover este lote da lista de configurações?")) {
+  const handleRemoveLot = async (index: number) => {
+    const lot = config.lotes[index];
+    const ok = await confirm({
+      title: "Remover Lote de Ingressos",
+      description: (
+        <span>
+          Tem certeza que deseja remover o lote{" "}
+          <strong className="text-[#f5e6b8]">{lot?.name || `Lote #${index + 1}`}</strong> das configurações do evento?
+        </span>
+      ),
+      confirmText: "Sim, Remover Lote",
+      cancelText: "Cancelar",
+      variant: "danger",
+    });
+    if (ok) {
       const updated = config.lotes.filter((_, i) => i !== index);
       setConfig({ ...config, lotes: updated });
     }

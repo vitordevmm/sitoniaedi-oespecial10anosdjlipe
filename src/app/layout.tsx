@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
+import { ConfirmProvider } from "@/context/ConfirmContext";
 import { MobileSplashScreen } from "@/components/layout/MobileSplashScreen";
 import "./globals.css";
 
@@ -90,7 +91,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#07090d] text-[#f6f8fc]">
         <MobileSplashScreen />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ConfirmProvider>{children}</ConfirmProvider>
+        </AuthProvider>
       </body>
     </html>
   );

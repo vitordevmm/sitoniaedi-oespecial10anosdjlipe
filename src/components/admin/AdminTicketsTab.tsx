@@ -24,6 +24,7 @@ import { CustomDropdown, DropdownOption } from "@/components/ui/CustomDropdown";
 import { GlowBadge } from "@/components/ui/GlowBadge";
 import { UserSearchAutocomplete } from "@/components/admin/UserSearchAutocomplete";
 import { AutocompleteUserItem } from "@/app/api/admin/users/search/route";
+import { useConfirm } from "@/context/ConfirmContext";
 
 interface TicketItem {
   id: string;
@@ -87,6 +88,27 @@ export function AdminTicketsTab({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [sectorFilter, setSectorFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  const { confirm } = useConfirm();
+
+  const handleRevokeTicket = async (t: TicketItem) => {
+    const ok = await confirm({
+      title: "Revogar Ingresso Oficial",
+      description: (
+        <span>
+          Tem certeza que deseja <strong className="text-red-400">REVOGAR</strong> e cancelar o ingresso{" "}
+          <strong className="text-[#f5e6b8] font-mono">{t.ticketNumberFormatted || t.id}</strong> de{" "}
+          <strong className="text-[#f6f8fc]">{t.userName}</strong>? A entrada na portaria do evento será bloqueada imediatamente.
+        </span>
+      ),
+      confirmText: "Sim, Revogar Ingresso",
+      cancelText: "Cancelar",
+      variant: "danger",
+    });
+    if (ok) {
+      onAction(t.id, "revoke");
+    }
+  };
 
   const sectorOptions: DropdownOption[] = [
     { value: "all", label: "Todos os Setores", icon: <Layers className="w-3.5 h-3.5 text-[#c9a227]" /> },
@@ -378,11 +400,7 @@ export function AdminTicketsTab({
                           {t.status !== "cancelled" && (
                             <button
                               type="button"
-                              onClick={() => {
-                                if (confirm(`Tem certeza que deseja REVOGAR e cancelar o ingresso ${t.id} de ${t.userName}? A entrada será bloqueada.`)) {
-                                  onAction(t.id, "revoke");
-                                }
-                              }}
+                              onClick={() => handleRevokeTicket(t)}
                               className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
                               title="Revogar ingresso"
                             >
@@ -502,11 +520,7 @@ export function AdminTicketsTab({
                     {t.status !== "cancelled" && (
                       <button
                         type="button"
-                        onClick={() => {
-                          if (confirm(`Tem certeza que deseja REVOGAR e cancelar o ingresso ${t.id} de ${t.userName}? A entrada será bloqueada.`)) {
-                            onAction(t.id, "revoke");
-                          }
-                        }}
+                        onClick={() => handleRevokeTicket(t)}
                         className="p-2.5 rounded-xl text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 transition-all"
                         title="Revogar ingresso"
                       >

@@ -37,6 +37,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { MinorAuthorizationContract } from "@/components/legal/MinorAuthorizationContract";
 import { downloadTicketPass, downloadPureQrCode } from "@/lib/tickets/downloadTicket";
 import type { Ticket } from "@/types/ticket";
+import { useConfirm } from "@/context/ConfirmContext";
 
 type ProfileTab = "informacoes" | "ingressos" | "configuracoes" | "autorizacao";
 
@@ -58,6 +59,7 @@ function ProfileContent() {
 
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { confirm, alert: customAlert } = useConfirm();
 
   const isMaster = (user?.email || "").toLowerCase().trim() === MASTER_ADMIN_EMAIL.toLowerCase();
   const isAdmin = profile?.role === "admin" || isMaster;
@@ -255,9 +257,23 @@ function ProfileContent() {
   // Handle Demo Ticket Generation (Apenas Admins)
   const handleIssueDemoTicket = async () => {
     if (!isAdmin) {
-      alert("Apenas administradores podem emitir ingressos de teste.");
+      await customAlert({
+        title: "Acesso Restrito",
+        description: "Apenas administradores do festival podem emitir ingressos de teste ou demonstração.",
+        variant: "warning",
+      });
       return;
     }
+
+    const ok = await confirm({
+      title: "Emitir Ingresso Demonstrativo",
+      description: "Deseja emitir um ingresso demonstrativo oficial (Pista Geral) com QR Code para testar no perfil e no leitor de portaria?",
+      confirmText: "Emitir Ingresso",
+      cancelText: "Cancelar",
+      variant: "gold",
+    });
+    if (!ok) return;
+
     try {
       setDemoTicketLoading(true);
       await issueDemoTicket("pista");
@@ -265,7 +281,11 @@ function ProfileContent() {
     } catch (err: unknown) {
       console.error(err);
       const message = err instanceof Error ? err.message : "Não foi possível gerar o ingresso de teste.";
-      alert(message);
+      await customAlert({
+        title: "Erro na Emissão",
+        description: message,
+        variant: "danger",
+      });
     } finally {
       setDemoTicketLoading(false);
     }

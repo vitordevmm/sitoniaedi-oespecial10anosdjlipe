@@ -21,6 +21,7 @@ import { CustomDropdown, DropdownOption } from "@/components/ui/CustomDropdown";
 import { GlowBadge } from "@/components/ui/GlowBadge";
 import { UserSearchAutocomplete } from "@/components/admin/UserSearchAutocomplete";
 import { AutocompleteUserItem } from "@/app/api/admin/users/search/route";
+import { useConfirm } from "@/context/ConfirmContext";
 
 interface CourtesyItem {
   id: string;
@@ -69,6 +70,27 @@ export function AdminCourtesiesTab({
   const [note, setNote] = useState("");
   const [issuing, setIssuing] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const { confirm } = useConfirm();
+
+  const handleRevokeCourtesy = async (c: CourtesyItem) => {
+    const ok = await confirm({
+      title: "Revogar Cortesia VIP",
+      description: (
+        <span>
+          Tem certeza que deseja <strong className="text-red-400">REVOGAR</strong> a cortesia{" "}
+          <strong className="text-[#f5e6b8] font-mono">{c.id}</strong> emitida para{" "}
+          <strong className="text-[#f6f8fc]">{c.userName}</strong>? O acesso VIP será cancelado imediatamente.
+        </span>
+      ),
+      confirmText: "Sim, Revogar Cortesia",
+      cancelText: "Cancelar",
+      variant: "danger",
+    });
+    if (ok) {
+      onAction(c.id, "revoke");
+    }
+  };
 
   const courtesySectorOptions: DropdownOption[] = [
     { value: "pista", label: "Pista Geral & Bar Central", icon: <Music2 className="w-3.5 h-3.5 text-[#f5e6b8]" /> },
@@ -288,11 +310,7 @@ export function AdminCourtesiesTab({
                           {c.status !== "cancelled" && (
                             <button
                               type="button"
-                              onClick={() => {
-                                if (confirm(`Deseja revogar a cortesia ${c.id} de ${c.userName}?`)) {
-                                  onAction(c.id, "revoke");
-                                }
-                              }}
+                              onClick={() => handleRevokeCourtesy(c)}
                               className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
                               title="Revogar cortesia"
                             >
@@ -389,11 +407,7 @@ export function AdminCourtesiesTab({
                     {c.status !== "cancelled" && (
                       <button
                         type="button"
-                        onClick={() => {
-                          if (confirm(`Deseja revogar a cortesia ${c.id} de ${c.userName}?`)) {
-                            onAction(c.id, "revoke");
-                          }
-                        }}
+                        onClick={() => handleRevokeCourtesy(c)}
                         className="p-2.5 rounded-xl text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 transition-all"
                         title="Revogar cortesia"
                       >

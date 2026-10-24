@@ -18,6 +18,7 @@ import { CustomDropdown, DropdownOption } from "@/components/ui/CustomDropdown";
 import { GlowBadge } from "@/components/ui/GlowBadge";
 import { UserSearchAutocomplete } from "@/components/admin/UserSearchAutocomplete";
 import { AutocompleteUserItem } from "@/app/api/admin/users/search/route";
+import { useConfirm } from "@/context/ConfirmContext";
 
 interface UserItem {
   id: string;
@@ -58,6 +59,8 @@ export function AdminUsersTab({
   const [searchInput, setSearchInput] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [roleFilter, setRoleFilter] = useState("all");
+
+  const { confirm } = useConfirm();
 
   const roleFilterOptions: DropdownOption[] = [
     { value: "all", label: "Todos os Cargos", icon: <Users className="w-3.5 h-3.5 text-[#a8b2c3]" /> },
@@ -118,11 +121,20 @@ export function AdminUsersTab({
 
   const handleRoleChange = async (user: UserItem, newRole: "user" | "admin" | "staff") => {
     if (user.role === newRole) return;
-    if (
-      confirm(
-        `Confirma a alteração de cargo de ${user.nome} de "${user.role.toUpperCase()}" para "${newRole.toUpperCase()}"?`
-      )
-    ) {
+    const ok = await confirm({
+      title: "Alterar Cargo de Usuário",
+      description: (
+        <span>
+          Confirma a alteração de cargo de <strong className="text-[#f6f8fc]">{user.nome}</strong> de{" "}
+          <strong className="text-[#a8b2c3] uppercase font-mono">{user.role}</strong> para{" "}
+          <strong className="text-[#f5e6b8] uppercase font-mono">{newRole}</strong>?
+        </span>
+      ),
+      confirmText: "Sim, Alterar Cargo",
+      cancelText: "Cancelar",
+      variant: newRole === "admin" ? "warning" : "gold",
+    });
+    if (ok) {
       setUpdatingId(user.id);
       await onUpdateRole(user.uid || user.id, user.email, newRole);
       setUpdatingId(null);
