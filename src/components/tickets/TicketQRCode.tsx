@@ -64,6 +64,7 @@ export function TicketQRCode({ payload, size = 180, className = "" }: TicketQRCo
 
   return (
     <div
+      data-darkreader-ignore="true"
       style={{
         colorScheme: "light",
         forcedColorAdjust: "none",
@@ -78,6 +79,7 @@ export function TicketQRCode({ payload, size = 180, className = "" }: TicketQRCo
         alt="QR Code do Ingresso Sintonia 10 Anos DJ Lipe"
         width={size}
         height={size}
+        data-darkreader-ignore="true"
         style={{
           colorScheme: "light",
           forcedColorAdjust: "none",

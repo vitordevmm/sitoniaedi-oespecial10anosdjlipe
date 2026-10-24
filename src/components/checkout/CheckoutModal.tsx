@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import QRCode from "qrcode";
 import {
   X,
   CheckCircle2,
@@ -41,6 +42,7 @@ export function CheckoutModal({
   const [paymentId, setPaymentId] = useState<number | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrCodeBase64, setQrCodeBase64] = useState<string | null>(null);
+  const [solidQrUrl, setSolidQrUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
 
@@ -57,12 +59,42 @@ export function CheckoutModal({
       setPaymentId(null);
       setQrCode(null);
       setQrCodeBase64(null);
+      setSolidQrUrl(null);
       setCopied(false);
       setIsApproved(false);
       setTimeLeft(15 * 60);
       if (pollingRef.current) clearInterval(pollingRef.current);
     }
   }, [isOpen]);
+
+  // Geração client-side do QR Code com pixels 100% opacos e blindagem contra auto-dark mode
+  useEffect(() => {
+    if (!qrCode) {
+      setSolidQrUrl(null);
+      return;
+    }
+
+    let isMounted = true;
+    QRCode.toDataURL(qrCode, {
+      width: 320,
+      margin: 1,
+      color: {
+        dark: "#000000",
+        light: "#ffffff",
+      },
+      errorCorrectionLevel: "M",
+    })
+      .then((url) => {
+        if (isMounted) setSolidQrUrl(url);
+      })
+      .catch((err) => {
+        console.error("[CheckoutModal] Erro ao renderizar QR code sólido:", err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [qrCode]);
 
   // Timer countdown
   useEffect(() => {
@@ -148,6 +180,8 @@ export function CheckoutModal({
   const seconds = timeLeft % 60;
   const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
+  const displayQr = solidQrUrl || (qrCodeBase64 ? `data:image/png;base64,${qrCodeBase64}` : null);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
       <div className="relative w-full max-w-lg my-8 rounded-3xl bg-[#101116] border-2 border-[#c9a227]/40 shadow-[0_0_50px_rgba(201,162,39,0.25)] p-6 sm:p-8 text-[#f6f8fc] overflow-hidden">
@@ -159,7 +193,8 @@ export function CheckoutModal({
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl bg-[#0b1930] hover:bg-[#c9a227]/20 text-[#a8b2c3] hover:text-[#f6f8fc] border border-[#0b1930] transition-colors"
+          aria-label="Fechar"
+          className="absolute top-5 right-5 p-2 rounded-xl bg-[#0b1930] hover:bg-[#c9a227]/20 text-[#a8b2c3] hover:text-[#f6f8fc] border border-[#0b1930] transition-colors z-30"
         >
           <X className="w-5 h-5" />
         </button>
@@ -267,15 +302,17 @@ export function CheckoutModal({
         ) : (
           /* TELA 2: PIX GERADO COM QR CODE E COPIA E COLA */
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-xs text-emerald-400">
+            {/* Header da Tela 2 com espaçamento de segurança à direita para o botão fechar [X] */}
+            <div className="flex flex-wrap items-center justify-between gap-2.5 mb-5 pr-14 sm:pr-16">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/50 border border-emerald-500/30 text-xs text-emerald-400 font-medium shadow-inner">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                 <span>PIX Gerado com Sucesso</span>
               </div>
 
-              <div className="flex items-center gap-1.5 text-xs text-[#a8b2c3]">
-                <Clock className="w-3.5 h-3.5 text-[#c9a227]" />
-                <span className="font-mono font-bold text-[#f5e6b8]">{formattedTime}</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0b1930] border border-[#c9a227]/30 text-xs text-[#a8b2c3] shadow-inner">
+                <Clock className="w-3.5 h-3.5 text-[#c9a227] flex-shrink-0" />
+                <span className="text-[11px] text-[#a8b2c3] font-medium hidden xs:inline">Válido por:</span>
+                <span className="font-mono font-bold text-[#f5e6b8] tracking-wider">{formattedTime}</span>
               </div>
             </div>
 
@@ -288,18 +325,43 @@ export function CheckoutModal({
               </p>
             </div>
 
-            {/* Imagem do QR Code Blindada contra auto-dark mode */}
-            <div className="w-52 h-52 mx-auto mb-5 p-3 rounded-2xl bg-white border-2 border-[#c9a227] shadow-[0_0_35px_rgba(201,162,39,0.3)] flex items-center justify-center qr-code-shield">
-              {qrCodeBase64 ? (
+            {/* Imagem do QR Code Blindada contra auto-dark mode com fundo 100% branco opaco */}
+            <div
+              data-darkreader-ignore="true"
+              style={{
+                colorScheme: "light",
+                forcedColorAdjust: "none",
+                backgroundColor: "#ffffff",
+                background: "#ffffff",
+                isolation: "isolate",
+              }}
+              className="w-56 h-56 sm:w-60 sm:h-60 mx-auto mb-5 p-3.5 rounded-2xl bg-white border-2 border-[#c9a227] shadow-[0_0_35px_rgba(201,162,39,0.3)] flex items-center justify-center qr-code-shield relative select-none"
+            >
+              {displayQr ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={`data:image/png;base64,${qrCodeBase64}`}
+                  src={displayQr}
                   alt="QR Code PIX Mercado Pago"
-                  className="w-full h-full object-contain"
+                  width={240}
+                  height={240}
+                  data-darkreader-ignore="true"
+                  style={{
+                    colorScheme: "light",
+                    forcedColorAdjust: "none",
+                    backgroundColor: "#ffffff",
+                    background: "#ffffff",
+                    filter: "none",
+                    WebkitFilter: "none",
+                    mixBlendMode: "normal",
+                    isolation: "isolate",
+                    imageRendering: "pixelated",
+                  }}
+                  className="w-full h-full object-contain block rounded-lg"
                 />
               ) : (
-                <div className="text-center p-4 text-[#07090d]">
-                  <QrCode className="w-16 h-16 mx-auto mb-2 text-[#07090d]" />
-                  <span className="text-[11px] font-bold">Use o código abaixo</span>
+                <div className="flex flex-col items-center justify-center p-4 text-[#07090d]">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#c9a227] mb-2" />
+                  <span className="text-[11px] font-bold text-[#07090d]">Gerando QR Code...</span>
                 </div>
               )}
             </div>

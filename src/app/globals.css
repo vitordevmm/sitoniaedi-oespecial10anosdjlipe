@@ -113,21 +113,11 @@ body {
   print-color-adjust: exact !important;
 }
 
-/* Blindagem absoluta do QR Code contra qualquer inversão de modo escuro de navegadores */
-.qr-code-shield {
-  color-scheme: light !important;
-  forced-color-adjust: none !important;
-  -webkit-print-color-adjust: exact !important;
-  print-color-adjust: exact !important;
-  isolation: isolate !important;
-  filter: none !important;
-  -webkit-filter: none !important;
-  background-color: #ffffff !important;
-  background: #ffffff !important;
-}
-
-.qr-code-shield img,
-.qr-code-shield canvas {
+/* Blindagem absoluta do QR Code contra qualquer inversão de modo escuro de navegadores e extensões */
+.qr-code-shield,
+.qr-code-shield *,
+[data-darkreader-ignore],
+[data-darkreader-ignore] * {
   color-scheme: light !important;
   forced-color-adjust: none !important;
   -webkit-print-color-adjust: exact !important;
@@ -138,6 +128,34 @@ body {
   mix-blend-mode: normal !important;
   background-color: #ffffff !important;
   background: #ffffff !important;
+}
+
+.qr-code-shield img,
+.qr-code-shield canvas,
+[data-darkreader-ignore] img,
+[data-darkreader-ignore] canvas {
+  color-scheme: light !important;
+  forced-color-adjust: none !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  isolation: isolate !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+  mix-blend-mode: normal !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+/* Proteção explícita contra Dark Reader e motores dinâmicos de auto dark theme */
+html[data-darkreader-scheme="dark"] .qr-code-shield,
+html[data-darkreader-mode] .qr-code-shield,
+html[data-darkreader-mode] .qr-code-shield img,
+html[data-darkreader-mode] .qr-code-shield canvas,
+html[data-darkreader-mode] [data-darkreader-ignore] {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
 /* Impressão com contraste 100% fiel */
