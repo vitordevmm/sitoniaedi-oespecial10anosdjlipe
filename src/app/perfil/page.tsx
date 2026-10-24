@@ -35,6 +35,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { TicketQRCode } from "@/components/tickets/TicketQRCode";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { MinorAuthorizationContract } from "@/components/legal/MinorAuthorizationContract";
+import { downloadTicketPass, downloadPureQrCode } from "@/lib/tickets/downloadTicket";
+import type { Ticket } from "@/types/ticket";
 
 type ProfileTab = "informacoes" | "ingressos" | "configuracoes" | "autorizacao";
 
@@ -269,9 +271,30 @@ function ProfileContent() {
     }
   };
 
-  // Print/Download Voucher
-  const handleDownloadTicket = () => {
-    window.print();
+  // Download Real de Voucher / QR Code como imagem PNG
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownloadTicket = async (ticket: Ticket) => {
+    try {
+      setDownloadingId(ticket.id);
+      await downloadTicketPass(ticket, { nome: profile?.nome, cpf: profile?.cpf });
+    } catch (err) {
+      console.error("Erro ao baixar voucher completo, tentando QR Code puro:", err);
+      await downloadPureQrCode(ticket);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const handleDownloadQrOnly = async (ticket: Ticket) => {
+    try {
+      setDownloadingId(ticket.id);
+      await downloadPureQrCode(ticket);
+    } catch (err) {
+      console.error("Erro ao baixar QR code puro:", err);
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   if (loading) {
@@ -708,15 +731,32 @@ function ProfileContent() {
                         {ticket.ticketNumberFormatted || `#${String(idx + 1).padStart(4, "0")}`}
                       </p>
 
-                      {/* Download Button */}
-                      <button
-                        type="button"
-                        onClick={handleDownloadTicket}
-                        className="mt-4 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-[#07090d] bg-gradient-to-r from-[#c9a227] via-[#e2bd44] to-[#f5e6b8] hover:opacity-95 active:scale-95 transition-all shadow-[0_0_20px_rgba(201,162,39,0.35)]"
-                      >
-                        <Download className="w-4 h-4" />
-                        <span>Fazer Download do Ingresso</span>
-                      </button>
+                      {/* Download Buttons (PNG Direto sem Print Dialog) */}
+                      <div className="w-full space-y-2 mt-4">
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadQrOnly(ticket)}
+                          disabled={downloadingId === ticket.id}
+                          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-[#07090d] bg-gradient-to-r from-[#c9a227] via-[#e2bd44] to-[#f5e6b8] hover:opacity-95 active:scale-95 transition-all shadow-[0_0_20px_rgba(201,162,39,0.35)] disabled:opacity-50"
+                        >
+                          {downloadingId === ticket.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-[#07090d]" />
+                          ) : (
+                            <QrCode className="w-4 h-4 text-[#07090d]" />
+                          )}
+                          <span>Baixar QR Code do Ingresso (PNG)</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadTicket(ticket)}
+                          disabled={downloadingId === ticket.id}
+                          className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-[11px] font-semibold text-[#a8b2c3] hover:text-[#f5e6b8] hover:bg-[#0b1930] transition-colors disabled:opacity-50"
+                        >
+                          <Download className="w-3.5 h-3.5 text-[#c9a227]" />
+                          <span>Baixar Cartão Completo (VIP Pass)</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
