@@ -33,6 +33,14 @@ interface AdminGeneralTabProps {
 
 export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
   const [hoveredDay, setHoveredDay] = useState<{ date: string; count: number; revenue: number } | null>(null);
+  const [chartMode, setChartMode] = useState<"bars" | "list">("bars");
+
+  // Define o dia inicial em foco (o mais recente) para exibir dados de imediato no mobile
+  React.useEffect(() => {
+    if (metrics?.dailySales && metrics.dailySales.length > 0 && !hoveredDay) {
+      setHoveredDay(metrics.dailySales[metrics.dailySales.length - 1]);
+    }
+  }, [metrics, hoveredDay]);
 
   if (loading || !metrics) {
     return (
@@ -61,13 +69,13 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
   const maxDayRevenue = Math.max(...metrics.dailySales.map((d) => d.revenue), 1);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
       {/* 4 CARDS PRINCIPAIS DE KPI */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Card 1: Valor Arrecadado */}
-        <GlassCard variant="gold" className="p-5 group">
+        <GlassCard variant="gold" className="p-4 sm:p-5 group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#c9a227]/10 rounded-full blur-2xl -z-10 group-hover:bg-[#c9a227]/20 transition-all" />
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#a8b2c3]">
               Arrecadação Total
             </span>
@@ -86,8 +94,8 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
         </GlassCard>
 
         {/* Card 2: Ingressos Vendidos */}
-        <GlassCard variant="default" className="p-5 group">
-          <div className="flex items-center justify-between mb-3">
+        <GlassCard variant="default" className="p-4 sm:p-5 group">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#a8b2c3]">
               Ingressos Vendidos
             </span>
@@ -106,8 +114,8 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
         </GlassCard>
 
         {/* Card 3: Base de Usuários */}
-        <GlassCard variant="default" className="p-5 group">
-          <div className="flex items-center justify-between mb-3">
+        <GlassCard variant="default" className="p-4 sm:p-5 group">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#a8b2c3]">
               Base de Usuários
             </span>
@@ -126,8 +134,8 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
         </GlassCard>
 
         {/* Card 4: Cortesias */}
-        <GlassCard variant="default" className="p-5 group">
-          <div className="flex items-center justify-between mb-3">
+        <GlassCard variant="default" className="p-4 sm:p-5 group">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#a8b2c3]">
               Cortesias VIPs
             </span>
@@ -152,8 +160,8 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
       </div>
 
       {/* GRÁFICO DE VENDAS DIÁRIAS COMPLETO */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[#101116] border border-[#c9a227]/30 shadow-[0_4px_25px_rgba(0,0,0,0.7)]">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+      <div className="p-4 sm:p-6 rounded-2xl bg-[#101116] border border-[#c9a227]/30 shadow-[0_4px_25px_rgba(0,0,0,0.7)]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
           <div>
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-[#c9a227]" />
@@ -162,39 +170,63 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
               </h2>
             </div>
             <p className="text-xs text-[#a8b2c3] mt-0.5">
-              Histórico diário de quantidade de ingressos emitidos e valor financeiro arrecadado
+              Histórico diário de quantidade de ingressos emitidos e valor arrecadado
             </p>
           </div>
 
-          {/* Tooltip Dinâmico do Dia Focado */}
-          {hoveredDay ? (
-            <div className="px-3.5 py-1.5 rounded-xl bg-[#0b1930] border border-[#c9a227]/50 text-xs flex items-center gap-3 shadow-[0_0_15px_rgba(201,162,39,0.3)] animate-in fade-in duration-200">
-              <span className="text-[#a8b2c3] font-semibold flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-[#c9a227]" />
-                {hoveredDay.date}
-              </span>
+          {/* Seletor de Modo no Mobile / Desktop: Barras vs Lista Diária */}
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#07090d] border border-[#0b1930]">
+            <button
+              type="button"
+              onClick={() => setChartMode("bars")}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                chartMode === "bars"
+                  ? "bg-[#c9a227] text-[#07090d]"
+                  : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+              }`}
+            >
+              Gráfico
+            </button>
+            <button
+              type="button"
+              onClick={() => setChartMode("list")}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                chartMode === "list"
+                  ? "bg-[#c9a227] text-[#07090d]"
+                  : "text-[#a8b2c3] hover:text-[#f6f8fc]"
+              }`}
+            >
+              Lista Detalhada
+            </button>
+          </div>
+        </div>
+
+        {/* Detalhe do Dia Focado (Card Responsivo) */}
+        {hoveredDay && (
+          <div className="mb-4 p-3 rounded-xl bg-[#0b1930]/80 border border-[#c9a227]/40 text-xs flex flex-wrap items-center justify-between gap-2.5 shadow-[0_0_15px_rgba(201,162,39,0.2)]">
+            <span className="text-[#a8b2c3] font-semibold flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-[#c9a227]" />
+              <span>Dia: <strong className="text-[#f6f8fc]">{hoveredDay.date}</strong></span>
+            </span>
+            <div className="flex items-center gap-3">
               <span className="text-[#f6f8fc] font-bold">
                 {hoveredDay.count} ingressos
               </span>
-              <span className="text-[#f5e6b8] font-extrabold">
+              <span className="text-[#f5e6b8] font-extrabold text-sm font-mono">
                 {formatCurrency(hoveredDay.revenue)}
               </span>
             </div>
-          ) : (
-            <div className="text-[11px] text-[#a8b2c3] italic">
-              Passe o mouse sobre as barras para detalhes diários
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Visualização de Gráfico de Barras Responsivo */}
         {metrics.dailySales.length === 0 ? (
           <div className="py-12 text-center text-xs text-[#a8b2c3]/60 italic">
             Nenhuma venda diária registrada ainda.
           </div>
-        ) : (
+        ) : chartMode === "bars" ? (
           <div className="space-y-4">
-            <div className="h-64 sm:h-72 w-full flex items-end gap-1.5 sm:gap-3 pt-6 pb-2 px-2 overflow-x-auto border-b border-[#0b1930]/80">
+            <div className="h-56 sm:h-72 w-full flex items-end gap-1 sm:gap-2.5 pt-6 pb-2 px-1 border-b border-[#0b1930]/80 justify-between sm:justify-start">
               {metrics.dailySales.map((day) => {
                 const heightPercent = Math.max(12, Math.round((day.count / maxDayCount) * 100));
                 const isHovered = hoveredDay?.date === day.date;
@@ -202,13 +234,14 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
                 return (
                   <div
                     key={day.date}
+                    onClick={() => setHoveredDay(day)}
+                    onTouchStart={() => setHoveredDay(day)}
                     onMouseEnter={() => setHoveredDay(day)}
-                    onMouseLeave={() => setHoveredDay(null)}
-                    className="flex-1 min-w-[28px] max-w-[48px] h-full flex flex-col justify-end items-center cursor-pointer group transition-all"
+                    className="flex-1 min-w-[20px] sm:min-w-[32px] max-w-[56px] h-full flex flex-col justify-end items-center cursor-pointer group transition-all"
                   >
                     {/* Indicador de Valor no Topo */}
                     <span
-                      className={`text-[9px] font-bold transition-all mb-1 ${
+                      className={`text-[8px] sm:text-[9px] font-bold transition-all mb-1 ${
                         isHovered ? "text-[#f5e6b8] scale-110" : "text-[#a8b2c3]/60"
                       }`}
                     >
@@ -227,8 +260,8 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
 
                     {/* Data no Eixo X */}
                     <span
-                      className={`text-[9px] font-semibold mt-2 whitespace-nowrap ${
-                        isHovered ? "text-[#f5e6b8]" : "text-[#a8b2c3]/60"
+                      className={`text-[8px] sm:text-[9px] font-semibold mt-2 whitespace-nowrap ${
+                        isHovered ? "text-[#f5e6b8] font-bold" : "text-[#a8b2c3]/60"
                       }`}
                     >
                       {formatDateLabel(day.date)}
@@ -239,15 +272,54 @@ export function AdminGeneralTab({ metrics, loading }: AdminGeneralTabProps) {
             </div>
 
             {/* Legenda do Gráfico */}
-            <div className="flex flex-wrap items-center justify-between text-xs text-[#a8b2c3] pt-2 gap-4">
+            <div className="flex flex-wrap items-center justify-between text-xs text-[#a8b2c3] pt-1 gap-2">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded bg-gradient-to-r from-[#c9a227] to-[#f5e6b8]" />
-                <span>Barras: Volume de ingressos emitidos por dia</span>
+                <span className="w-2.5 h-2.5 rounded bg-gradient-to-r from-[#c9a227] to-[#f5e6b8]" />
+                <span className="text-[11px]">Toque ou passe o mouse na barra para selecionar o dia</span>
               </div>
               <div className="text-[11px] text-[#a8b2c3]">
-                Total de dias com emissão: <strong className="text-[#f6f8fc]">{metrics.dailySales.length}</strong>
+                Total: <strong className="text-[#f6f8fc]">{metrics.dailySales.length}</strong> dias
               </div>
             </div>
+          </div>
+        ) : (
+          /* Modo Lista Detalhada (100% Amigável no Celular) */
+          <div className="space-y-2 pt-2 divide-y divide-[#0b1930]">
+            {metrics.dailySales.map((day) => {
+              const heightPercent = Math.max(8, Math.round((day.count / maxDayCount) * 100));
+              const isSelected = hoveredDay?.date === day.date;
+
+              return (
+                <div
+                  key={day.date}
+                  onClick={() => setHoveredDay(day)}
+                  className={`pt-2.5 pb-2 px-3 rounded-xl cursor-pointer transition-all ${
+                    isSelected ? "bg-[#0b1930] border border-[#c9a227]/40" : "hover:bg-white/[0.02]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className="font-semibold text-[#f6f8fc] flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-[#c9a227]" />
+                      {day.date}
+                    </span>
+                    <span className="text-[#f5e6b8] font-mono font-bold">
+                      {formatCurrency(day.revenue)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-2 rounded-full bg-[#07090d] overflow-hidden border border-[#0b1930]">
+                      <div
+                        style={{ width: `${heightPercent}%` }}
+                        className="h-full rounded-full bg-gradient-to-r from-[#c9a227] to-[#f5e6b8]"
+                      />
+                    </div>
+                    <span className="text-[11px] text-[#a8b2c3] font-bold w-16 text-right">
+                      {day.count} ingr.
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

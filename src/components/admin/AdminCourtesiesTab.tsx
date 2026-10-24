@@ -172,9 +172,9 @@ export function AdminCourtesiesTab({
 
       {/* TABELA DE CORTESIAS (50 POR PÁGINA) */}
       <div className="rounded-2xl bg-[#101116] border border-[#0b1930] shadow-[0_4px_25px_rgba(0,0,0,0.7)] overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#0b1930] flex items-center justify-between">
+        <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-[#0b1930] flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-bold uppercase tracking-wider text-[#a8b2c3]">
-            Cortesias Emitidas ({totalCourtesies} registros) • 50 por página
+            Cortesias Emitidas ({totalCourtesies} registros)
           </p>
           <div className="text-xs text-[#a8b2c3]">
             Página <strong className="text-[#f6f8fc]">{page}</strong> de{" "}
@@ -192,118 +192,219 @@ export function AdminCourtesiesTab({
             Nenhuma cortesia emitida ainda. Clique em &quot;Emitir Nova Cortesia&quot; para presentear convidados VIPs.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#a8b2c3]">
-              <thead className="bg-[#07090d]/80 text-[10px] font-bold uppercase tracking-wider text-[#a8b2c3] border-b border-[#0b1930]">
-                <tr>
-                  <th className="py-3 px-4">Código / Voucher</th>
-                  <th className="py-3 px-4">Convidado VIP</th>
-                  <th className="py-3 px-4">Setor</th>
-                  <th className="py-3 px-4">Anotação / Motivo</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#0b1930]/50">
-                {courtesies.map((c) => (
-                  <tr key={c.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-amber-400 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <span>{c.id}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(c.id)}
-                          className="text-[#a8b2c3]/60 hover:text-amber-400 transition-colors"
-                        >
-                          {copiedId === c.id ? (
-                            <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          ) : (
-                            <Copy className="w-3.5 h-3.5" />
+          <>
+            {/* 1. VISUALIZAÇÃO DESKTOP: TABELA */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs text-[#a8b2c3]">
+                <thead className="bg-[#07090d]/80 text-[10px] font-bold uppercase tracking-wider text-[#a8b2c3] border-b border-[#0b1930]">
+                  <tr>
+                    <th className="py-3 px-4">Código / Voucher</th>
+                    <th className="py-3 px-4">Convidado VIP</th>
+                    <th className="py-3 px-4">Setor</th>
+                    <th className="py-3 px-4">Anotação / Motivo</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#0b1930]/50">
+                  {courtesies.map((c) => (
+                    <tr key={c.id} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-amber-400 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <span>{c.id}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(c.id)}
+                            className="text-[#a8b2c3]/60 hover:text-amber-400 transition-colors"
+                          >
+                            {copiedId === c.id ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+                        <span className="text-[10px] font-normal text-[#a8b2c3]/60 block font-sans">
+                          {c.purchaseDate.split("T")[0]}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <p className="font-bold text-[#f6f8fc] leading-tight">{c.userName}</p>
+                        <p className="text-[10px] text-[#a8b2c3]/70 truncate max-w-[180px]">{c.userEmail}</p>
+                      </td>
+
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span className="font-semibold text-[#f6f8fc]">{c.sectorName}</span>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-[11px] text-[#a8b2c3] max-w-[160px] truncate">
+                        {c.note || "Cortesia Oficial da Produção"}
+                      </td>
+
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {c.status === "used" && (
+                          <GlowBadge
+                            variant="blue"
+                            size="sm"
+                            icon={<CheckCircle2 className="w-3 h-3" />}
+                          >
+                            Utilizada na Entrada
+                          </GlowBadge>
+                        )}
+                        {c.status === "approved" && (
+                          <GlowBadge
+                            variant="amber"
+                            size="sm"
+                            pulse
+                            icon={<CheckCircle2 className="w-3 h-3" />}
+                          >
+                            Válida / Cortesia VIP
+                          </GlowBadge>
+                        )}
+                        {c.status === "cancelled" && (
+                          <GlowBadge
+                            variant="red"
+                            size="sm"
+                            icon={<XCircle className="w-3 h-3" />}
+                          >
+                            Revogada
+                          </GlowBadge>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {c.status === "approved" && (
+                            <button
+                              type="button"
+                              onClick={() => onAction(c.id, "validate")}
+                              className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#07090d] bg-emerald-400 hover:bg-emerald-300 transition-all active:scale-95"
+                              title="Validar entrada na catraca"
+                            >
+                              Validar Entrada
+                            </button>
                           )}
-                        </button>
-                      </div>
-                      <span className="text-[10px] font-normal text-[#a8b2c3]/60 block font-sans">
-                        {c.purchaseDate.split("T")[0]}
-                      </span>
-                    </td>
+                          {c.status !== "cancelled" && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm(`Deseja revogar a cortesia ${c.id} de ${c.userName}?`)) {
+                                  onAction(c.id, "revoke");
+                                }
+                              }}
+                              className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
+                              title="Revogar cortesia"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-                    <td className="py-3.5 px-4">
-                      <p className="font-bold text-[#f6f8fc] leading-tight">{c.userName}</p>
-                      <p className="text-[10px] text-[#a8b2c3]/70 truncate max-w-[180px]">{c.userEmail}</p>
-                    </td>
+            {/* 2. VISUALIZAÇÃO MOBILE: CARDS RESPONSIVOS (ZERO SCROLL LATERAL) */}
+            <div className="block md:hidden divide-y divide-[#0b1930]/80">
+              {courtesies.map((c) => (
+                <div key={c.id} className="p-4 space-y-3 hover:bg-white/[0.01] transition-colors">
+                  {/* Top: Código e Status */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-xs text-amber-400 font-mono font-bold truncate">{c.id}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(c.id)}
+                        className="text-[#a8b2c3]/60 hover:text-amber-400 flex-shrink-0"
+                        title="Copiar código"
+                      >
+                        {copiedId === c.id ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
 
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="font-semibold text-[#f6f8fc]">{c.sectorName}</span>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-[11px] text-[#a8b2c3] max-w-[160px] truncate">
-                      {c.note || "Cortesia Oficial da Produção"}
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap">
+                    <div className="flex-shrink-0">
                       {c.status === "used" && (
-                        <GlowBadge
-                          variant="blue"
-                          size="sm"
-                          icon={<CheckCircle2 className="w-3 h-3" />}
-                        >
-                          Utilizada na Entrada
+                        <GlowBadge variant="blue" size="xs" icon={<CheckCircle2 className="w-3 h-3" />}>
+                          Utilizada
                         </GlowBadge>
                       )}
                       {c.status === "approved" && (
-                        <GlowBadge
-                          variant="amber"
-                          size="sm"
-                          pulse
-                          icon={<CheckCircle2 className="w-3 h-3" />}
-                        >
-                          Válida / Cortesia VIP
+                        <GlowBadge variant="amber" size="xs" pulse icon={<CheckCircle2 className="w-3 h-3" />}>
+                          VIP Válida
                         </GlowBadge>
                       )}
                       {c.status === "cancelled" && (
-                        <GlowBadge
-                          variant="red"
-                          size="sm"
-                          icon={<XCircle className="w-3 h-3" />}
-                        >
+                        <GlowBadge variant="red" size="xs" icon={<XCircle className="w-3 h-3" />}>
                           Revogada
                         </GlowBadge>
                       )}
-                    </td>
+                    </div>
+                  </div>
 
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {c.status === "approved" && (
-                          <button
-                            type="button"
-                            onClick={() => onAction(c.id, "validate")}
-                            className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#07090d] bg-emerald-400 hover:bg-emerald-300 transition-all active:scale-95"
-                            title="Validar entrada na catraca"
-                          >
-                            Validar Entrada
-                          </button>
-                        )}
-                        {c.status !== "cancelled" && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (confirm(`Deseja revogar a cortesia ${c.id} de ${c.userName}?`)) {
-                                onAction(c.id, "revoke");
-                              }
-                            }}
-                            className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
-                            title="Revogar cortesia"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                  {/* Convidado VIP */}
+                  <div className="bg-[#07090d]/60 rounded-xl p-3 border border-[#0b1930] space-y-1">
+                    <p className="font-bold text-[#f6f8fc] text-xs leading-tight truncate">{c.userName}</p>
+                    <p className="text-[10px] text-[#a8b2c3]/70 truncate">{c.userEmail}</p>
+                  </div>
+
+                  {/* Setor e Anotação */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2.5 rounded-xl bg-[#07090d]/40 border border-[#0b1930]">
+                      <span className="text-[9px] text-[#a8b2c3] block uppercase tracking-wider">Setor</span>
+                      <span className="font-semibold text-[#f6f8fc] block truncate text-xs mt-0.5">{c.sectorName}</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-[#07090d]/40 border border-[#0b1930]">
+                      <span className="text-[9px] text-[#a8b2c3] block uppercase tracking-wider">Data Emissão</span>
+                      <span className="text-[#f5e6b8] font-mono block text-xs mt-0.5">{c.purchaseDate.split("T")[0]}</span>
+                    </div>
+                  </div>
+
+                  {c.note && (
+                    <div className="p-2 rounded-lg bg-[#07090d]/40 border border-[#0b1930] text-[11px] text-[#a8b2c3] truncate">
+                      <span className="text-[#c9a227] font-semibold">Motivo:</span> {c.note}
+                    </div>
+                  )}
+
+                  {/* Ações Mobile */}
+                  <div className="flex items-center gap-2 pt-1">
+                    {c.status === "approved" && (
+                      <button
+                        type="button"
+                        onClick={() => onAction(c.id, "validate")}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold text-[#07090d] bg-emerald-400 hover:bg-emerald-300 transition-all active:scale-95"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Validar Entrada</span>
+                      </button>
+                    )}
+
+                    {c.status !== "cancelled" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`Deseja revogar a cortesia ${c.id} de ${c.userName}?`)) {
+                            onAction(c.id, "revoke");
+                          }
+                        }}
+                        className="p-2.5 rounded-xl text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 transition-all"
+                        title="Revogar cortesia"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {/* PAGINAÇÃO INFERIOR */}

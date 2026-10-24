@@ -450,75 +450,75 @@ export default function AdminPage() {
       {/* CONTAINER PRINCIPAL */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 space-y-6">
         {/* BARRA DE NAVEGAÇÃO DAS 5 ABAS PRINCIPAIS */}
-        <div className="p-1.5 rounded-2xl bg-[#101116] border border-[#0b1930] shadow-[0_4px_25px_rgba(0,0,0,0.7)] flex flex-wrap items-center gap-1.5">
+        <div className="p-1.5 rounded-2xl bg-[#101116] border border-[#0b1930] shadow-[0_4px_25px_rgba(0,0,0,0.7)] grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap items-center gap-1.5">
           {/* Aba 1: Geral */}
           <button
             type="button"
             onClick={() => setActiveTab("geral")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
               activeTab === "geral"
                 ? "bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] text-[#07090d] shadow-[0_0_15px_rgba(201,162,39,0.3)]"
                 : "text-[#a8b2c3] hover:text-[#f6f8fc] hover:bg-white/5"
             }`}
           >
-            <BarChart3 className="w-4 h-4" />
-            <span>Geral (Métricas)</span>
+            <BarChart3 className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Métricas</span>
           </button>
 
           {/* Aba 2: Ingressos */}
           <button
             type="button"
             onClick={() => setActiveTab("ingressos")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
               activeTab === "ingressos"
                 ? "bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] text-[#07090d] shadow-[0_0_15px_rgba(201,162,39,0.3)]"
                 : "text-[#a8b2c3] hover:text-[#f6f8fc] hover:bg-white/5"
             }`}
           >
-            <Ticket className="w-4 h-4" />
-            <span>Ingressos ({ticketsTotalCount})</span>
+            <Ticket className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Ingressos ({ticketsTotalCount})</span>
           </button>
 
           {/* Aba 3: Cortesias */}
           <button
             type="button"
             onClick={() => setActiveTab("cortesias")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
               activeTab === "cortesias"
                 ? "bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] text-[#07090d] shadow-[0_0_15px_rgba(201,162,39,0.3)]"
                 : "text-[#a8b2c3] hover:text-[#f6f8fc] hover:bg-white/5"
             }`}
           >
-            <Gift className="w-4 h-4" />
-            <span>Cortesias ({courtesiesTotalCount})</span>
+            <Gift className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Cortesias ({courtesiesTotalCount})</span>
           </button>
 
           {/* Aba 4: Usuários */}
           <button
             type="button"
             onClick={() => setActiveTab("usuarios")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
               activeTab === "usuarios"
                 ? "bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] text-[#07090d] shadow-[0_0_15px_rgba(201,162,39,0.3)]"
                 : "text-[#a8b2c3] hover:text-[#f6f8fc] hover:bg-white/5"
             }`}
           >
-            <Users className="w-4 h-4" />
-            <span>Usuários ({usersTotalCount})</span>
+            <Users className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Usuários ({usersTotalCount})</span>
           </button>
 
           {/* Aba 5: Configurações */}
           <button
             type="button"
             onClick={() => setActiveTab("configuracoes")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ml-auto ${
+            className={`col-span-2 sm:col-span-1 lg:ml-auto flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
               activeTab === "configuracoes"
                 ? "bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] text-[#07090d] shadow-[0_0_15px_rgba(201,162,39,0.3)]"
                 : "text-[#a8b2c3] hover:text-[#f6f8fc] hover:bg-white/5"
             }`}
           >
-            <Settings className="w-4 h-4" />
-            <span>Configurações</span>
+            <Settings className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Configurações</span>
           </button>
         </div>
 

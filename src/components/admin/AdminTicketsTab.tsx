@@ -173,7 +173,7 @@ export function AdminTicketsTab({
         </form>
 
         {/* Filtros e Scanner */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-center gap-2.5 w-full lg:w-auto">
           {/* Filtro Setor */}
           <CustomDropdown
             value={sectorFilter}
@@ -184,7 +184,7 @@ export function AdminTicketsTab({
             options={sectorOptions}
             size="md"
             className="w-full sm:w-auto"
-            buttonClassName="rounded-xl min-w-[200px]"
+            buttonClassName="rounded-xl w-full sm:min-w-[180px]"
           />
 
           {/* Filtro Status */}
@@ -197,7 +197,7 @@ export function AdminTicketsTab({
             options={statusOptions}
             size="md"
             className="w-full sm:w-auto"
-            buttonClassName="rounded-xl min-w-[200px]"
+            buttonClassName="rounded-xl w-full sm:min-w-[180px]"
           />
 
           {/* Botão Scanner Portaria */}
@@ -208,9 +208,9 @@ export function AdminTicketsTab({
               setScannerResult(null);
               setScannerCodeInput("");
             }}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-[#07090d] bg-[#c9a227] hover:bg-[#f5e6b8] transition-all shadow-[0_0_15px_rgba(201,162,39,0.3)] active:scale-95"
+            className="col-span-1 sm:col-span-2 lg:col-span-1 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-[#07090d] bg-[#c9a227] hover:bg-[#f5e6b8] transition-all shadow-[0_0_15px_rgba(201,162,39,0.3)] active:scale-95 w-full sm:w-auto"
           >
-            <Camera className="w-4 h-4" />
+            <Camera className="w-4 h-4 flex-shrink-0" />
             <span>Validar na Portaria</span>
           </button>
         </div>
@@ -218,9 +218,9 @@ export function AdminTicketsTab({
 
       {/* TABELA DE INGRESSOS (50 POR PÁGINA) */}
       <div className="rounded-2xl bg-[#101116] border border-[#0b1930] shadow-[0_4px_25px_rgba(0,0,0,0.7)] overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#0b1930] flex items-center justify-between">
+        <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-[#0b1930] flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-bold uppercase tracking-wider text-[#a8b2c3]">
-            Listagem de Ingressos ({totalTickets} registros) • 50 por página
+            Listagem de Ingressos ({totalTickets} registros)
           </p>
           <div className="text-xs text-[#a8b2c3]">
             Página <strong className="text-[#f6f8fc]">{page}</strong> de{" "}
@@ -238,162 +238,286 @@ export function AdminTicketsTab({
             Nenhum ingresso encontrado para os filtros selecionados.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#a8b2c3]">
-              <thead className="bg-[#07090d]/80 text-[10px] font-bold uppercase tracking-wider text-[#a8b2c3] border-b border-[#0b1930]">
-                <tr>
-                  <th className="py-3 px-4">Código / Voucher</th>
-                  <th className="py-3 px-4">Titular (Dono)</th>
-                  <th className="py-3 px-4">CPF</th>
-                  <th className="py-3 px-4">Setor / Lote</th>
-                  <th className="py-3 px-4">Valor</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Ações de Gestão</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#0b1930]/50">
-                {tickets.map((t) => (
-                  <tr key={t.id} className="hover:bg-white/[0.02] transition-colors">
-                    {/* Código / Voucher com Número Sequencial */}
-                    <td className="py-3.5 px-4 font-mono font-bold whitespace-nowrap">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-sm">
-                          {t.ticketNumberFormatted || `#${String(t.ticketNumber || 1).padStart(4, "0")}`}
+          <>
+            {/* 1. VISUALIZAÇÃO DESKTOP: TABELA COMPLETA */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs text-[#a8b2c3]">
+                <thead className="bg-[#07090d]/80 text-[10px] font-bold uppercase tracking-wider text-[#a8b2c3] border-b border-[#0b1930]">
+                  <tr>
+                    <th className="py-3 px-4">Código / Voucher</th>
+                    <th className="py-3 px-4">Titular (Dono)</th>
+                    <th className="py-3 px-4">CPF</th>
+                    <th className="py-3 px-4">Setor / Lote</th>
+                    <th className="py-3 px-4">Valor</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Ações de Gestão</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#0b1930]/50">
+                  {tickets.map((t) => (
+                    <tr key={t.id} className="hover:bg-white/[0.02] transition-colors">
+                      {/* Código / Voucher com Número Sequencial */}
+                      <td className="py-3.5 px-4 font-mono font-bold whitespace-nowrap">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="px-2 py-0.5 rounded-md text-[11px] font-black bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-sm">
+                            {t.ticketNumberFormatted || `#${String(t.ticketNumber || 1).padStart(4, "0")}`}
+                          </span>
+                          <span className="text-xs text-[#f5e6b8]">{t.id}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(t.id)}
+                            className="text-[#a8b2c3]/60 hover:text-[#f5e6b8] transition-colors"
+                            title="Copiar código"
+                          >
+                            {copiedId === t.id ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+                        <span className="text-[10px] font-normal text-[#a8b2c3]/60 block font-sans">
+                          {t.purchaseDate.split("T")[0]}
                         </span>
-                        <span className="text-xs text-[#f5e6b8]">{t.id}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(t.id)}
-                          className="text-[#a8b2c3]/60 hover:text-[#f5e6b8] transition-colors"
-                          title="Copiar código"
-                        >
-                          {copiedId === t.id ? (
-                            <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          ) : (
-                            <Copy className="w-3.5 h-3.5" />
+                      </td>
+
+                      {/* Titular */}
+                      <td className="py-3.5 px-4">
+                        <p className="font-bold text-[#f6f8fc] leading-tight">{t.userName}</p>
+                        <p className="text-[10px] text-[#a8b2c3]/70 truncate max-w-[180px]">{t.userEmail}</p>
+                      </td>
+
+                      {/* CPF */}
+                      <td className="py-3.5 px-4 font-mono whitespace-nowrap text-[#f6f8fc]">
+                        {t.userCpf || "-"}
+                      </td>
+
+                      {/* Setor */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span className="font-semibold text-[#f6f8fc] block">{t.sectorName}</span>
+                        <span className="text-[10px] text-[#c9a227]">{t.lotName}</span>
+                      </td>
+
+                      {/* Valor */}
+                      <td className="py-3.5 px-4 font-bold whitespace-nowrap">
+                        {t.isCourtesy ? (
+                          <GlowBadge variant="amber" size="xs">
+                            CORTESIA
+                          </GlowBadge>
+                        ) : (
+                          <span className="text-[#f5e6b8]">
+                            {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(t.price)}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {t.status === "used" && (
+                          <GlowBadge
+                            variant="blue"
+                            size="sm"
+                            icon={<CheckCircle2 className="w-3 h-3" />}
+                          >
+                            Utilizado na Entrada
+                          </GlowBadge>
+                        )}
+                        {t.status === "approved" && (
+                          <GlowBadge
+                            variant="emerald"
+                            size="sm"
+                            pulse
+                            icon={<CheckCircle2 className="w-3 h-3" />}
+                          >
+                            Aprovado / Válido
+                          </GlowBadge>
+                        )}
+                        {t.status === "cancelled" && (
+                          <GlowBadge
+                            variant="red"
+                            size="sm"
+                            icon={<XCircle className="w-3 h-3" />}
+                          >
+                            Revogado
+                          </GlowBadge>
+                        )}
+                      </td>
+
+                      {/* Ações */}
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Validar Entrada */}
+                          {t.status === "approved" && (
+                            <button
+                              type="button"
+                              onClick={() => onAction(t.id, "validate")}
+                              className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#07090d] bg-emerald-400 hover:bg-emerald-300 transition-all active:scale-95"
+                              title="Validar entrada na catraca"
+                            >
+                              Validar Entrada
+                            </button>
                           )}
-                        </button>
-                      </div>
-                      <span className="text-[10px] font-normal text-[#a8b2c3]/60 block font-sans">
-                        {t.purchaseDate.split("T")[0]}
+
+                          {/* Transferir */}
+                          {t.status !== "cancelled" && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedTicket(t);
+                                setTargetEmail("");
+                                setTransferModalOpen(true);
+                              }}
+                              className="p-1.5 rounded-lg text-[#a8b2c3] hover:text-[#f5e6b8] hover:bg-[#0b1930] transition-all"
+                              title="Transferir ingresso para outro usuário cadastrado"
+                            >
+                              <ArrowRightLeft className="w-4 h-4" />
+                            </button>
+                          )}
+
+                          {/* Revogar */}
+                          {t.status !== "cancelled" && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm(`Tem certeza que deseja REVOGAR e cancelar o ingresso ${t.id} de ${t.userName}? A entrada será bloqueada.`)) {
+                                  onAction(t.id, "revoke");
+                                }
+                              }}
+                              className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
+                              title="Revogar ingresso"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 2. VISUALIZAÇÃO MOBILE: CARDS RESPONSIVOS (ZERO SCROLL LATERAL) */}
+            <div className="block md:hidden divide-y divide-[#0b1930]/80">
+              {tickets.map((t) => (
+                <div key={t.id} className="p-4 space-y-3 hover:bg-white/[0.01] transition-colors">
+                  {/* Top: Voucher & Status */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-sm font-mono flex-shrink-0">
+                        {t.ticketNumberFormatted || `#${String(t.ticketNumber || 1).padStart(4, "0")}`}
                       </span>
-                    </td>
+                      <span className="text-xs text-[#f5e6b8] font-mono truncate">{t.id}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(t.id)}
+                        className="text-[#a8b2c3]/60 hover:text-[#f5e6b8] flex-shrink-0"
+                        title="Copiar código"
+                      >
+                        {copiedId === t.id ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
 
-                    {/* Titular */}
-                    <td className="py-3.5 px-4">
-                      <p className="font-bold text-[#f6f8fc] leading-tight">{t.userName}</p>
-                      <p className="text-[10px] text-[#a8b2c3]/70 truncate max-w-[180px]">{t.userEmail}</p>
-                    </td>
-
-                    {/* CPF */}
-                    <td className="py-3.5 px-4 font-mono whitespace-nowrap text-[#f6f8fc]">
-                      {t.userCpf || "-"}
-                    </td>
-
-                    {/* Setor */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="font-semibold text-[#f6f8fc] block">{t.sectorName}</span>
-                      <span className="text-[10px] text-[#c9a227]">{t.lotName}</span>
-                    </td>
-
-                    {/* Valor */}
-                    <td className="py-3.5 px-4 font-bold whitespace-nowrap">
-                      {t.isCourtesy ? (
-                        <GlowBadge variant="amber" size="xs">
-                          CORTESIA
-                        </GlowBadge>
-                      ) : (
-                        <span className="text-[#f5e6b8]">
-                          {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(t.price)}
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Status */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
+                    <div className="flex-shrink-0">
                       {t.status === "used" && (
-                        <GlowBadge
-                          variant="blue"
-                          size="sm"
-                          icon={<CheckCircle2 className="w-3 h-3" />}
-                        >
-                          Utilizado na Entrada
+                        <GlowBadge variant="blue" size="xs" icon={<CheckCircle2 className="w-3 h-3" />}>
+                          Utilizado
                         </GlowBadge>
                       )}
                       {t.status === "approved" && (
-                        <GlowBadge
-                          variant="emerald"
-                          size="sm"
-                          pulse
-                          icon={<CheckCircle2 className="w-3 h-3" />}
-                        >
-                          Aprovado / Válido
+                        <GlowBadge variant="emerald" size="xs" pulse icon={<CheckCircle2 className="w-3 h-3" />}>
+                          Aprovado
                         </GlowBadge>
                       )}
                       {t.status === "cancelled" && (
-                        <GlowBadge
-                          variant="red"
-                          size="sm"
-                          icon={<XCircle className="w-3 h-3" />}
-                        >
+                        <GlowBadge variant="red" size="xs" icon={<XCircle className="w-3 h-3" />}>
                           Revogado
                         </GlowBadge>
                       )}
-                    </td>
+                    </div>
+                  </div>
 
-                    {/* Ações */}
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {/* Validar Entrada */}
-                        {t.status === "approved" && (
-                          <button
-                            type="button"
-                            onClick={() => onAction(t.id, "validate")}
-                            className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#07090d] bg-emerald-400 hover:bg-emerald-300 transition-all active:scale-95"
-                            title="Validar entrada na catraca"
-                          >
-                            Validar Entrada
-                          </button>
-                        )}
+                  {/* Titular */}
+                  <div className="bg-[#07090d]/60 rounded-xl p-3 border border-[#0b1930] space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-bold text-[#f6f8fc] text-xs leading-tight truncate">{t.userName}</p>
+                      <span className="text-[11px] font-mono text-[#a8b2c3] flex-shrink-0">{t.userCpf || "-"}</span>
+                    </div>
+                    <p className="text-[10px] text-[#a8b2c3]/70 truncate">{t.userEmail}</p>
+                  </div>
 
-                        {/* Transferir */}
-                        {t.status !== "cancelled" && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedTicket(t);
-                              setTargetEmail("");
-                              setTransferModalOpen(true);
-                            }}
-                            className="p-1.5 rounded-lg text-[#a8b2c3] hover:text-[#f5e6b8] hover:bg-[#0b1930] transition-all"
-                            title="Transferir ingresso para outro usuário cadastrado"
-                          >
-                            <ArrowRightLeft className="w-4 h-4" />
-                          </button>
-                        )}
+                  {/* Setor, Valor e Data */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2.5 rounded-xl bg-[#07090d]/40 border border-[#0b1930]">
+                      <span className="text-[9px] text-[#a8b2c3] block uppercase tracking-wider">Setor / Lote</span>
+                      <span className="font-semibold text-[#f6f8fc] block truncate text-xs">{t.sectorName}</span>
+                      <span className="text-[10px] text-[#c9a227]">{t.lotName}</span>
+                    </div>
 
-                        {/* Revogar */}
-                        {t.status !== "cancelled" && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (confirm(`Tem certeza que deseja REVOGAR e cancelar o ingresso ${t.id} de ${t.userName}? A entrada será bloqueada.`)) {
-                                onAction(t.id, "revoke");
-                              }
-                            }}
-                            className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
-                            title="Revogar ingresso"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    <div className="p-2.5 rounded-xl bg-[#07090d]/40 border border-[#0b1930]">
+                      <span className="text-[9px] text-[#a8b2c3] block uppercase tracking-wider">Valor</span>
+                      {t.isCourtesy ? (
+                        <span className="text-amber-400 font-bold block text-xs">CORTESIA</span>
+                      ) : (
+                        <span className="text-[#f5e6b8] font-mono font-bold block text-xs">
+                          {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(t.price)}
+                        </span>
+                      )}
+                      <span className="text-[9px] text-[#a8b2c3]/60 block">{t.purchaseDate.split("T")[0]}</span>
+                    </div>
+                  </div>
+
+                  {/* Ações de Gestão no Mobile */}
+                  <div className="flex items-center gap-2 pt-1">
+                    {t.status === "approved" && (
+                      <button
+                        type="button"
+                        onClick={() => onAction(t.id, "validate")}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold text-[#07090d] bg-emerald-400 hover:bg-emerald-300 transition-all active:scale-95"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Validar Entrada</span>
+                      </button>
+                    )}
+
+                    {t.status !== "cancelled" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedTicket(t);
+                          setTargetEmail("");
+                          setTransferModalOpen(true);
+                        }}
+                        className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold text-[#f5e6b8] bg-[#0b1930] border border-[#c9a227]/30 hover:border-[#c9a227] transition-all"
+                      >
+                        <ArrowRightLeft className="w-3.5 h-3.5" />
+                        <span>Transferir</span>
+                      </button>
+                    )}
+
+                    {t.status !== "cancelled" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`Tem certeza que deseja REVOGAR e cancelar o ingresso ${t.id} de ${t.userName}? A entrada será bloqueada.`)) {
+                            onAction(t.id, "revoke");
+                          }
+                        }}
+                        className="p-2.5 rounded-xl text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 transition-all"
+                        title="Revogar ingresso"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {/* PAGINAÇÃO INFERIOR */}

@@ -21,33 +21,33 @@ export function AdminHeader({
   refreshing,
 }: AdminHeaderProps) {
   return (
-    <header className="w-full bg-[#101116]/95 border-b border-[#c9a227]/30 backdrop-blur-xl sticky top-0 z-40 px-4 sm:px-6 lg:px-8 py-3.5 shadow-[0_4px_25px_rgba(0,0,0,0.8)]">
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+    <header className="w-full bg-[#101116]/95 border-b border-[#c9a227]/30 backdrop-blur-xl sticky top-0 z-40 px-3.5 sm:px-6 lg:px-8 py-3 shadow-[0_4px_25px_rgba(0,0,0,0.8)]">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand / Title */}
-        <div className="flex items-center gap-3.5">
-          <div className="relative w-28 sm:w-36 h-9 flex items-center">
+        <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
+          <div className="relative w-24 sm:w-36 h-8 sm:h-9 flex items-center flex-shrink-0">
             <Image
               src="/assets/logos/logo-especial-10-anos-lipe.svg"
               alt="Especial 10 Anos DJ Lipe"
               width={140}
               height={40}
-              className="object-contain max-h-9 w-auto drop-shadow-[0_0_15px_rgba(201,162,39,0.35)]"
+              className="object-contain max-h-8 sm:max-h-9 w-auto drop-shadow-[0_0_15px_rgba(201,162,39,0.35)]"
               priority
             />
           </div>
 
           <div className="h-6 w-[1px] bg-[#0b1930] hidden sm:block" />
 
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#c9a227]/10 border border-[#c9a227]/40 shadow-[0_0_12px_rgba(201,162,39,0.2)]">
-            <ShieldCheck className="w-4 h-4 text-[#c9a227]" />
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#f5e6b8]">
-              Painel Admin
+          <div className="flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#c9a227]/10 border border-[#c9a227]/40 shadow-[0_0_12px_rgba(201,162,39,0.2)] flex-shrink-0">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#c9a227]" />
+            <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-[#f5e6b8]">
+              Admin
             </span>
           </div>
         </div>
 
         {/* User Info & Actions */}
-        <div className="flex items-center gap-3 sm:gap-4 ml-auto">
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
           {/* Atualizar Dados */}
           <button
             type="button"

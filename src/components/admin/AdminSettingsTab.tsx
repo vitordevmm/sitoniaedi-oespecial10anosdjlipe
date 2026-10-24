@@ -108,68 +108,68 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* BARRA SUPERIOR COM SUB-ABAS E BOTÃO SALVAR */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[#101116] border border-[#c9a227]/30 shadow-[0_4px_25px_rgba(0,0,0,0.7)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#101116] border border-[#c9a227]/30 shadow-[0_4px_25px_rgba(0,0,0,0.7)] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Sub-abas Navigation */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#07090d] border border-[#0b1930]">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#07090d] border border-[#0b1930] w-full lg:w-auto">
           <button
             type="button"
             onClick={() => setActiveSubTab("lotes")}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
               activeSubTab === "lotes"
                 ? "bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-[0_0_12px_rgba(201,162,39,0.3)]"
                 : "text-[#a8b2c3] hover:text-[#f6f8fc]"
             }`}
           >
-            <Layers className="w-4 h-4" />
-            <span>Lotes & Preços</span>
+            <Layers className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Lotes & Preços</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveSubTab("ingressos")}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
               activeSubTab === "ingressos"
                 ? "bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-[0_0_12px_rgba(201,162,39,0.3)]"
                 : "text-[#a8b2c3] hover:text-[#f6f8fc]"
             }`}
           >
-            <Ticket className="w-4 h-4" />
-            <span>Ingressos (Capacidade)</span>
+            <Ticket className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Capacidade</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveSubTab("idade")}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
               activeSubTab === "idade"
                 ? "bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-[0_0_12px_rgba(201,162,39,0.3)]"
                 : "text-[#a8b2c3] hover:text-[#f6f8fc]"
             }`}
           >
-            <Calendar className="w-4 h-4" />
-            <span>Idade & Autorização</span>
+            <Calendar className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Idade Mínima</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveSubTab("cortesias")}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
               activeSubTab === "cortesias"
                 ? "bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] shadow-[0_0_12px_rgba(201,162,39,0.3)]"
                 : "text-[#a8b2c3] hover:text-[#f6f8fc]"
             }`}
           >
-            <Gift className="w-4 h-4" />
-            <span>Cortesias (Limite)</span>
+            <Gift className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Cortesias</span>
           </button>
         </div>
 
         {/* Botão de Salvar Global */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full lg:w-auto">
           {saveSuccess && (
             <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4" />
-              Configurações salvas!
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+              Salvo!
             </span>
           )}
 
@@ -177,7 +177,7 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
             type="button"
             onClick={() => handleSave()}
             disabled={saving}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:brightness-110 shadow-[0_0_15px_rgba(201,162,39,0.3)] transition-all active:scale-95 disabled:opacity-50"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:brightness-110 shadow-[0_0_15px_rgba(201,162,39,0.3)] transition-all active:scale-95 disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? "Salvando..." : "Salvar Alterações"}</span>
@@ -223,7 +223,7 @@ export function AdminSettingsTab({ initialConfig, loading, onSaveConfig }: Admin
                 }`}
               >
                 {/* Nome do Lote */}
-                <div className="flex-1 min-w-[200px]">
+                <div className="flex-1 min-w-0 md:min-w-[200px]">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-[#a8b2c3] block mb-1">
                     Nome do Lote:
                   </label>
