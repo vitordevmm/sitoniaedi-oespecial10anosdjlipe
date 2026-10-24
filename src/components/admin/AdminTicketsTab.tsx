@@ -19,6 +19,7 @@ import {
   Music2,
   Car,
   Crown,
+  Trash2,
 } from "lucide-react";
 import { CustomDropdown, DropdownOption } from "@/components/ui/CustomDropdown";
 import { GlowBadge } from "@/components/ui/GlowBadge";
@@ -56,7 +57,7 @@ interface AdminTicketsTabProps {
   onSearchChange: (search: string) => void;
   onSectorFilterChange: (sector: string) => void;
   onStatusFilterChange: (status: string) => void;
-  onAction: (ticketId: string, action: "revoke" | "validate" | "transfer", targetUserEmail?: string) => Promise<boolean>;
+  onAction: (ticketId: string, action: "revoke" | "validate" | "transfer" | "delete", targetUserEmail?: string) => Promise<boolean>;
   onVerifyScanner: (rawCode: string) => Promise<any>;
 }
 
@@ -107,6 +108,28 @@ export function AdminTicketsTab({
     });
     if (ok) {
       onAction(t.id, "revoke");
+    }
+  };
+
+  const handleDeleteTicket = async (t: TicketItem) => {
+    const ok = await confirm({
+      title: "Excluir Ingresso Definitivamente",
+      description: (
+        <span>
+          Tem certeza que deseja <strong className="text-red-400">EXCLUIR</strong> definitivamente o ingresso{" "}
+          <strong className="text-[#f5e6b8] font-mono">{t.ticketNumberFormatted || t.id}</strong> de{" "}
+          <strong className="text-[#f6f8fc]">{t.userName}</strong>?
+          <br /><br />
+          O registro sumirá do sistema e a numeração{" "}
+          <strong className="text-[#f5e6b8] font-mono">{t.ticketNumberFormatted}</strong> ficará livre para o próximo comprador.
+        </span>
+      ),
+      confirmText: "Sim, Excluir Ingresso",
+      cancelText: "Cancelar",
+      variant: "danger",
+    });
+    if (ok) {
+      onAction(t.id, "delete");
     }
   };
 
@@ -368,44 +391,54 @@ export function AdminTicketsTab({
                       {/* Ações */}
                       <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
-                          {/* Validar Entrada */}
-                          {t.status === "approved" && (
+                          {t.status === "cancelled" ? (
+                            /* Se revogado, exibir EXCLUSIVAMENTE a opção de excluir */
                             <button
                               type="button"
-                              onClick={() => onAction(t.id, "validate")}
-                              className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#07090d] bg-emerald-400 hover:bg-emerald-300 transition-all active:scale-95"
-                              title="Validar entrada na catraca"
+                              onClick={() => handleDeleteTicket(t)}
+                              className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all flex items-center gap-1 group"
+                              title="Excluir ingresso definitivamente e liberar numeração"
                             >
-                              Validar Entrada
+                              <Trash2 className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
                             </button>
-                          )}
+                          ) : (
+                            <>
+                              {/* Validar Entrada */}
+                              {t.status === "approved" && (
+                                <button
+                                  type="button"
+                                  onClick={() => onAction(t.id, "validate")}
+                                  className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#07090d] bg-emerald-400 hover:bg-emerald-300 transition-all active:scale-95"
+                                  title="Validar entrada na catraca"
+                                >
+                                  Validar Entrada
+                                </button>
+                              )}
 
-                          {/* Transferir */}
-                          {t.status !== "cancelled" && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedTicket(t);
-                                setTargetEmail("");
-                                setTransferModalOpen(true);
-                              }}
-                              className="p-1.5 rounded-lg text-[#a8b2c3] hover:text-[#f5e6b8] hover:bg-[#0b1930] transition-all"
-                              title="Transferir ingresso para outro usuário cadastrado"
-                            >
-                              <ArrowRightLeft className="w-4 h-4" />
-                            </button>
-                          )}
+                              {/* Transferir */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedTicket(t);
+                                  setTargetEmail("");
+                                  setTransferModalOpen(true);
+                                }}
+                                className="p-1.5 rounded-lg text-[#a8b2c3] hover:text-[#f5e6b8] hover:bg-[#0b1930] transition-all"
+                                title="Transferir ingresso para outro usuário cadastrado"
+                              >
+                                <ArrowRightLeft className="w-4 h-4" />
+                              </button>
 
-                          {/* Revogar */}
-                          {t.status !== "cancelled" && (
-                            <button
-                              type="button"
-                              onClick={() => handleRevokeTicket(t)}
-                              className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
-                              title="Revogar ingresso"
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </button>
+                              {/* Revogar */}
+                              <button
+                                type="button"
+                                onClick={() => handleRevokeTicket(t)}
+                                className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all"
+                                title="Revogar ingresso"
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
@@ -491,41 +524,52 @@ export function AdminTicketsTab({
 
                   {/* Ações de Gestão no Mobile */}
                   <div className="flex items-center gap-2 pt-1">
-                    {t.status === "approved" && (
+                    {t.status === "cancelled" ? (
+                      /* Se revogado, exibir EXCLUSIVAMENTE o botão de excluir */
                       <button
                         type="button"
-                        onClick={() => onAction(t.id, "validate")}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold text-[#07090d] bg-emerald-400 hover:bg-emerald-300 transition-all active:scale-95"
+                        onClick={() => handleDeleteTicket(t)}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 active:scale-95 transition-all"
+                        title="Excluir ingresso definitivamente e liberar numeração"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Validar Entrada</span>
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                        <span>Excluir Ingresso Definitivamente</span>
                       </button>
-                    )}
+                    ) : (
+                      <>
+                        {t.status === "approved" && (
+                          <button
+                            type="button"
+                            onClick={() => onAction(t.id, "validate")}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold text-[#07090d] bg-emerald-400 hover:bg-emerald-300 transition-all active:scale-95"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Validar Entrada</span>
+                          </button>
+                        )}
 
-                    {t.status !== "cancelled" && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedTicket(t);
-                          setTargetEmail("");
-                          setTransferModalOpen(true);
-                        }}
-                        className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold text-[#f5e6b8] bg-[#0b1930] border border-[#c9a227]/30 hover:border-[#c9a227] transition-all"
-                      >
-                        <ArrowRightLeft className="w-3.5 h-3.5" />
-                        <span>Transferir</span>
-                      </button>
-                    )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedTicket(t);
+                            setTargetEmail("");
+                            setTransferModalOpen(true);
+                          }}
+                          className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold text-[#f5e6b8] bg-[#0b1930] border border-[#c9a227]/30 hover:border-[#c9a227] transition-all"
+                        >
+                          <ArrowRightLeft className="w-3.5 h-3.5" />
+                          <span>Transferir</span>
+                        </button>
 
-                    {t.status !== "cancelled" && (
-                      <button
-                        type="button"
-                        onClick={() => handleRevokeTicket(t)}
-                        className="p-2.5 rounded-xl text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 transition-all"
-                        title="Revogar ingresso"
-                      >
-                        <XCircle className="w-4 h-4" />
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRevokeTicket(t)}
+                          className="p-2.5 rounded-xl text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 transition-all"
+                          title="Revogar ingresso"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>

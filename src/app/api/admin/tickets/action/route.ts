@@ -12,14 +12,14 @@ export async function POST(req: NextRequest) {
 
     if (!ticketId || !action) {
       return NextResponse.json(
-        { error: "ticketId e action ('revoke' | 'validate' | 'transfer') são obrigatórios." },
+        { error: "ticketId e action ('revoke' | 'validate' | 'transfer' | 'delete') são obrigatórios." },
         { status: 400 }
       );
     }
 
-    if ((action === "revoke" || action === "transfer") && userAuth.role !== "admin") {
+    if ((action === "revoke" || action === "transfer" || action === "delete") && userAuth.role !== "admin") {
       return NextResponse.json(
-        { error: "Apenas administradores podem revogar ou transferir ingressos." },
+        { error: "Apenas administradores podem revogar, transferir ou excluir ingressos." },
         { status: 403 }
       );
     }
@@ -36,6 +36,22 @@ export async function POST(req: NextRequest) {
     }
 
     const ticketData = ticketSnap.data()!;
+
+    // ==========================================
+    // 0. AÇÃO: EXCLUIR DEFINITIVAMENTE INGRESSO
+    // ==========================================
+    if (action === "delete") {
+      const ticketFormatted =
+        ticketData.ticketNumberFormatted ||
+        `#${String(ticketData.ticketNumber || "").padStart(4, "0")}`;
+
+      await ticketRef.delete();
+
+      return NextResponse.json({
+        success: true,
+        message: `Ingresso ${ticketFormatted} (${ticketId}) excluído com sucesso. A numeração ${ticketFormatted} foi liberada para a próxima compra!`,
+      });
+    }
 
     // ==========================================
     // 1. AÇÃO: REVOGAR INGRESSO

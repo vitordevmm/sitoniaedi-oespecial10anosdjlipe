@@ -342,7 +342,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         profile,
         tickets,
-        hasTicket: tickets.length > 0,
+        hasTicket: tickets.some((t) => t.status !== "cancelled"),
         loading,
         ticketsLoading,
         login,

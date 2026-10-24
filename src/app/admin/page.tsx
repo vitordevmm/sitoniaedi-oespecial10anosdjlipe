@@ -274,7 +274,7 @@ export default function AdminPage() {
   // ===============================================================
   const handleTicketAction = async (
     ticketId: string,
-    action: "revoke" | "validate" | "transfer",
+    action: "revoke" | "validate" | "transfer" | "delete",
     targetUserEmail?: string
   ): Promise<boolean> => {
     try {

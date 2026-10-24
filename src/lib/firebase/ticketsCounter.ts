@@ -1,27 +1,54 @@
-import { Firestore, FieldValue } from "firebase-admin/firestore";
+import { Firestore } from "firebase-admin/firestore";
 
 /**
- * Obtém atomicamente o próximo número sequencial de ingresso.
- * Utiliza o documento /configuracoes/contadores com increment do Firestore.
+ * Obtém atomicamente o menor número sequencial de ingresso disponível.
+ * Regra de negócio: Se o ingresso #0001 for revogado/excluído e estiver no #0010,
+ * a próxima compra preenche o primeiro número livre (#0001).
  * Retorna o número e a string formatada no padrão #0001, #0002, etc.
  */
 export async function getNextTicketSequence(db: Firestore): Promise<{ number: number; formatted: string }> {
   const counterRef = db.collection("configuracoes").doc("contadores");
 
   return await db.runTransaction(async (transaction) => {
-    const doc = await transaction.get(counterRef);
-    let currentNumber = 0;
+    // 1. Busca todos os ingressos existentes na base para mapear números ocupados
+    const ticketsQuery = db.collection("ingressos").select("ticketNumber", "ticketNumberFormatted", "status");
+    const ticketsSnap = await transaction.get(ticketsQuery);
 
-    if (doc.exists) {
-      currentNumber = Number(doc.data()?.ticketSequence || 0);
+    const occupiedNumbers = new Set<number>();
+
+    ticketsSnap.docs.forEach((doc) => {
+      const data = doc.data();
+      // Ingressos cancelados/revogados ou excluídos NÃO ocupam numeração
+      if (data.status !== "cancelled") {
+        let num = data.ticketNumber;
+        if (!num && data.ticketNumberFormatted) {
+          num = parseInt(String(data.ticketNumberFormatted).replace(/\D/g, ""), 10);
+        }
+        if (typeof num === "number" && !isNaN(num) && num > 0) {
+          occupiedNumbers.add(num);
+        }
+      }
+    });
+
+    // 2. Encontra o primeiro número livre a partir de 1 (#0001, #0002...)
+    let nextNumber = 1;
+    while (occupiedNumbers.has(nextNumber)) {
+      nextNumber++;
     }
 
-    const nextNumber = currentNumber + 1;
+    // 3. Atualiza o documento de contadores com o maior número já alcançado e o último atribuído
+    const counterDoc = await transaction.get(counterRef);
+    let highestSequence = 0;
+    if (counterDoc.exists) {
+      highestSequence = Number(counterDoc.data()?.ticketSequence || 0);
+    }
+    const maxSequence = Math.max(highestSequence, nextNumber);
 
     transaction.set(
       counterRef,
       {
-        ticketSequence: nextNumber,
+        ticketSequence: maxSequence,
+        lastAssignedNumber: nextNumber,
         updatedAt: new Date(),
       },
       { merge: true }

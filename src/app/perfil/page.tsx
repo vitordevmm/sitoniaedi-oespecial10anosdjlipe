@@ -55,7 +55,10 @@ function ProfileContent() {
     updateUserPhone,
     updateUserPassword,
     issueDemoTicket,
+    refreshTickets,
   } = useAuth();
+
+  const activeTickets = tickets.filter((t) => t.status !== "cancelled");
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -106,13 +109,25 @@ function ProfileContent() {
 
   const isMinor = Boolean(profile?.idade && profile.idade < minAgeRequired);
 
-  // Sync tab with URL query parameter
+  // Sync tab with URL query parameter & auto-refresh tickets
   useEffect(() => {
     const tabParam = searchParams.get("tab") as ProfileTab | null;
     if (tabParam && ["informacoes", "ingressos", "configuracoes", "autorizacao"].includes(tabParam)) {
       setActiveTab(tabParam);
+      if (tabParam === "ingressos") {
+        refreshTickets();
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, refreshTickets]);
+
+  // Recarrega os ingressos ao focar a aba/janela do navegador
+  useEffect(() => {
+    const handleFocus = () => {
+      refreshTickets();
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [refreshTickets]);
 
   // Pre-fill phone in settings
   useEffect(() => {
@@ -131,6 +146,9 @@ function ProfileContent() {
 
   const changeTab = (tab: ProfileTab) => {
     setActiveTab(tab);
+    if (tab === "ingressos") {
+      refreshTickets();
+    }
     router.replace(`/perfil?tab=${tab}`, { scroll: false });
   };
 
@@ -619,9 +637,9 @@ function ProfileContent() {
               <Loader2 className="w-8 h-8 animate-spin text-[#c9a227] mx-auto mb-3" />
               <p className="text-sm text-[#a8b2c3]">Consultando seus ingressos na base segura...</p>
             </div>
-          ) : tickets.length > 0 ? (
+          ) : activeTickets.length > 0 ? (
             <div className="space-y-6">
-              {tickets.map((ticket, idx) => (
+              {activeTickets.map((ticket, idx) => (
                 <div
                   key={ticket.id}
                   id={`ticket-${ticket.id}`}
@@ -650,10 +668,22 @@ function ProfileContent() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Voucher Ativo
-                      </span>
+                      {ticket.status === "cancelled" ? (
+                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/30 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                          Ingresso Revogado
+                        </span>
+                      ) : ticket.status === "used" ? (
+                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                          Entrada Realizada
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          Voucher Ativo
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -723,10 +753,18 @@ function ProfileContent() {
                           <span className="text-[10px] uppercase text-[#a8b2c3] block">Status da Catraca</span>
                           <span
                             className={`text-xs font-bold block ${
-                              ticket.status === "used" ? "text-amber-400" : "text-emerald-400"
+                              ticket.status === "cancelled"
+                                ? "text-red-400"
+                                : ticket.status === "used"
+                                ? "text-amber-400"
+                                : "text-emerald-400"
                             }`}
                           >
-                            {ticket.status === "used" ? "Entrada Validada" : "Pronto para Entrada"}
+                            {ticket.status === "cancelled"
+                              ? "Entrada Bloqueada"
+                              : ticket.status === "used"
+                              ? "Entrada Validada"
+                              : "Pronto para Entrada"}
                           </span>
                         </div>
                       </div>

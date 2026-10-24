@@ -36,7 +36,10 @@ export async function GET(req: NextRequest) {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sintoniaedicaoespecial.online";
 
-    const tickets: Ticket[] = ticketDocs.map((doc, idx) => {
+    // Ingressos cancelados/revogados NÃO devem constar como ingressos disponíveis do usuário
+    const activeTicketDocs = ticketDocs.filter((doc) => doc.data()?.status !== "cancelled");
+
+    const tickets: Ticket[] = activeTicketDocs.map((doc, idx) => {
       const data = doc.data();
       const num = data.ticketNumber || idx + 1;
       const numFormatted = data.ticketNumberFormatted || `#${String(num).padStart(4, "0")}`;
