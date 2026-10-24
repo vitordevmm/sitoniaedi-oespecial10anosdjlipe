@@ -33,6 +33,7 @@ import { EventCountdown } from "@/components/home/EventCountdown";
 import { EventConfig, DEFAULT_EVENT_CONFIG } from "@/types/config";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { GlowBadge } from "@/components/ui/GlowBadge";
+import { CheckoutModal } from "@/components/checkout/CheckoutModal";
 import Link from "next/link";
 
 export default function Home() {
@@ -41,6 +42,7 @@ export default function Home() {
   const [authModalTab, setAuthModalTab] = useState<"login" | "register">("login");
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const [termsInitialTab, setTermsInitialTab] = useState<TermsTab>("geral");
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   // Toast divertido de bloqueio de acesso não autorizado a /admin
@@ -360,12 +362,12 @@ export default function Home() {
                 Favorito do Público
               </div>
               <div className="flex justify-between items-center h-7 mb-4">
-                <GlowBadge variant="gold" size="sm">
+                <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded bg-[#0b1930] text-[#f5e6b8] border border-[#c9a227]/30">
                   {activePistaLot.name}
-                </GlowBadge>
-                <GlowBadge variant="gold" size="xs" pulse>
-                  Últimas unidades
-                </GlowBadge>
+                </span>
+                <span className="text-xs text-[#a8b2c3] flex items-center gap-1">
+                  <Users className="w-3.5 h-3.5 text-[#c9a227]" /> Arena Principal
+                </span>
               </div>
               <h3 className="text-xl font-bold text-[#f6f8fc] mb-2 min-h-[28px] flex items-center">Pista</h3>
               <p className="text-xs text-[#a8b2c3] mb-6 min-h-[52px] leading-relaxed">
@@ -417,7 +419,7 @@ export default function Home() {
                         setAuthModalTab("register");
                         setAuthModalOpen(true);
                       } else {
-                        window.location.href = "/perfil?tab=ingressos";
+                        setCheckoutModalOpen(true);
                       }
                     }}
                     className="h-12 w-full px-4 rounded-xl text-sm font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] hover:opacity-95 shadow-[0_0_20px_rgba(201,162,39,0.35)] transition-all flex items-center justify-center gap-2"
@@ -441,7 +443,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold text-[#f6f8fc] mb-2 min-h-[28px] flex items-center">Lounge Rosa</h3>
               <p className="text-xs text-[#a8b2c3] mb-6 min-h-[52px] leading-relaxed">
-                Espaço automotivo na ala lateral esquerda delimitada por gradil, com entrada privativa para seu veículo.
+                Área segura na ala lateral esquerda com gradil separando carros e grupos, com atendimento exclusivo por garçons.
               </p>
 
               <div className="space-y-2.5 mb-6 flex-1 text-xs text-[#a8b2c3]">
@@ -451,15 +453,15 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pink-400 flex-shrink-0" />
-                  <span>Espaço privativo para seu veículo e grupo</span>
+                  <span>Espaço privado para seu grupo e seu carro</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pink-400 flex-shrink-0" />
-                  <span>Gradil de proteção e segurança dedicada</span>
+                  <span>Área segura com gradil separando carros e grupos</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-pink-400 flex-shrink-0" />
-                  <span>Bar e atendimento próximo aos veículos</span>
+                  <span>Garçons para que não pegue filas</span>
                 </div>
               </div>
 
@@ -495,7 +497,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold text-[#f6f8fc] mb-2 min-h-[28px] flex items-center">Lounge Azul</h3>
               <p className="text-xs text-[#a8b2c3] mb-6 min-h-[52px] leading-relaxed">
-                Espaço automotivo na ala lateral direita delimitada por gradil, com entrada privativa para seu veículo.
+                Área segura na ala lateral direita com gradil separando carros e grupos, com atendimento exclusivo por garçons.
               </p>
 
               <div className="space-y-2.5 mb-6 flex-1 text-xs text-[#a8b2c3]">
@@ -505,15 +507,15 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-sky-400 flex-shrink-0" />
-                  <span>Espaço privativo para seu veículo e grupo</span>
+                  <span>Espaço privado para seu grupo e seu carro</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-sky-400 flex-shrink-0" />
-                  <span>Gradil de proteção e segurança dedicada</span>
+                  <span>Área segura com gradil separando carros e grupos</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-sky-400 flex-shrink-0" />
-                  <span>Bar e atendimento próximo aos veículos</span>
+                  <span>Garçons para que não pegue filas</span>
                 </div>
               </div>
 
@@ -549,21 +551,21 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold text-[#f6f8fc] mb-2 min-h-[28px] flex items-center">Camarote no Palco</h3>
               <p className="text-xs text-[#a8b2c3] mb-6 min-h-[52px] leading-relaxed">
-                Montado diretamente no palco ao lado da mesa do DJ Lipe, com acesso a camarim e serviço VIP de garçom.
+                Área privativa montada no palco ao lado da mesa do DJ Lipe, com banheiro exclusivo e atendimento por garçons.
               </p>
 
               <div className="space-y-2.5 mb-6 flex-1 text-xs text-[#a8b2c3]">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-[#c9a227] flex-shrink-0" />
-                  <span>Estrutura exclusiva em cima do palco</span>
+                  <span>Área privativa em cima do palco</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-[#c9a227] flex-shrink-0" />
-                  <span>Acesso a camarim e banheiro privativo</span>
+                  <span>Banheiro privativo e exclusivo</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-[#c9a227] flex-shrink-0" />
-                  <span>Atendimento dedicado de garçom</span>
+                  <span>Atendimento dedicado por garçons</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-[#c9a227] flex-shrink-0" />
@@ -823,13 +825,21 @@ export default function Home() {
               <span>Ver Meu Ingresso • QR Code</span>
             </Link>
           ) : (
-            <a
-              href="#ingressos"
+            <button
+              type="button"
+              onClick={() => {
+                if (!user) {
+                  setAuthModalTab("register");
+                  setAuthModalOpen(true);
+                } else {
+                  setCheckoutModalOpen(true);
+                }
+              }}
               className="flex-1 py-3 px-4 rounded-xl text-center text-xs font-extrabold text-[#07090d] bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(201,162,39,0.3)]"
             >
               <Ticket className="w-4 h-4" />
               <span>Garantir Ingresso • {activePistaLot.name} R$ {activePistaLot.price}</span>
-            </a>
+            </button>
           )}
         </div>
       </div>
@@ -849,6 +859,15 @@ export default function Home() {
         isOpen={termsModalOpen}
         onClose={() => setTermsModalOpen(false)}
         initialTab={termsInitialTab}
+      />
+
+      {/* CHECKOUT MERCADO PAGO MODAL */}
+      <CheckoutModal
+        isOpen={checkoutModalOpen}
+        onClose={() => setCheckoutModalOpen(false)}
+        sector="pista"
+        lotName={activePistaLot.name}
+        price={activePistaLot.price}
       />
     </div>
   );
