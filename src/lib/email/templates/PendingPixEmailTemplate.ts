@@ -31,7 +31,35 @@ export function generatePendingPixEmailHtml(data: PendingPixEmailData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sua vaga está reservada • Sintonia Especial 10 Anos DJ Lipe</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Sua vaga está pré-reservada • Sintonia Especial 10 Anos DJ Lipe</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+    .gold-btn {
+      background-color: #c9a227 !important;
+      background: #c9a227 !important;
+      color: #07090d !important;
+    }
+    .dark-tag-box {
+      background-color: #141720 !important;
+      border: 1px solid #c9a227 !important;
+    }
+    @media (prefers-color-scheme: dark) {
+      .gold-btn {
+        background-color: #c9a227 !important;
+        background: #c9a227 !important;
+        color: #07090d !important;
+      }
+      .dark-tag-box {
+        background-color: #141720 !important;
+        border: 1px solid #c9a227 !important;
+      }
+    }
+  </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #07090d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f6f8fc; -webkit-font-smoothing: antialiased;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #07090d; min-height: 100vh;">
@@ -41,9 +69,9 @@ export function generatePendingPixEmailHtml(data: PendingPixEmailData): string {
         <!-- Main Email Container -->
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #101116; border: 1px solid #c9a227; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(201, 162, 39, 0.2);">
           
-          <!-- Top Accent Light Bar (Urgency Orange / Gold) -->
+          <!-- Top Accent Light Bar (Solid Gold Gradient without pastel) -->
           <tr>
-            <td style="height: 4px; background: linear-gradient(90deg, #f59e0b 0%, #c9a227 50%, #f5e6b8 100%);"></td>
+            <td style="height: 4px; background: #c9a227; background-color: #c9a227;"></td>
           </tr>
 
           <!-- Header Section -->
@@ -53,9 +81,9 @@ export function generatePendingPixEmailHtml(data: PendingPixEmailData): string {
               <!-- Selo Urgência / Reserva -->
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 16px;">
                 <tr>
-                  <td style="background-color: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.5); border-radius: 20px; padding: 5px 16px;">
-                    <span style="font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: #fbbf24; text-transform: uppercase;">
-                      ⏳ Reserva Temporária de Ingresso
+                  <td style="background-color: rgba(201, 162, 39, 0.15); border: 1px solid rgba(201, 162, 39, 0.4); border-radius: 20px; padding: 6px 16px;">
+                    <span style="font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: #f5e6b8; text-transform: uppercase;">
+                      Reserva Temporária de Ingresso
                     </span>
                   </td>
                 </tr>
@@ -79,7 +107,7 @@ export function generatePendingPixEmailHtml(data: PendingPixEmailData): string {
                 <tr>
                   <td align="center" style="padding: 16px 20px; text-align: center;">
                     <span style="font-size: 12px; font-weight: 800; color: #f5e6b8; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">
-                      ⚡ Atenção: Lote com Alta Concorrência
+                      Lote com Alta Procura
                     </span>
                     <p style="margin: 0; font-size: 13px; color: #a8b2c3; line-height: 1.5;">
                       Para evitar a perda da vaga ou virada de preço, conclua o pagamento em até <strong style="color: #ffffff;">${expiresInMinutes} minutos</strong>.
@@ -98,14 +126,21 @@ export function generatePendingPixEmailHtml(data: PendingPixEmailData): string {
                   <td style="border-bottom: 1px solid #0b1930; padding-bottom: 14px;">
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
-                        <td>
+                        <td style="vertical-align: middle;">
                           <span style="font-size: 11px; text-transform: uppercase; color: #a8b2c3; display: block; margin-bottom: 2px;">Setor Selecionado</span>
-                          <strong style="font-size: 15px; color: #f6f8fc;">${sectorName}</strong>
+                          <strong style="font-size: 15px; color: #f6f8fc; line-height: 1.3; display: block;">${sectorName}</strong>
                         </td>
-                        <td align="right">
-                          <span style="background-color: rgba(201, 162, 39, 0.15); border: 1px solid #c9a227; color: #f5e6b8; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">
-                            ${lotName}
-                          </span>
+                        <td align="right" style="vertical-align: middle; white-space: nowrap; padding-left: 12px;">
+                          <!-- Badge de Lote com Nested Table e Nowrap (Anti-Quebra e Anti-Colisão de Bordas) -->
+                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="display: inline-table; margin-left: auto;">
+                            <tr>
+                              <td class="dark-tag-box" style="background-color: #141720; border: 1px solid #c9a227; border-radius: 6px; padding: 4px 10px; text-align: center; white-space: nowrap;">
+                                <span style="font-size: 11px; font-weight: 800; color: #f5e6b8; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; display: block; line-height: 1.2;">
+                                  ${lotName}
+                                </span>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
                     </table>
@@ -115,11 +150,11 @@ export function generatePendingPixEmailHtml(data: PendingPixEmailData): string {
                   <td style="padding-top: 14px;">
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                       <tr>
-                        <td>
+                        <td style="vertical-align: middle;">
                           <span style="font-size: 11px; text-transform: uppercase; color: #a8b2c3; display: block;">Total do Pedido</span>
                           <span style="font-size: 11px; color: #34d399;">Pagamento Instantâneo via PIX</span>
                         </td>
-                        <td align="right">
+                        <td align="right" style="vertical-align: middle;">
                           <strong style="font-size: 22px; font-weight: 900; color: #f5e6b8;">${formattedPrice}</strong>
                         </td>
                       </tr>
@@ -157,14 +192,14 @@ export function generatePendingPixEmailHtml(data: PendingPixEmailData): string {
               : ""
           }
 
-          <!-- Main CTA Button -->
+          <!-- Main CTA Button (Solid Gold Metallic - Imune à Inversão de Modo Escuro) -->
           <tr>
             <td align="center" style="padding: 0 30px 30px 30px; text-align: center;">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto; width: 100%;">
                 <tr>
-                  <td align="center" style="border-radius: 14px; background: linear-gradient(90deg, #c9a227 0%, #f5e6b8 50%, #c9a227 100%);">
-                    <a href="${paymentUrl}" target="_blank" style="display: block; padding: 18px 24px; font-size: 15px; font-weight: 900; color: #07090d; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 14px; text-align: center;">
-                      CONCLUIR PAGAMENTO AGORA & GARANTIR INGRESSO
+                  <td align="center" class="gold-btn" style="border-radius: 14px; background-color: #c9a227 !important; background: #c9a227 !important;">
+                    <a href="${paymentUrl}" target="_blank" class="gold-btn" style="display: block; padding: 18px 24px; font-size: 15px; font-weight: 900; color: #07090d !important; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 14px; text-align: center; background-color: #c9a227 !important; background: #c9a227 !important;">
+                      CONCLUIR PAGAMENTO COM PIX
                     </a>
                   </td>
                 </tr>

@@ -56,6 +56,32 @@ export async function generateTicketEmailHtml(data: TicketEmailData): Promise<st
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <title>Seu Ingresso Confirmado • Sintonia Especial 10 Anos DJ Lipe</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+    .gold-btn {
+      background-color: #c9a227 !important;
+      background: #c9a227 !important;
+      color: #07090d !important;
+    }
+    .dark-tag-box {
+      background-color: #141720 !important;
+      border: 1px solid #c9a227 !important;
+    }
+    @media (prefers-color-scheme: dark) {
+      .gold-btn {
+        background-color: #c9a227 !important;
+        background: #c9a227 !important;
+        color: #07090d !important;
+      }
+      .dark-tag-box {
+        background-color: #141720 !important;
+        border: 1px solid #c9a227 !important;
+      }
+    }
+  </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #07090d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f6f8fc; -webkit-font-smoothing: antialiased;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #07090d; min-height: 100vh;">
@@ -65,9 +91,9 @@ export async function generateTicketEmailHtml(data: TicketEmailData): Promise<st
         <!-- Main Email Container -->
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #101116; border: 1px solid #c9a227; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(201, 162, 39, 0.2);">
           
-          <!-- Top Accent Light Bar -->
+          <!-- Top Accent Light Bar (Solid Gold Gradient) -->
           <tr>
-            <td style="height: 4px; background: linear-gradient(90deg, #0b1930 0%, #c9a227 50%, #f5e6b8 100%);"></td>
+            <td style="height: 4px; background: #c9a227; background-color: #c9a227;"></td>
           </tr>
 
           <!-- Header Section -->
@@ -134,10 +160,17 @@ export async function generateTicketEmailHtml(data: TicketEmailData): Promise<st
                             ${sectorName}
                           </strong>
                         </td>
-                        <td align="right">
-                          <span style="display: inline-block; background-color: rgba(201, 162, 39, 0.15); border: 1px solid #c9a227; color: #f5e6b8; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">
-                            ${lotName}
-                          </span>
+                        <td align="right" style="vertical-align: middle; white-space: nowrap; padding-left: 12px;">
+                          <!-- Badge de Lote com Nested Table e Nowrap (Anti-Quebra e Anti-Colisão de Bordas) -->
+                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="display: inline-table; margin-left: auto;">
+                            <tr>
+                              <td class="dark-tag-box" style="background-color: #141720; border: 1px solid #c9a227; border-radius: 6px; padding: 4px 10px; text-align: center; white-space: nowrap;">
+                                <span style="font-size: 11px; font-weight: 800; color: #f5e6b8; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; display: block; line-height: 1.2;">
+                                  ${lotName}
+                                </span>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
                     </table>
@@ -198,13 +231,13 @@ export async function generateTicketEmailHtml(data: TicketEmailData): Promise<st
             </td>
           </tr>
 
-          <!-- Primary CTA Button (Download / View in Profile) -->
+          <!-- Primary CTA Button (Solid Gold Metallic - Imune à Inversão de Modo Escuro) -->
           <tr>
             <td align="center" style="padding: 0 30px 35px 30px; text-align: center;">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto; width: 100%;">
                 <tr>
-                  <td align="center" style="border-radius: 14px; background: linear-gradient(90deg, #c9a227 0%, #f5e6b8 50%, #c9a227 100%);">
-                    <a href="${profileTicketUrl}" target="_blank" style="display: block; padding: 18px 24px; font-size: 15px; font-weight: 900; color: #07090d; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 14px; text-align: center;">
+                  <td align="center" class="gold-btn" style="border-radius: 14px; background-color: #c9a227 !important; background: #c9a227 !important;">
+                    <a href="${profileTicketUrl}" target="_blank" class="gold-btn" style="display: block; padding: 18px 24px; font-size: 15px; font-weight: 900; color: #07090d !important; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 14px; text-align: center; background-color: #c9a227 !important; background: #c9a227 !important;">
                       BAIXAR INGRESSO & ACESSAR NO PERFIL
                     </a>
                   </td>
