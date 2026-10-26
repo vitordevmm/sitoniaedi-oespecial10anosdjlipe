@@ -76,7 +76,7 @@ export default function Home() {
   // Lote ativo da pista
   const activePistaLot =
     eventConfig.lotes.find((l) => l.sector === "pista" && l.active) || {
-      name: "1º Lote",
+      name: "1º Lote Oficial",
       price: 60,
     };
 

@@ -151,6 +151,8 @@ export function CheckoutModal({
           userName: profile?.nome || user.displayName || "Membro Oficial",
           userCpf: profile?.cpf || "",
           sector,
+          lotName,
+          price,
         }),
       });
 

@@ -4,6 +4,7 @@ import { verifyAdminRequest } from "@/lib/auth/adminAuth";
 import { Ticket } from "@/types/ticket";
 import { sendTicketIssuedEmail } from "@/lib/email/resend";
 import { getNextTicketSequence } from "@/lib/firebase/ticketsCounter";
+import { getActiveLotForSector } from "@/lib/firebase/eventConfig";
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,31 +49,8 @@ export async function POST(req: NextRequest) {
     const timestampSec = Math.floor(Date.now() / 1000).toString().slice(-4);
     const ticketId = `SINTONIA-10A-${timestampSec}${randomHex}`;
 
-    // Sector metadata
-    const sectorMap: Record<string, { name: string; price: number; lotName: string }> = {
-      pista: {
-        name: "Pista Geral & Bar Central",
-        price: 60.0,
-        lotName: "1º Lote Oficial",
-      },
-      lounge_rosa: {
-        name: "Lounge Rosa (Ala Esquerda)",
-        price: 1200.0,
-        lotName: "Vaga Automotiva",
-      },
-      lounge_azul: {
-        name: "Lounge Azul (Ala Direita)",
-        price: 1200.0,
-        lotName: "Vaga Automotiva",
-      },
-      camarote: {
-        name: "Camarote no Palco Oficial",
-        price: 2500.0,
-        lotName: "Área Exclusiva Palco",
-      },
-    };
-
-    const sectorInfo = sectorMap[sector] || sectorMap.pista;
+    // 4. Busca lote ativo e valores configurados no painel administrativo
+    const activeLot = await getActiveLotForSector(sector);
 
     // URL oficial de validação que o porteiro abre na câmera
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sintoniaedicaoespecial.online";
@@ -89,10 +67,10 @@ export async function POST(req: NextRequest) {
       userAge,
       userBirthDate,
       sector: sector as any,
-      sectorName: sectorInfo.name,
-      lot: 1,
-      lotName: sectorInfo.lotName,
-      price: sectorInfo.price,
+      sectorName: activeLot.sectorName || "Pista Geral & Bar Central",
+      lot: activeLot.order || 1,
+      lotName: activeLot.name || "1º Lote Oficial",
+      price: Number(activeLot.price) || 60.0,
       status: "approved",
       qrPayload,
       purchaseDate: new Date().toISOString(),

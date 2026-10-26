@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { Ticket } from "@/types/ticket";
+import { getActiveLotForSector } from "@/lib/firebase/eventConfig";
 
 export async function GET(req: NextRequest) {
   try {
@@ -39,37 +40,81 @@ export async function GET(req: NextRequest) {
     // Ingressos cancelados/revogados NÃO devem constar como ingressos disponíveis do usuário
     const activeTicketDocs = ticketDocs.filter((doc) => doc.data()?.status !== "cancelled");
 
-    const tickets: Ticket[] = activeTicketDocs.map((doc, idx) => {
-      const data = doc.data();
-      const num = data.ticketNumber || idx + 1;
-      const numFormatted = data.ticketNumberFormatted || `#${String(num).padStart(4, "0")}`;
-      const validationUrl = `${baseUrl}/validar/${doc.id}`;
+    // Busca configurações ativas de lote para manter ingressos de teste sempre alinhados com o Admin
+    const activePistaLot = await getActiveLotForSector("pista");
 
-      return {
-        id: doc.id,
-        ticketNumber: num,
-        ticketNumberFormatted: numFormatted,
-        userId: data.userId || "",
-        userEmail: data.userEmail || "",
-        userName: data.userName || "",
-        userCpf: data.userCpf || "",
-        userAge: data.userAge,
-        userBirthDate: data.userBirthDate,
-        sector: data.sector || "pista",
-        sectorName: data.sectorName || "Pista Geral & Bar Central",
-        lot: data.lot || 1,
-        lotName: data.lotName || "1º Lote Oficial",
-        price: data.price !== undefined ? data.price : 60,
-        status: data.status || "approved",
-        qrPayload: data.qrPayload?.startsWith("http") ? data.qrPayload : validationUrl,
-        purchaseDate: data.purchaseDate || new Date().toISOString(),
-        paymentId: data.paymentId,
-        paymentMethod: data.paymentMethod || "pix",
-        isCourtesy: data.isCourtesy || data.price === 0,
-        checkedInAt: data.checkedInAt,
-        checkedInBy: data.checkedInBy,
-      };
-    });
+    const tickets: Ticket[] = await Promise.all(
+      activeTicketDocs.map(async (doc, idx) => {
+        const data = doc.data();
+        const num = data.ticketNumber || idx + 1;
+        const numFormatted = data.ticketNumberFormatted || `#${String(num).padStart(4, "0")}`;
+        const validationUrl = `${baseUrl}/validar/${doc.id}`;
+        const isCourtesy =
+          data.isCourtesy ||
+          data.price === 0 ||
+          String(data.lotName || "").toLowerCase().includes("cortesia");
+
+        // Se for um ingresso demonstrativo de teste emitido sem pagamento real, sincroniza com o lote ativo configurado no Admin
+        let currentLotName = data.lotName;
+        let currentPrice = data.price;
+        let currentSectorName = data.sectorName;
+        let currentLot = data.lot;
+
+        if (!data.paymentId && !isCourtesy) {
+          const activeLot =
+            data.sector && data.sector !== "pista"
+              ? await getActiveLotForSector(data.sector)
+              : activePistaLot;
+
+          if (activeLot) {
+            currentLotName = activeLot.name;
+            currentPrice = activeLot.price;
+            currentSectorName = activeLot.sectorName;
+            currentLot = activeLot.order;
+
+            // Se o documento no Firestore estiver com valores antigos, atualiza em background
+            if (data.lotName !== currentLotName || data.price !== currentPrice) {
+              doc.ref
+                .update({
+                  lotName: currentLotName,
+                  price: currentPrice,
+                  sectorName: currentSectorName,
+                  lot: currentLot,
+                  updatedAt: new Date(),
+                })
+                .catch((e: any) =>
+                  console.warn("[api/tickets/my] Erro ao sincronizar ticket demo:", e)
+                );
+            }
+          }
+        }
+
+        return {
+          id: doc.id,
+          ticketNumber: num,
+          ticketNumberFormatted: numFormatted,
+          userId: data.userId || "",
+          userEmail: data.userEmail || "",
+          userName: data.userName || "",
+          userCpf: data.userCpf || "",
+          userAge: data.userAge,
+          userBirthDate: data.userBirthDate,
+          sector: data.sector || "pista",
+          sectorName: currentSectorName || "Pista Geral & Bar Central",
+          lot: currentLot || 1,
+          lotName: currentLotName || "1º Lote Oficial",
+          price: currentPrice !== undefined ? currentPrice : 60,
+          status: data.status || "approved",
+          qrPayload: data.qrPayload?.startsWith("http") ? data.qrPayload : validationUrl,
+          purchaseDate: data.purchaseDate || new Date().toISOString(),
+          paymentId: data.paymentId,
+          paymentMethod: data.paymentMethod || "pix",
+          isCourtesy,
+          checkedInAt: data.checkedInAt,
+          checkedInBy: data.checkedInBy,
+        };
+      })
+    );
 
     return NextResponse.json({ tickets });
   } catch (error: unknown) {

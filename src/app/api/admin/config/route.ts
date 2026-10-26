@@ -6,28 +6,16 @@ import { DEFAULT_EVENT_CONFIG, EventConfig } from "@/types/config";
 const CONFIG_DOC_PATH = "configuracoes";
 const CONFIG_DOC_ID = "evento";
 
+import { getEventConfigFromDb } from "@/lib/firebase/eventConfig";
+
 /**
  * GET /api/admin/config
  * Retorna as configurações oficiais do evento (Lotes, Capacidade, Idade Mínima, Cortesias).
  */
 export async function GET() {
   try {
-    const db = await getAdminDb();
-    const docRef = db.collection(CONFIG_DOC_PATH).doc(CONFIG_DOC_ID);
-    const snap = await docRef.get();
-
-    if (!snap.exists) {
-      // Inicializa com as configurações padrão caso ainda não exista
-      await docRef.set({
-        ...DEFAULT_EVENT_CONFIG,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-      return NextResponse.json({ config: DEFAULT_EVENT_CONFIG });
-    }
-
-    const data = snap.data() as EventConfig;
-    return NextResponse.json({ config: data });
+    const config = await getEventConfigFromDb();
+    return NextResponse.json({ config });
   } catch (error: any) {
     console.error("[Config GET Error]:", error);
     return NextResponse.json(

@@ -145,6 +145,14 @@ Como o evento receberá **milhares de pessoas** com alta demanda simultânea, ha
      - O Mercado Pago por padrão aplicava sua cor de sucesso nativa (verde escuro `#002b1f` / `#013328`) ao validar CPFs de 11 dígitos, quebrando a harmonia Dark & Gold. Foi neutralizado definindo `successColor: "#0b1930"` em `customVariables`, adicionando regras globais de CSS contra classes `[class*="success"]`, `[class*="valid"]` e backgrounds verdes inline, além de um `MutationObserver` em tempo real.
      - O seletor de documento foi travado via CSS (`pointer-events: none`, `-webkit-appearance: none`) e teve sua setinha SVG ocultada, funcionando como um elegante prefixo integrado dourado (`CPF |`) sem abrir dropdowns nativos brancos ou opções de CNPJ desnecessárias para ingressos nominais de festival.
 
+10. **Sincronização Dinâmica em Cascata de Lotes e Preços (/configuracoes/evento):**
+    - Todas as rotas de emissão e checkout consomem o helper centralizado @/lib/firebase/eventConfig.ts (getActiveLotForSector e getEventConfigFromDb).
+    - Qualquer alteração feita na aba de configurações do painel admin reflete de forma atômica no preço e nome do lote:
+      1. **Home:** Cards de setores e CTA de compra.
+      2. **Checkout (PIX e Cartão):** Resumo modal, valores das transações no Mercado Pago e registro em pedidos.
+      3. **Emissão de Ingressos (ticketIssuer.ts e /api/tickets/issue):** Ingressos recebem exatamente o nome do lote, setor, ordem e valor ativo configurado.
+      4. **Sincronização de Ingressos de Teste (/api/tickets/my):** Ingressos demonstrativos de teste do perfil são atualizados automaticamente para os novos valores assim que a tela de perfil é aberta, mantendo o ambiente de homologação sempre consistente com as configurações atuais do festival.
+
 ---
 
 ## 6. Stack Tecnológica e Habilidades (Skills) Vinculadas

@@ -3,6 +3,7 @@ import { getNextTicketSequence } from "@/lib/firebase/ticketsCounter";
 import { sendTicketIssuedEmail } from "@/lib/email/resend";
 import { getPaymentClient } from "@/lib/mercadopago/client";
 import { Ticket } from "@/types/ticket";
+import { getActiveLotForSector } from "@/lib/firebase/eventConfig";
 
 export interface IssueTicketParams {
   paymentId: string;
@@ -101,6 +102,8 @@ export async function issueTicketForPayment({
     data.payment_type_id === "credit_card" ||
     (data.payment_method_id && data.payment_method_id !== "pix");
 
+  const activeLot = await getActiveLotForSector(sector);
+
   const finalTicket: Ticket & { paymentId: string } = {
     id: ticketId,
     paymentId: String(paymentId),
@@ -113,10 +116,10 @@ export async function issueTicketForPayment({
     userAge,
     userBirthDate,
     sector: sector as any,
-    sectorName: "Pista Geral & Bar Central",
-    lot: 1,
-    lotName: "1º Lote Oficial",
-    price: data.transaction_amount || 60.0,
+    sectorName: metadata.sector_name || activeLot.sectorName || "Pista Geral & Bar Central",
+    lot: Number(metadata.lot) || activeLot.order || 1,
+    lotName: metadata.lot_name || activeLot.name || "1º Lote Oficial",
+    price: data.transaction_amount !== undefined ? Number(data.transaction_amount) : Number(activeLot.price) || 60.0,
     status: "approved",
     qrPayload,
     purchaseDate: new Date().toISOString(),

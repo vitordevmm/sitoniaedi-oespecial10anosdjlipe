@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createCardPayment } from "@/lib/mercadopago/client";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { issueTicketForPayment } from "@/lib/firebase/ticketIssuer";
+import { getActiveLotForSector } from "@/lib/firebase/eventConfig";
 
 function getCardRejectedMessage(statusDetail?: string): string {
   switch (statusDetail) {
@@ -74,23 +75,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Preço oficial do lote ativo de Pista (segurança server-side)
-    let amount = 60.0;
-    let lotTitle = "1º Lote Oficial";
-
-    try {
-      const configDoc = await db.collection("config").doc("eventConfig").get();
-      if (configDoc.exists) {
-        const cfg = configDoc.data();
-        const pistaLot = cfg?.lots?.find((l: any) => l.sector === "pista" && l.active);
-        if (pistaLot && pistaLot.price) {
-          amount = Number(pistaLot.price);
-          lotTitle = pistaLot.name || lotTitle;
-        }
-      }
-    } catch (cfgErr) {
-      console.warn("[Checkout Cartão] Aviso ao ler eventConfig, usando padrão:", cfgErr);
-    }
+    // 2. Preço oficial do lote ativo (segurança server-side sincronizada com configuracoes/evento)
+    const activeLot = await getActiveLotForSector(sector);
+    const amount = Number(activeLot.price) || 60.0;
+    const lotTitle = activeLot.name || "1º Lote Oficial";
+    const sectorTitle = activeLot.sectorName || "Pista Geral & Bar Central";
+    const lotOrder = activeLot.order || 1;
 
     const safeInstallments = Math.max(1, Math.min(12, Number(installments) || 1));
 
@@ -112,7 +102,9 @@ export async function POST(req: NextRequest) {
         user_name: finalName,
         user_cpf: finalCpf,
         sector,
-        lot: 1,
+        sector_name: sectorTitle,
+        lot: lotOrder,
+        lot_name: lotTitle,
         installments: safeInstallments,
       },
     });
@@ -127,7 +119,9 @@ export async function POST(req: NextRequest) {
       userName: finalName,
       userCpf: finalCpf || "",
       sector,
-      lot: 1,
+      sectorName: sectorTitle,
+      lot: lotOrder,
+      lotName: lotTitle,
       amount,
       status: cardResponse.status,
       statusDetail: cardResponse.statusDetail,

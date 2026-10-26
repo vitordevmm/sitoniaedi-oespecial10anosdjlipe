@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPixPayment } from "@/lib/mercadopago/client";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { sendPendingPaymentEmail } from "@/lib/email/resend";
+import { getActiveLotForSector } from "@/lib/firebase/eventConfig";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,24 +31,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Preço oficial do lote ativo de Pista (sincronizado com eventConfig)
-    let amount = 60.0;
-    let lotTitle = "1º Lote Oficial";
-    const sectorTitle = "Pista Geral & Bar Central";
-
-    try {
-      const configDoc = await db.collection("config").doc("eventConfig").get();
-      if (configDoc.exists) {
-        const cfg = configDoc.data();
-        const pistaLot = cfg?.lots?.find((l: any) => l.sector === "pista" && l.active);
-        if (pistaLot && pistaLot.price) {
-          amount = Number(pistaLot.price);
-          lotTitle = pistaLot.name || lotTitle;
-        }
-      }
-    } catch (cfgErr) {
-      console.warn("[Checkout PIX] Aviso ao ler eventConfig, usando padrão:", cfgErr);
-    }
+    // 2. Preço oficial do lote ativo (sincronizado com as configurações oficiais de evento)
+    const activeLot = await getActiveLotForSector(sector);
+    const amount = Number(activeLot.price) || 60.0;
+    const lotTitle = activeLot.name || "1º Lote Oficial";
+    const sectorTitle = activeLot.sectorName || "Pista Geral & Bar Central";
+    const lotOrder = activeLot.order || 1;
 
     // 3. Cria cobrança PIX no Mercado Pago
     const pixResponse = await createPixPayment({
@@ -62,7 +51,9 @@ export async function POST(req: NextRequest) {
         user_name: finalName,
         user_cpf: finalCpf,
         sector,
-        lot: 1,
+        sector_name: sectorTitle,
+        lot: lotOrder,
+        lot_name: lotTitle,
       },
     });
 
@@ -76,7 +67,9 @@ export async function POST(req: NextRequest) {
       userName: finalName,
       userCpf: finalCpf || "",
       sector,
-      lot: 1,
+      sectorName: sectorTitle,
+      lot: lotOrder,
+      lotName: lotTitle,
       amount,
       status: pixResponse.status, // "pending"
       paymentMethod: "pix",
