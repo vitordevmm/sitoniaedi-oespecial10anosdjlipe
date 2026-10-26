@@ -106,6 +106,86 @@ export async function createPixPayment(params: CreatePixPaymentParams): Promise<
   };
 }
 
+export interface CreateCardPaymentParams {
+  transactionAmount: number;
+  token: string;
+  description: string;
+  installments: number;
+  paymentMethodId: string;
+  issuerId?: string | number;
+  payerEmail: string;
+  payerName: string;
+  payerCpf?: string;
+  metadata?: Record<string, any>;
+  notificationUrl?: string;
+}
+
+export interface CardPaymentResult {
+  id: number;
+  status: string;
+  statusDetail: string;
+  paymentMethodId: string;
+  installments: number;
+  transactionAmount: number;
+  dateApproved?: string;
+}
+
+/**
+ * Cria uma cobrança de Cartão de Crédito via Mercado Pago Payments API.
+ * As taxas de parcelamento são calculadas automaticamente e repassadas ao comprador
+ * conforme a configuração oficial da conta do vendedor no Mercado Pago.
+ */
+export async function createCardPayment(params: CreateCardPaymentParams): Promise<CardPaymentResult> {
+  const payment = getPaymentClient();
+
+  const nameParts = params.payerName.trim().split(" ");
+  const firstName = nameParts[0] || "Cliente";
+  const lastName = nameParts.slice(1).join(" ") || "Sintonia";
+
+  const cleanCpf = params.payerCpf ? params.payerCpf.replace(/\D/g, "") : "";
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sintoniaedicaoespecial.online";
+  const notificationUrl = params.notificationUrl || `${baseUrl}/api/webhooks/mercadopago`;
+
+  const body: any = {
+    transaction_amount: Number(params.transactionAmount.toFixed(2)),
+    token: params.token,
+    description: params.description,
+    installments: Number(params.installments || 1),
+    payment_method_id: params.paymentMethodId,
+    payer: {
+      email: params.payerEmail.toLowerCase().trim(),
+      first_name: firstName,
+      last_name: lastName,
+    },
+    notification_url: notificationUrl,
+    metadata: params.metadata || {},
+  };
+
+  if (params.issuerId && !isNaN(Number(params.issuerId))) {
+    body.issuer_id = Number(params.issuerId);
+  }
+
+  if (cleanCpf && cleanCpf.length === 11) {
+    body.payer.identification = {
+      type: "CPF",
+      number: cleanCpf,
+    };
+  }
+
+  const response = await payment.create({ body });
+
+  return {
+    id: response.id as number,
+    status: response.status || "pending",
+    statusDetail: response.status_detail || "",
+    paymentMethodId: response.payment_method_id || params.paymentMethodId,
+    installments: response.installments || params.installments,
+    transactionAmount: response.transaction_amount || params.transactionAmount,
+    dateApproved: response.date_approved || undefined,
+  };
+}
+
 /**
  * Validação criptográfica de assinatura do Webhook HMAC-SHA256 conforme padrão oficial do Mercado Pago.
  * Canonical: id:<data.id>;request-id:<x-request-id>;ts:<ts>;

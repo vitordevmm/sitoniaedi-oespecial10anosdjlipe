@@ -10,6 +10,7 @@
     "push": "git add -A && git commit -m \"feat: producao oficial Sintonia Especial 10 Anos DJ Lipe\" && git push -u origin main"
   },
   "dependencies": {
+    "@mercadopago/sdk-react": "^1.0.7",
     "@opentelemetry/api": "^1.10.0",
     "@types/qrcode": "^1.5.6",
     "firebase": "^13.1.0",
