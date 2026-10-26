@@ -192,6 +192,12 @@ input[type="number"] {
 #cardPaymentBrick_container,
 [id*="cardPaymentBrick"] {
   color-scheme: dark !important;
+  --success-color: #0b1930 !important;
+  --mp-color-success: #0b1930 !important;
+  --mp-input-background-color: #0b1930 !important;
+  --mp-input-focused-background-color: #0b1930 !important;
+  --mp-input-valid-background-color: #0b1930 !important;
+  --mp-input-valid-border-color: #c9a227 !important;
 }
 
 .card-payment-wrapper iframe,
@@ -205,12 +211,37 @@ input[type="number"] {
 }
 
 .card-payment-wrapper input,
-#cardPaymentBrick_container input,
-.card-payment-wrapper select,
-#cardPaymentBrick_container select {
+#cardPaymentBrick_container input {
   background-color: #0b1930 !important;
   color: #f6f8fc !important;
   color-scheme: dark !important;
+}
+
+/* Neutraliza completamente qualquer fundo verde de validação do Mercado Pago */
+.card-payment-wrapper [class*="success"],
+.card-payment-wrapper [class*="valid"],
+.card-payment-wrapper [class*="has-success"],
+.card-payment-wrapper [class*="is-valid"],
+.card-payment-wrapper [aria-invalid="false"] {
+  background-color: #0b1930 !important;
+  background: #0b1930 !important;
+}
+
+/* Neutraliza cores verdes inline e classes de validação */
+.card-payment-wrapper [style*="background-color: rgb(0, "],
+.card-payment-wrapper [style*="background-color: rgb(1, "],
+.card-payment-wrapper [style*="background-color: rgb(0,"],
+.card-payment-wrapper [style*="background-color: rgb(1,"],
+.card-payment-wrapper [style*="background: rgb(0, "],
+.card-payment-wrapper [style*="background: rgb(1, "],
+.card-payment-wrapper [style*="background: rgb(0,"],
+.card-payment-wrapper [style*="background: rgb(1,"],
+.card-payment-wrapper [style*="#002b1f"],
+.card-payment-wrapper [style*="#013328"],
+.card-payment-wrapper [style*="#00402b"],
+.card-payment-wrapper [style*="#00a650"] {
+  background-color: #0b1930 !important;
+  background: #0b1930 !important;
 }
 
 /* Remove fundos brancos residuais em containers intermediários do SDK */
@@ -220,6 +251,49 @@ input[type="number"] {
 .card-payment-wrapper [style*="background: #ffffff"] {
   background-color: #0b1930 !important;
   background: #0b1930 !important;
+}
+
+/* Estilização Premium do Seletor de Documento (CPF) - Trava visual integrada */
+.card-payment-wrapper select,
+#cardPaymentBrick_container select {
+  background-color: #0b1930 !important;
+  background: #0b1930 !important;
+  color: #f5e6b8 !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.05em !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  cursor: default !important;
+  pointer-events: none !important; /* Desativa a abertura do menu popup nativo branco/azul */
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  padding-right: 4px !important;
+  color-scheme: dark !important;
+}
+
+/* Oculta seta chevron do seletor para parecer um badge prefixo integrado "CPF |" */
+.card-payment-wrapper select::-ms-expand {
+  display: none !important;
+}
+
+.card-payment-wrapper [class*="select"] svg,
+.card-payment-wrapper [class*="select"] [class*="arrow"],
+.card-payment-wrapper [class*="select"] [class*="chevron"],
+.card-payment-wrapper [class*="chevron"],
+.card-payment-wrapper [class*="arrow"],
+.card-payment-wrapper svg[class*="icon-arrow"] {
+  display: none !important;
+}
+
+/* Blindagem caso qualquer select ou option tente abrir */
+.card-payment-wrapper option,
+#cardPaymentBrick_container option {
+  background-color: #0b1930 !important;
+  color: #f6f8fc !important;
+  color-scheme: dark !important;
 }
 
 

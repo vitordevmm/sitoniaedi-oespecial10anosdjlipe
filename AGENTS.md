@@ -141,6 +141,9 @@ Como o evento receberá **milhares de pessoas** com alta demanda simultânea, ha
    - **Repasse Oficial de Juros:** As taxas de parcelamento do cartão são calculadas pelo Mercado Pago e repassadas ao comprador na fatura, recebendo o organizador o valor líquido integral do lote.
    - **Tokenização Segura PCI-DSS:** Utilização do `@mercadopago/sdk-react` (`CardPayment` Brick) e inicialização segura via `initMercadoPago` no `CardPaymentForm.tsx`, impedindo exposição de dados sensíveis de cartão ao código da aplicação.
    - **Serviço Unificado de Emissão (`ticketIssuer.ts`):** Emissão atômica, sequencial (`#0001, #0002...`) e idempotente de ingressos, compartilhada de forma estrita entre a aprovação síncrona de cartão (`/api/checkout/card`) e o webhook assíncrono do Mercado Pago (`/api/webhooks/mercadopago`).
+   - **Blindagem Visual Anti-Verde & Seletor de Documento como Prefixo CPF:**
+     - O Mercado Pago por padrão aplicava sua cor de sucesso nativa (verde escuro `#002b1f` / `#013328`) ao validar CPFs de 11 dígitos, quebrando a harmonia Dark & Gold. Foi neutralizado definindo `successColor: "#0b1930"` em `customVariables`, adicionando regras globais de CSS contra classes `[class*="success"]`, `[class*="valid"]` e backgrounds verdes inline, além de um `MutationObserver` em tempo real.
+     - O seletor de documento foi travado via CSS (`pointer-events: none`, `-webkit-appearance: none`) e teve sua setinha SVG ocultada, funcionando como um elegante prefixo integrado dourado (`CPF |`) sem abrir dropdowns nativos brancos ou opções de CNPJ desnecessárias para ingressos nominais de festival.
 
 ---
 

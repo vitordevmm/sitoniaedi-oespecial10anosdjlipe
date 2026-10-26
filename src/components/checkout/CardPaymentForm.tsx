@@ -62,9 +62,11 @@ export function CardPaymentForm({
     setTimeout(() => setCopiedCard(false), 2500);
   };
 
-  // Garante blindagem Dark contra fundos brancos residuais em iframes do Mercado Pago
-  const applyDarkToIframes = () => {
+  // Garante blindagem Dark total: elimina verde de validação, fundos brancos e trava o dropdown como prefixo CPF
+  const sanitizeBrickElements = () => {
     if (!containerRef.current) return;
+
+    // 1. Blindagem de iframes (dados sensíveis do cartão)
     const iframes = containerRef.current.querySelectorAll("iframe");
     iframes.forEach((iframe) => {
       iframe.style.backgroundColor = "#0b1930";
@@ -72,7 +74,78 @@ export function CardPaymentForm({
       iframe.style.borderRadius = "8px";
     });
 
-    // Auto-preenche o nome do titular com o nome oficial ou 'APRO' se o campo existir no DOM
+    // 2. Trava e estiliza o seletor de documento como prefixo elegante "CPF |" sem abrir dropdown branco nativo
+    const selects = containerRef.current.querySelectorAll<HTMLSelectElement>("select");
+    selects.forEach((sel) => {
+      sel.style.setProperty("pointer-events", "none", "important");
+      sel.style.setProperty("-webkit-appearance", "none", "important");
+      sel.style.setProperty("appearance", "none", "important");
+      sel.style.setProperty("background-color", "#0b1930", "important");
+      sel.style.setProperty("background", "#0b1930", "important");
+      sel.style.setProperty("color", "#f5e6b8", "important");
+      sel.style.setProperty("font-weight", "700", "important");
+      sel.style.setProperty("font-size", "13px", "important");
+      sel.style.setProperty("letter-spacing", "0.05em", "important");
+      sel.style.setProperty("border", "none", "important");
+      sel.style.setProperty("outline", "none", "important");
+      sel.style.setProperty("box-shadow", "none", "important");
+      sel.style.setProperty("cursor", "default", "important");
+
+      const parent = sel.parentElement;
+      if (parent) {
+        parent.style.setProperty("background-color", "#0b1930", "important");
+        parent.style.setProperty("background", "#0b1930", "important");
+        // Oculta setinhas/chevrons SVG
+        const svgs = parent.querySelectorAll<SVGElement>("svg");
+        svgs.forEach((svg) => {
+          svg.style.setProperty("display", "none", "important");
+        });
+
+        // Se o usuário clicar na área do prefixo CPF, redireciona o foco para o input de número
+        if (!parent.getAttribute("data-click-bound")) {
+          parent.setAttribute("data-click-bound", "true");
+          parent.addEventListener("click", () => {
+            const docInput = containerRef.current?.querySelector<HTMLInputElement>(
+              'input[name*="identificationNumber"], input[id*="identificationNumber"], input[type="text"]'
+            );
+            docInput?.focus();
+          });
+        }
+      }
+    });
+
+    // 3. Neutraliza qualquer fundo verde (validação do CPF / sucesso) em todos os containers
+    const allEls = containerRef.current.querySelectorAll<HTMLElement>("*");
+    allEls.forEach((el) => {
+      const bg = el.style.backgroundColor || "";
+      // Se tiver tonalidades de verde de validação do SDK
+      if (
+        bg.includes("0, 43, 31") ||
+        bg.includes("0, 51, 40") ||
+        bg.includes("0, 40") ||
+        bg.includes("1, 51") ||
+        bg.includes("0, 166, 80") ||
+        bg.includes("0, 128") ||
+        bg === "#002b1f" ||
+        bg === "#013328" ||
+        bg === "#00402b"
+      ) {
+        el.style.setProperty("background-color", "#0b1930", "important");
+        el.style.setProperty("background", "#0b1930", "important");
+      }
+
+      // Neutraliza containers de input com classe valid ou success
+      if (
+        el.className &&
+        typeof el.className === "string" &&
+        (el.className.includes("success") || el.className.includes("valid"))
+      ) {
+        el.style.setProperty("background-color", "#0b1930", "important");
+        el.style.setProperty("background", "#0b1930", "important");
+      }
+    });
+
+    // 4. Auto-preenche o nome do titular com o nome oficial ou 'APRO' se o campo existir no DOM
     try {
       const nameInput = containerRef.current.querySelector<HTMLInputElement>(
         'input[name*="cardholderName"], input[id*="cardholderName"]'
@@ -86,6 +159,26 @@ export function CardPaymentForm({
       // Ignora erro silenciosamente
     }
   };
+
+  // Observador de mutações no DOM para interceptar em tempo real validações do SDK
+  useEffect(() => {
+    if (!isReady || !containerRef.current) return;
+
+    sanitizeBrickElements();
+
+    const observer = new MutationObserver(() => {
+      sanitizeBrickElements();
+    });
+
+    observer.observe(containerRef.current, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
+
+    return () => observer.disconnect();
+  }, [isReady]);
 
   const handleSubmit = async (cardFormData: any) => {
     setCardError(null);
@@ -264,6 +357,10 @@ export function CardPaymentForm({
                     borderRadiusMedium: "12px",
                     inputBorderWidth: "1px",
                     inputFocusedBoxShadow: "0 0 0 2px rgba(201, 162, 39, 0.4)",
+                    successColor: "#0b1930",
+                    warningColor: "#c9a227",
+                    baseColorFirstVariant: "#0b1930",
+                    baseColorSecondVariant: "#101116",
                   },
                 },
                 hideFormTitle: true,
@@ -279,9 +376,10 @@ export function CardPaymentForm({
             onSubmit={handleSubmit}
             onReady={() => {
               setIsReady(true);
-              applyDarkToIframes();
-              setTimeout(applyDarkToIframes, 300);
-              setTimeout(applyDarkToIframes, 800);
+              sanitizeBrickElements();
+              setTimeout(sanitizeBrickElements, 200);
+              setTimeout(sanitizeBrickElements, 600);
+              setTimeout(sanitizeBrickElements, 1200);
             }}
             onError={(err) => {
               console.error("[CardPayment Brick Error]", err);
