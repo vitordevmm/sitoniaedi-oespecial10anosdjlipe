@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { initMercadoPago, CardPayment } from "@mercadopago/sdk-react";
-import { Loader2, AlertCircle, ShieldCheck } from "lucide-react";
+import { Loader2, AlertCircle, ShieldCheck, Sparkles, Copy, Check } from "lucide-react";
 
 interface CardPaymentFormProps {
   price: number;
@@ -32,6 +32,9 @@ export function CardPaymentForm({
   const [isReady, setIsReady] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
+  const [copiedCard, setCopiedCard] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const pubKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || "";
@@ -50,6 +53,39 @@ export function CardPaymentForm({
   }, []);
 
   const cleanCpf = userCpf ? userCpf.replace(/\D/g, "") : "";
+
+  const handleCopyCard = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText("4235647728025682");
+    setCopiedCard(true);
+    setTimeout(() => setCopiedCard(false), 2500);
+  };
+
+  // Garante blindagem Dark contra fundos brancos residuais em iframes do Mercado Pago
+  const applyDarkToIframes = () => {
+    if (!containerRef.current) return;
+    const iframes = containerRef.current.querySelectorAll("iframe");
+    iframes.forEach((iframe) => {
+      iframe.style.backgroundColor = "#0b1930";
+      iframe.style.colorScheme = "dark";
+      iframe.style.borderRadius = "8px";
+    });
+
+    // Auto-preenche o nome do titular com o nome oficial ou 'APRO' se o campo existir no DOM
+    try {
+      const nameInput = containerRef.current.querySelector<HTMLInputElement>(
+        'input[name*="cardholderName"], input[id*="cardholderName"]'
+      );
+      if (nameInput && !nameInput.value) {
+        nameInput.value = "APRO";
+        nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+        nameInput.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    } catch {
+      // Ignora erro silenciosamente
+    }
+  };
 
   const handleSubmit = async (cardFormData: any) => {
     setCardError(null);
@@ -81,13 +117,13 @@ export function CardPaymentForm({
         throw new Error(errorMsg);
       }
 
-      // Pagamento Aprovado!
+      // Pagamento Aprovado com sucesso!
       onSuccess(data.ticketId);
     } catch (err: any) {
       console.error("[CardPaymentForm] Erro ao submeter pagamento:", err);
       const msg = err.message || "Erro inesperado ao processar o cartão.";
       setCardError(msg);
-      throw err; // Rejeita a promise do Brick para mantê-lo interativo
+      throw err; // Rejeita a promise do Brick para que o formulário continue utilizável
     } finally {
       setSubmitting(false);
       if (onProcessingChange) onProcessingChange(false);
@@ -117,6 +153,64 @@ export function CardPaymentForm({
 
   return (
     <div className="relative">
+      {/* CARD DE EXEMPLO PARA TESTES (HOMOLOGAÇÃO) */}
+      <div className="mb-4 p-3.5 rounded-2xl bg-[#0b1930]/90 border border-[#c9a227]/40 shadow-inner">
+        <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#c9a227]/20">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#f5e6b8]">
+            <Sparkles className="w-3.5 h-3.5 text-[#c9a227]" />
+            <span>Dados de Exemplo para Teste</span>
+          </div>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a227]/20 text-[#f5e6b8] font-bold border border-[#c9a227]/30">
+            Aprovação Imediata
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] mb-2">
+          {/* Número do Cartão com Cópia Rápida */}
+          <div className="flex items-center justify-between p-2 rounded-xl bg-[#101116] border border-[#1e293b]">
+            <span className="text-[#a8b2c3]">Cartão:</span>
+            <div className="flex items-center gap-1.5 font-mono text-[#f6f8fc] font-bold">
+              <span>4235 6477 2802 5682</span>
+              <button
+                type="button"
+                onClick={handleCopyCard}
+                className={`px-1.5 py-0.5 rounded text-[10px] flex items-center gap-1 transition-all ${
+                  copiedCard
+                    ? "bg-emerald-500 text-black font-bold"
+                    : "bg-[#0b1930] hover:bg-[#c9a227]/20 text-[#c9a227] border border-[#c9a227]/30"
+                }`}
+                title="Copiar número do cartão"
+              >
+                {copiedCard ? (
+                  <>
+                    <Check className="w-3 h-3 text-black" />
+                    <span>COPIADO</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3 h-3" />
+                    <span>COPIAR</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Validade e CVV */}
+          <div className="flex items-center justify-between p-2 rounded-xl bg-[#101116] border border-[#1e293b]">
+            <span className="text-[#a8b2c3]">Validade:</span>
+            <span className="font-mono text-[#f6f8fc] font-bold">11/30</span>
+            <span className="text-[#a8b2c3] ml-2">CVV:</span>
+            <span className="font-mono text-[#f6f8fc] font-bold">123</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-[10px] text-[#a8b2c3] px-1">
+          <span>Nome no cartão: <strong className="text-[#f6f8fc]">APRO</strong></span>
+          <span>Parcelamento: <strong className="text-[#f5e6b8]">1x até 12x</strong></span>
+        </div>
+      </div>
+
       {/* Skeleton enquanto o iframe do Mercado Pago monta */}
       {(!initialized || !isReady) && (
         <div className="flex flex-col items-center justify-center p-8 rounded-2xl bg-[#0b1930]/40 border border-[#c9a227]/20 text-center min-h-[300px]">
@@ -137,17 +231,8 @@ export function CardPaymentForm({
         </div>
       )}
 
-      {/* Aviso de Parcelamento Oficial */}
-      <div className="mb-4 flex items-center justify-between px-3 py-2 rounded-xl bg-[#0b1930]/70 border border-[#c9a227]/30 text-[11px] text-[#a8b2c3]">
-        <div className="flex items-center gap-1.5 text-[#f5e6b8]">
-          <ShieldCheck className="w-4 h-4 text-[#c9a227]" />
-          <span className="font-semibold">Parcelamento em até 12x</span>
-        </div>
-        <span className="text-[10px] text-[#a8b2c3]">Taxas calculadas pelo Mercado Pago</span>
-      </div>
-
-      {/* Container Oficial do Brick */}
-      <div className={!isReady ? "hidden" : "block"}>
+      {/* Container Oficial do Brick com ref para injeção de estilo dark nos iframes */}
+      <div ref={containerRef} className={`card-payment-wrapper ${!isReady ? "hidden" : "block"}`}>
         {initialized && (
           <CardPayment
             initialization={{
@@ -168,10 +253,17 @@ export function CardPaymentForm({
                 style: {
                   theme: "dark",
                   customVariables: {
-                    theme: "dark",
                     baseColor: "#c9a227",
-                    primaryColor: "#c9a227",
+                    inputBackgroundColor: "#0b1930",
+                    formBackgroundColor: "transparent",
+                    textPrimaryColor: "#f6f8fc",
+                    textSecondaryColor: "#a8b2c3",
                     outlinePrimaryColor: "#c9a227",
+                    outlineSecondaryColor: "#0b1930",
+                    buttonTextColor: "#07090d",
+                    borderRadiusMedium: "12px",
+                    inputBorderWidth: "1px",
+                    inputFocusedBoxShadow: "0 0 0 2px rgba(201, 162, 39, 0.4)",
                   },
                 },
                 hideFormTitle: true,
@@ -185,7 +277,12 @@ export function CardPaymentForm({
               },
             }}
             onSubmit={handleSubmit}
-            onReady={() => setIsReady(true)}
+            onReady={() => {
+              setIsReady(true);
+              applyDarkToIframes();
+              setTimeout(applyDarkToIframes, 300);
+              setTimeout(applyDarkToIframes, 800);
+            }}
             onError={(err) => {
               console.error("[CardPayment Brick Error]", err);
             }}
