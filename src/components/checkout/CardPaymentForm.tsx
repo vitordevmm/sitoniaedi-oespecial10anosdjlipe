@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { initMercadoPago, CardPayment } from "@mercadopago/sdk-react";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, CreditCard, ShieldCheck } from "lucide-react";
 
 interface CardPaymentFormProps {
   price: number;
@@ -55,43 +55,44 @@ export function CardPaymentForm({
 
   const cleanCpf = userCpf ? userCpf.replace(/\D/g, "") : "";
 
-  // Garante blindagem Dark total: elimina verde de validação, fundos brancos e estiliza o formulário
+  // Garante estilização limpa e integrada no Card Branco Oficial do Mercado Pago
   const sanitizeBrickElements = () => {
     if (!containerRef.current) return;
 
-    // 1. Blindagem de iframes (dados sensíveis do cartão)
+    // 1. Blindagem de iframes com fundo branco e contraste perfeito
     const iframes = containerRef.current.querySelectorAll("iframe");
     iframes.forEach((iframe) => {
       iframe.setAttribute("allowtransparency", "true");
-      iframe.style.setProperty("background-color", "#0b1930", "important");
-      iframe.style.setProperty("color-scheme", "dark", "important");
-      iframe.style.setProperty("border-radius", "12px", "important");
+      iframe.style.setProperty("background-color", "#ffffff", "important");
+      iframe.style.setProperty("color-scheme", "light", "important");
+      iframe.style.setProperty("border-radius", "10px", "important");
       iframe.style.setProperty("border", "none", "important");
     });
 
-    // 2. Trava e estiliza o seletor de documento como prefixo elegante "CPF |" sem abrir dropdown branco nativo
+    // 2. Trava e estiliza o seletor de documento como prefixo elegante "CPF |"
     const selects = containerRef.current.querySelectorAll<HTMLSelectElement>("select");
     selects.forEach((sel) => {
       sel.style.setProperty("pointer-events", "none", "important");
       sel.style.setProperty("-webkit-appearance", "none", "important");
       sel.style.setProperty("appearance", "none", "important");
-      sel.style.setProperty("background-color", "#0b1930", "important");
-      sel.style.setProperty("color", "#f5e6b8", "important");
+      sel.style.setProperty("background-color", "#f3f4f6", "important");
+      sel.style.setProperty("color", "#111827", "important");
       sel.style.setProperty("font-weight", "700", "important");
       sel.style.setProperty("font-size", "13px", "important");
       sel.style.setProperty("letter-spacing", "0.05em", "important");
-      sel.style.setProperty("border-radius", "12px 0 0 12px", "important");
+      sel.style.setProperty("border-radius", "10px 0 0 10px", "important");
       sel.style.setProperty("border", "none", "important");
-      sel.style.setProperty("border-right", "1px solid rgba(201, 162, 39, 0.4)", "important");
+      sel.style.setProperty("border-right", "1px solid #d1d5db", "important");
       sel.style.setProperty("outline", "none", "important");
       sel.style.setProperty("box-shadow", "none", "important");
       sel.style.setProperty("cursor", "default", "important");
 
       const parent = sel.parentElement;
       if (parent) {
-        parent.style.setProperty("border-radius", "12px", "important");
+        parent.style.setProperty("border-radius", "10px", "important");
         parent.style.setProperty("overflow", "hidden", "important");
-        parent.style.setProperty("border", "1px solid rgba(201, 162, 39, 0.4)", "important");
+        parent.style.setProperty("border", "1px solid #d1d5db", "important");
+        parent.style.setProperty("background-color", "#ffffff", "important");
 
         // Oculta setinhas/chevrons SVG
         const svgs = parent.querySelectorAll<SVGElement>("svg");
@@ -112,28 +113,27 @@ export function CardPaymentForm({
       }
     });
 
-    // 3. Document Number Input (arredondado na direita e sem borda verde)
+    // 3. Document Number Input (fundo branco, texto escuro nítido)
     const docInput = containerRef.current.querySelector<HTMLInputElement>(
       'input[name*="identificationNumber"], input[id*="identificationNumber"]'
     );
     if (docInput) {
-      docInput.style.setProperty("border-radius", "0 12px 12px 0", "important");
+      docInput.style.setProperty("border-radius", "0 10px 10px 0", "important");
       docInput.style.setProperty("border", "none", "important");
       docInput.style.setProperty("box-shadow", "none", "important");
       docInput.style.setProperty("outline", "none", "important");
-      docInput.style.setProperty("background-color", "#0b1930", "important");
-      docInput.style.setProperty("color", "#f6f8fc", "important");
+      docInput.style.setProperty("background-color", "#ffffff", "important");
+      docInput.style.setProperty("color", "#111827", "important");
     }
 
-    // 4. Centraliza e estiliza o ícone de cartão no código de segurança na cor dourada
+    // 4. Centraliza o ícone de cartão no código de segurança
     const icons = containerRef.current.querySelectorAll<HTMLElement>(
       '[class*="icon"], [class*="securityCode"] svg, [class*="cvv"] svg, [class*="securityCode"] img, [class*="cvv"] img'
     );
     icons.forEach((ic) => {
-      ic.style.setProperty("filter", "sepia(1) saturate(5) hue-rotate(5deg) brightness(0.9)", "important");
-      ic.style.setProperty("opacity", "0.85", "important");
       ic.style.setProperty("transform", "translateY(-50%)", "important");
       ic.style.setProperty("top", "50%", "important");
+      ic.style.setProperty("opacity", "0.75", "important");
     });
 
     // 5. Preenche o nome do titular com o nome real do comprador caso esteja vazio
@@ -141,10 +141,14 @@ export function CardPaymentForm({
       const nameInput = containerRef.current.querySelector<HTMLInputElement>(
         'input[name*="cardholderName"], input[id*="cardholderName"]'
       );
-      if (nameInput && !nameInput.value && userName) {
-        nameInput.value = userName.trim();
-        nameInput.dispatchEvent(new Event("input", { bubbles: true }));
-        nameInput.dispatchEvent(new Event("change", { bubbles: true }));
+      if (nameInput) {
+        nameInput.style.setProperty("color", "#111827", "important");
+        nameInput.style.setProperty("background-color", "#ffffff", "important");
+        if (!nameInput.value && userName) {
+          nameInput.value = userName.trim();
+          nameInput.dispatchEvent(new Event("input", { bubbles: true }));
+          nameInput.dispatchEvent(new Event("change", { bubbles: true }));
+        }
       }
     } catch {
       // Ignora erro silenciosamente
@@ -217,11 +221,23 @@ export function CardPaymentForm({
   }
 
   return (
-    <div className="relative">
+    <div className="relative rounded-3xl bg-white p-5 sm:p-7 border-2 border-[#c9a227]/40 shadow-[0_15px_40px_rgba(0,0,0,0.45)] text-gray-900">
+      {/* Cabeçalho do Card Branco Oficial */}
+      <div className="flex items-center justify-between pb-3.5 mb-5 border-b border-gray-100">
+        <div className="flex items-center gap-2 text-xs sm:text-sm font-extrabold text-gray-900">
+          <CreditCard className="w-4 h-4 text-[#c9a227]" />
+          <span>Dados do Cartão de Crédito</span>
+        </div>
+        <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-extrabold border border-emerald-200 flex items-center gap-1 shadow-sm">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <span>Ambiente PCI-DSS Seguro</span>
+        </span>
+      </div>
+
       {/* Alerta de Erro de Pagamento */}
       {cardError && (
-        <div className="mb-4 p-3.5 rounded-xl bg-red-950/60 border border-red-500/50 flex items-start gap-2.5 text-xs text-red-200 animate-fadeIn">
-          <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+        <div className="mb-4 p-3.5 rounded-xl bg-red-50 border border-red-300 flex items-start gap-2.5 text-xs text-red-800 animate-fadeIn">
+          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <strong className="block font-bold">Transação não concluída:</strong>
             <span>{cardError}</span>
@@ -229,14 +245,14 @@ export function CardPaymentForm({
         </div>
       )}
 
-      {/* Container Oficial do Brick com ref para injeção de estilo dark nos iframes */}
+      {/* Container Oficial do Brick */}
       <div ref={containerRef} className="card-payment-wrapper relative min-h-[380px]">
         {/* Skeleton enquanto o iframe do Mercado Pago monta */}
         {(!initialized || !isReady) && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 rounded-2xl bg-[#0b1930] border border-[#c9a227]/20 text-center">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 rounded-2xl bg-gray-50/90 border border-gray-200 text-center">
             <Loader2 className="w-8 h-8 text-[#c9a227] animate-spin mb-3" />
-            <p className="text-xs text-[#f5e6b8] font-bold">Carregando gateway seguro...</p>
-            <span className="text-[11px] text-[#a8b2c3] mt-1">Conectando criptografia PCI-DSS</span>
+            <p className="text-xs text-gray-900 font-extrabold">Carregando formulário seguro...</p>
+            <span className="text-[11px] text-gray-500 mt-1">Conectando criptografia PCI-DSS</span>
           </div>
         )}
 
@@ -258,20 +274,20 @@ export function CardPaymentForm({
             customization={{
               visual: {
                 style: {
-                  theme: "dark",
+                  theme: "default",
                   customVariables: {
                     baseColor: "#c9a227",
-                    formBackgroundColor: "#0b1930",
-                    inputBackgroundColor: "#0b1930",
-                    textPrimaryColor: "#f6f8fc",
-                    textSecondaryColor: "#a8b2c3",
+                    formBackgroundColor: "#ffffff",
+                    inputBackgroundColor: "#ffffff",
+                    textPrimaryColor: "#111827",
+                    textSecondaryColor: "#374151",
                     errorColor: "#ef4444",
-                    successColor: "#c9a227",
+                    successColor: "#10b981",
                     outlinePrimaryColor: "#c9a227",
-                    outlineSecondaryColor: "#1e293b",
-                    borderRadiusMedium: "12px",
+                    outlineSecondaryColor: "#d1d5db",
+                    borderRadiusMedium: "10px",
                     borderRadiusSmall: "8px",
-                    borderRadiusLarge: "14px",
+                    borderRadiusLarge: "12px",
                     buttonTextColor: "#07090d",
                   },
                 },
@@ -301,10 +317,10 @@ export function CardPaymentForm({
 
       {/* Overlay de carregamento durante a submissão */}
       {submitting && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#101116]/85 backdrop-blur-sm rounded-2xl">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm rounded-2xl">
           <Loader2 className="w-10 h-10 text-[#c9a227] animate-spin mb-3" />
-          <p className="text-sm font-extrabold text-[#f6f8fc]">Processando Pagamento...</p>
-          <span className="text-xs text-[#a8b2c3] mt-1">Aguardando autorização da operadora</span>
+          <p className="text-sm font-extrabold text-gray-900">Processando Pagamento...</p>
+          <span className="text-xs text-gray-600 mt-1">Aguardando autorização da operadora</span>
         </div>
       )}
     </div>
