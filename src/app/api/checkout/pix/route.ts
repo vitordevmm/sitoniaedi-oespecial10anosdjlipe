@@ -162,7 +162,14 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("[Checkout PIX] Erro ao criar cobrança PIX:", error);
-    const message = error?.message || "Não foi possível gerar a cobrança PIX no Mercado Pago.";
+    let message = error?.message || "Não foi possível gerar a cobrança PIX no Mercado Pago.";
+    const errStr = (String(error?.message || "") + " " + JSON.stringify(error?.cause || "")).toLowerCase();
+    
+    if (errStr.includes("without key enabled") || errStr.includes("key enabled for qr")) {
+      message =
+        "A conta do Mercado Pago ainda não possui uma Chave PIX cadastrada para receber pagamentos. Acesse o aplicativo ou site do Mercado Pago na conta do vendedor e cadastre qualquer chave PIX (CPF, Celular, E-mail ou Chave Aleatória) para ativar o recebimento de PIX instantâneo.";
+    }
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

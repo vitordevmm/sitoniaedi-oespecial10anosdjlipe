@@ -580,8 +580,9 @@ export function CheckoutModal({
                 </div>
 
                 {error && (
-                  <div className="p-3.5 rounded-xl bg-red-950/40 border border-red-500/40 text-xs text-red-300 mb-5">
-                    {error}
+                  <div className="p-3.5 rounded-xl bg-red-950/60 border border-red-500/50 text-xs text-red-200 mb-5 flex items-start gap-2.5 animate-fadeIn">
+                    <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div className="leading-relaxed">{error}</div>
                   </div>
                 )}
 
