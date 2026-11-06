@@ -62,6 +62,7 @@ export async function getAdminDb(): Promise<Firestore> {
   const app = await getAdminApp();
   const { getFirestore } = await import("firebase-admin/firestore");
   _adminDb = getFirestore(app);
+  _adminDb.settings({ ignoreUndefinedProperties: true });
   return _adminDb;
 }
 

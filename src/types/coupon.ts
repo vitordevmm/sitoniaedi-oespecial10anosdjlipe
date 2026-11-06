@@ -5,9 +5,9 @@ export interface Coupon {
   code: string; // Código em maiúsculas
   displayCode: string; // Código formatado para exibição
   influencerName: string; // Nome ou @ do influencer/parceiro
-  influencerPhone?: string; // Telefone/WhatsApp do influencer
-  influencerEmail?: string; // E-mail para contato/relatórios
-  influencerInstagram?: string; // @handle do Instagram
+  influencerPhone?: string | null; // Telefone/WhatsApp do influencer
+  influencerEmail?: string | null; // E-mail para contato/relatórios
+  influencerInstagram?: string | null; // @handle do Instagram
   discountType: CouponDiscountType; // "none" = apenas rastreamento, "percentage" = % de desconto, "fixed" = R$ fixo
   discountValue: number; // Valor do desconto (ex: 10 para 10% ou 15 para R$ 15,00)
   unlimited: boolean; // true se não tiver limite de usos
@@ -20,7 +20,7 @@ export interface Coupon {
   conversionRate?: number; // Percentual de conversão (soldCount / appliedUsersCount * 100)
   totalRevenue: number; // Faturamento total bruto/líquido gerado através do cupom (R$)
   totalDiscountGiven: number; // Total acumulado de desconto concedido aos compradores (R$)
-  notes?: string; // Observações internas de produção
+  notes?: string | null; // Observações internas de produção
   createdBy?: string;
   createdAt: string | Date;
   updatedAt?: string | Date;

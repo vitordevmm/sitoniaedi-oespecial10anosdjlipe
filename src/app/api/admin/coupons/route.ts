@@ -153,12 +153,12 @@ export async function POST(req: NextRequest) {
       code,
       displayCode,
       influencerName: influencerName.trim(),
-      influencerPhone: influencerPhone?.trim() || undefined,
-      influencerEmail: influencerEmail?.trim()?.toLowerCase() || undefined,
-      influencerInstagram: influencerInstagram?.trim() || undefined,
+      influencerPhone: influencerPhone?.trim() || null,
+      influencerEmail: influencerEmail?.trim()?.toLowerCase() || null,
+      influencerInstagram: influencerInstagram?.trim() || null,
       discountType,
       discountValue: discountType === "none" ? 0 : Number(discountValue || 0),
-      maxUses: isUnlimitedVal ? undefined : Number(maxUses || 0),
+      maxUses: isUnlimitedVal ? null : Number(maxUses || 0),
       unlimited: Boolean(isUnlimitedVal),
       isUnlimited: Boolean(isUnlimitedVal),
       active: active !== false,
@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
       conversionRate: 0,
       totalRevenue: 0,
       totalDiscountGiven: 0,
-      notes: notes?.trim() || undefined,
+      notes: notes?.trim() || null,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
     };
@@ -227,9 +227,9 @@ export async function PATCH(req: NextRequest) {
 
     if (updates.displayCode !== undefined) cleanUpdates.displayCode = updates.displayCode.trim();
     if (updates.influencerName !== undefined) cleanUpdates.influencerName = updates.influencerName.trim();
-    if (updates.influencerPhone !== undefined) cleanUpdates.influencerPhone = updates.influencerPhone.trim();
-    if (updates.influencerEmail !== undefined) cleanUpdates.influencerEmail = updates.influencerEmail.trim().toLowerCase();
-    if (updates.influencerInstagram !== undefined) cleanUpdates.influencerInstagram = updates.influencerInstagram.trim();
+    if (updates.influencerPhone !== undefined) cleanUpdates.influencerPhone = updates.influencerPhone.trim() || null;
+    if (updates.influencerEmail !== undefined) cleanUpdates.influencerEmail = updates.influencerEmail.trim().toLowerCase() || null;
+    if (updates.influencerInstagram !== undefined) cleanUpdates.influencerInstagram = updates.influencerInstagram.trim() || null;
     if (updates.discountType !== undefined) cleanUpdates.discountType = updates.discountType;
     const isUnlimitedVal = updates.isUnlimited !== undefined ? updates.isUnlimited : updates.unlimited;
     if (isUnlimitedVal !== undefined) {
