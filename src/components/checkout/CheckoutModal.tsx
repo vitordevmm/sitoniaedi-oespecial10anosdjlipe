@@ -15,6 +15,7 @@ import {
   Ticket as TicketIcon,
   Tag,
   Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { CardPaymentForm } from "./CardPaymentForm";
@@ -320,31 +321,31 @@ export function CheckoutModal({
               Garanta sua vaga oficial com compensação em tempo real.
             </p>
 
-            {/* SEÇÃO DE CUPOM DE INFLUENCIADOR */}
-            <div className="mb-5 p-3.5 rounded-2xl bg-[#0b1930]/70 border border-[#c9a227]/30">
+            {/* SEÇÃO DE CUPOM DE INFLUENCIADOR (DESTAQUE VIP DARK & GOLD) */}
+            <div className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-[#0b1930] via-[#101116] to-[#0b1930] border-2 border-[#c9a227]/40 shadow-[0_0_20px_rgba(201,162,39,0.12)]">
               {appliedCoupon ? (
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-[#c9a227]/20 border border-[#c9a227]/40 flex items-center justify-center flex-shrink-0 text-[#f5e6b8]">
-                      <Tag className="w-4 h-4 text-[#c9a227]" />
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#c9a227]/30 to-[#f5e6b8]/10 border border-[#c9a227]/50 flex items-center justify-center flex-shrink-0 text-[#f5e6b8] shadow-[0_0_12px_rgba(201,162,39,0.25)]">
+                      <Tag className="w-5 h-5 text-[#f5e6b8]" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono font-extrabold text-xs text-[#f5e6b8] tracking-wider">
+                        <span className="font-mono font-black text-sm text-[#f5e6b8] tracking-widest">
                           {appliedCoupon.displayCode || appliedCoupon.code}
                         </span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-500/30">
-                          Cupom Aplicado
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-950/90 text-emerald-300 border border-emerald-500/40">
+                          ✓ Cupom Ativo
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#a8b2c3] truncate mt-0.5">
+                      <p className="text-xs text-[#a8b2c3] truncate mt-0.5">
                         Influenciador(a): <strong className="text-[#f6f8fc]">{appliedCoupon.influencerName}</strong>
                         {discountAmount > 0 ? (
-                          <span className="text-emerald-400 font-semibold ml-1.5">
+                          <span className="text-emerald-400 font-extrabold ml-1.5">
                             (- R$ {discountAmount.toFixed(2).replace(".", ",")})
                           </span>
                         ) : (
-                          <span className="text-[#f5e6b8] ml-1.5">(Apoio Oficial)</span>
+                          <span className="text-[#f5e6b8] font-bold ml-1.5">(Apoio Oficial)</span>
                         )}
                       </p>
                     </div>
@@ -352,54 +353,65 @@ export function CheckoutModal({
                   <button
                     type="button"
                     onClick={handleRemoveCoupon}
-                    className="px-2.5 py-1 rounded-lg text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-500/20 transition-all flex-shrink-0"
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-500/30 transition-all flex-shrink-0"
                   >
                     Remover
                   </button>
                 </div>
               ) : (
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label htmlFor="coupon-input" className="text-xs font-bold text-[#f6f8fc] flex items-center gap-1.5">
-                      <Tag className="w-3.5 h-3.5 text-[#c9a227]" />
-                      <span>Possui cupom de influenciador?</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <label htmlFor="coupon-input" className="text-xs font-extrabold text-[#f6f8fc] flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-[#c9a227]/20 border border-[#c9a227]/40 flex items-center justify-center text-[#f5e6b8]">
+                        <Tag className="w-3.5 h-3.5 text-[#f5e6b8]" />
+                      </div>
+                      <span>Possui Cupom de Influenciador ou Desconto?</span>
                     </label>
-                    <span className="text-[10px] text-[#a8b2c3]">Opcional</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a227]/15 text-[#f5e6b8] font-bold border border-[#c9a227]/30">
+                      PIX e Cartão
+                    </span>
                   </div>
 
+                  <p className="text-[11px] text-[#a8b2c3] mb-2.5">
+                    Digite o código de influenciador para aplicar o desconto no total do seu pedido:
+                  </p>
+
                   <div className="flex gap-2">
-                    <input
-                      id="coupon-input"
-                      type="text"
-                      value={couponInput}
-                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          applyCouponCode();
-                        }
-                      }}
-                      placeholder="Ex: LIPE10"
-                      className="flex-1 h-10 px-3 rounded-xl bg-[#101116] border border-[#c9a227]/30 text-xs text-[#f6f8fc] placeholder:text-[#a8b2c3]/60 font-mono tracking-wider focus:outline-none focus:border-[#c9a227] focus:ring-1 focus:ring-[#c9a227]"
-                    />
+                    <div className="relative flex-1">
+                      <input
+                        id="coupon-input"
+                        type="text"
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            applyCouponCode();
+                          }
+                        }}
+                        placeholder="Ex: LIPE10"
+                        className="w-full h-11 px-3.5 rounded-xl bg-[#0b1930] border-2 border-[#c9a227]/40 text-xs sm:text-sm text-[#f6f8fc] placeholder:text-[#a8b2c3]/60 font-mono tracking-widest font-bold focus:outline-none focus:border-[#c9a227] focus:ring-2 focus:ring-[#c9a227]/30 transition-all uppercase"
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={() => applyCouponCode()}
                       disabled={couponLoading || !couponInput.trim()}
-                      className="h-10 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] hover:opacity-95 disabled:opacity-40 transition-all flex items-center justify-center gap-1.5 flex-shrink-0"
+                      className="h-11 px-5 rounded-xl font-extrabold text-xs bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] text-[#07090d] hover:opacity-95 disabled:opacity-40 shadow-[0_0_15px_rgba(201,162,39,0.25)] transition-all flex items-center justify-center gap-1.5 flex-shrink-0 cursor-pointer"
                     >
                       {couponLoading ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
-                        <span>APLICAR</span>
+                        <span>APLICAR CUPOM</span>
                       )}
                     </button>
                   </div>
 
                   {couponError && (
-                    <p className="text-[11px] text-red-400 mt-1.5 pl-1">
-                      {couponError}
-                    </p>
+                    <div className="mt-2 p-2 rounded-lg bg-red-950/60 border border-red-500/40 text-[11px] text-red-200 flex items-center gap-1.5 animate-fadeIn">
+                      <AlertCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                      <span>{couponError}</span>
+                    </div>
                   )}
                 </div>
               )}
@@ -465,6 +477,20 @@ export function CheckoutModal({
                   <div className="text-[11px] text-[#a8b2c3]">
                     Parcelamento disponível em até 12x com juros repassados na fatura pelo Mercado Pago.
                   </div>
+                  {!appliedCoupon && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const input = document.getElementById("coupon-input");
+                        input?.focus();
+                        input?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }}
+                      className="mt-2 text-[11px] text-[#f5e6b8] hover:text-[#c9a227] flex items-center gap-1.5 font-bold cursor-pointer transition-colors"
+                    >
+                      <Tag className="w-3.5 h-3.5 text-[#c9a227]" />
+                      <span>Possui cupom de influenciador? Clique aqui para inserir</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Formulário Oficial do Cartão */}
@@ -534,6 +560,21 @@ export function CheckoutModal({
                       </div>
                     )}
                   </div>
+
+                  {!appliedCoupon && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const input = document.getElementById("coupon-input");
+                        input?.focus();
+                        input?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }}
+                      className="mt-3 text-[11px] text-[#f5e6b8] hover:text-[#c9a227] flex items-center gap-1.5 font-bold cursor-pointer transition-colors"
+                    >
+                      <Tag className="w-3.5 h-3.5 text-[#c9a227]" />
+                      <span>Possui cupom de influenciador? Clique aqui para inserir</span>
+                    </button>
+                  )}
                 </div>
 
                 {error && (

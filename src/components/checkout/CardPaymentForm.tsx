@@ -55,16 +55,27 @@ export function CardPaymentForm({
 
   const cleanCpf = userCpf ? userCpf.replace(/\D/g, "") : "";
 
-  // Garante blindagem Dark total: elimina verde de validação, fundos brancos e trava o dropdown como prefixo CPF
+  // Garante blindagem Dark total: elimina verde de validação, fundos brancos e estiliza o formulário
   const sanitizeBrickElements = () => {
     if (!containerRef.current) return;
 
-    // 1. Blindagem de iframes (dados sensíveis do cartão)
+    // 1. Blindagem de iframes (dados sensíveis do cartão) e seus containers
     const iframes = containerRef.current.querySelectorAll("iframe");
     iframes.forEach((iframe) => {
-      iframe.style.backgroundColor = "#0b1930";
-      iframe.style.colorScheme = "dark";
-      iframe.style.borderRadius = "8px";
+      iframe.setAttribute("allowtransparency", "true");
+      iframe.style.setProperty("background-color", "#0b1930", "important");
+      iframe.style.setProperty("background", "#0b1930", "important");
+      iframe.style.setProperty("color-scheme", "dark", "important");
+      iframe.style.setProperty("border-radius", "12px", "important");
+      iframe.style.setProperty("border", "none", "important");
+
+      const parent = iframe.parentElement;
+      if (parent) {
+        parent.style.setProperty("background-color", "#0b1930", "important");
+        parent.style.setProperty("background", "#0b1930", "important");
+        parent.style.setProperty("border-radius", "12px", "important");
+        parent.style.setProperty("overflow", "hidden", "important");
+      }
     });
 
     // 2. Trava e estiliza o seletor de documento como prefixo elegante "CPF |" sem abrir dropdown branco nativo
@@ -79,7 +90,9 @@ export function CardPaymentForm({
       sel.style.setProperty("font-weight", "700", "important");
       sel.style.setProperty("font-size", "13px", "important");
       sel.style.setProperty("letter-spacing", "0.05em", "important");
+      sel.style.setProperty("border-radius", "12px 0 0 12px", "important");
       sel.style.setProperty("border", "none", "important");
+      sel.style.setProperty("border-right", "1px solid rgba(201, 162, 39, 0.4)", "important");
       sel.style.setProperty("outline", "none", "important");
       sel.style.setProperty("box-shadow", "none", "important");
       sel.style.setProperty("cursor", "default", "important");
@@ -88,6 +101,10 @@ export function CardPaymentForm({
       if (parent) {
         parent.style.setProperty("background-color", "#0b1930", "important");
         parent.style.setProperty("background", "#0b1930", "important");
+        parent.style.setProperty("border-radius", "12px", "important");
+        parent.style.setProperty("overflow", "hidden", "important");
+        parent.style.setProperty("border", "1px solid rgba(201, 162, 39, 0.4)", "important");
+
         // Oculta setinhas/chevrons SVG
         const svgs = parent.querySelectorAll<SVGElement>("svg");
         svgs.forEach((svg) => {
@@ -107,12 +124,28 @@ export function CardPaymentForm({
       }
     });
 
-    // 3. Neutraliza qualquer fundo verde (validação do CPF / sucesso) em todos os containers
+    // 3. Document Number Input (arredondado na direita e sem borda verde)
+    const docInput = containerRef.current.querySelector<HTMLInputElement>(
+      'input[name*="identificationNumber"], input[id*="identificationNumber"]'
+    );
+    if (docInput) {
+      docInput.style.setProperty("border-radius", "0 12px 12px 0", "important");
+      docInput.style.setProperty("border", "none", "important");
+      docInput.style.setProperty("box-shadow", "none", "important");
+      docInput.style.setProperty("outline", "none", "important");
+      docInput.style.setProperty("background-color", "#0b1930", "important");
+      docInput.style.setProperty("background", "#0b1930", "important");
+      docInput.style.setProperty("color", "#f6f8fc", "important");
+    }
+
+    // 4. Neutraliza qualquer fundo verde/branco e bordas verdes em todos os containers
     const allEls = containerRef.current.querySelectorAll<HTMLElement>("*");
     allEls.forEach((el) => {
       const bg = el.style.backgroundColor || "";
-      // Se tiver tonalidades de verde de validação do SDK
       if (
+        bg.includes("255, 255, 255") ||
+        bg === "#ffffff" ||
+        bg === "white" ||
         bg.includes("0, 43, 31") ||
         bg.includes("0, 51, 40") ||
         bg.includes("0, 40") ||
@@ -127,6 +160,18 @@ export function CardPaymentForm({
         el.style.setProperty("background", "#0b1930", "important");
       }
 
+      const bc = el.style.borderColor || "";
+      if (
+        bc.includes("0, 166, 80") ||
+        bc.includes("0, 43") ||
+        bc.includes("1, 51") ||
+        bc === "#00a650" ||
+        bc === "#002b1f" ||
+        bc === "#013328"
+      ) {
+        el.style.setProperty("border-color", "#c9a227", "important");
+      }
+
       // Neutraliza containers de input com classe valid ou success
       if (
         el.className &&
@@ -135,16 +180,28 @@ export function CardPaymentForm({
       ) {
         el.style.setProperty("background-color", "#0b1930", "important");
         el.style.setProperty("background", "#0b1930", "important");
+        el.style.setProperty("border-color", "#c9a227", "important");
       }
     });
 
-    // 4. Auto-preenche o nome do titular com o nome oficial ou 'APRO' se o campo existir no DOM
+    // 5. Centraliza e estiliza o ícone de cartão no código de segurança na cor dourada
+    const icons = containerRef.current.querySelectorAll<HTMLElement>(
+      '[class*="icon"], [class*="securityCode"] svg, [class*="cvv"] svg, [class*="securityCode"] img, [class*="cvv"] img'
+    );
+    icons.forEach((ic) => {
+      ic.style.setProperty("filter", "sepia(1) saturate(5) hue-rotate(5deg) brightness(0.9)", "important");
+      ic.style.setProperty("opacity", "0.85", "important");
+      ic.style.setProperty("transform", "translateY(-50%)", "important");
+      ic.style.setProperty("top", "50%", "important");
+    });
+
+    // 6. Preenche o nome do titular com o nome real do comprador caso esteja vazio
     try {
       const nameInput = containerRef.current.querySelector<HTMLInputElement>(
         'input[name*="cardholderName"], input[id*="cardholderName"]'
       );
-      if (nameInput && !nameInput.value) {
-        nameInput.value = "APRO";
+      if (nameInput && !nameInput.value && userName) {
+        nameInput.value = userName.trim();
         nameInput.dispatchEvent(new Event("input", { bubbles: true }));
         nameInput.dispatchEvent(new Event("change", { bubbles: true }));
       }
@@ -283,20 +340,18 @@ export function CardPaymentForm({
                   theme: "dark",
                   customVariables: {
                     baseColor: "#c9a227",
+                    formBackgroundColor: "#0b1930",
                     inputBackgroundColor: "#0b1930",
-                    formBackgroundColor: "transparent",
                     textPrimaryColor: "#f6f8fc",
                     textSecondaryColor: "#a8b2c3",
+                    errorColor: "#ef4444",
+                    successColor: "#c9a227",
                     outlinePrimaryColor: "#c9a227",
-                    outlineSecondaryColor: "#0b1930",
-                    buttonTextColor: "#07090d",
+                    outlineSecondaryColor: "#1e293b",
                     borderRadiusMedium: "12px",
-                    inputBorderWidth: "1px",
-                    inputFocusedBoxShadow: "0 0 0 2px rgba(201, 162, 39, 0.4)",
-                    successColor: "#0b1930",
-                    warningColor: "#c9a227",
-                    baseColorFirstVariant: "#0b1930",
-                    baseColorSecondVariant: "#101116",
+                    borderRadiusSmall: "8px",
+                    borderRadiusLarge: "14px",
+                    buttonTextColor: "#07090d",
                   },
                 },
                 hideFormTitle: true,
