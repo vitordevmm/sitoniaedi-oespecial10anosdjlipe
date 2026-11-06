@@ -45,6 +45,10 @@ interface TicketItem {
   paymentMethod: string;
   checkedInAt?: string | null;
   checkedInBy?: string | null;
+  couponCode?: string | null;
+  influencerName?: string | null;
+  originalPrice?: number | null;
+  discountAmount?: number | null;
 }
 
 interface AdminTicketsTabProps {
@@ -340,7 +344,14 @@ export function AdminTicketsTab({
                       {/* Setor */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span className="font-semibold text-[#f6f8fc] block">{t.sectorName}</span>
-                        <span className="text-[10px] text-[#c9a227]">{t.lotName}</span>
+                        <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                          <span className="text-[10px] text-[#c9a227]">{t.lotName}</span>
+                          {t.couponCode && (
+                            <GlowBadge variant="purple" size="xs">
+                              Cupom: {t.couponCode}
+                            </GlowBadge>
+                          )}
+                        </div>
                       </td>
 
                       {/* Valor */}
@@ -506,7 +517,14 @@ export function AdminTicketsTab({
                     <div className="p-2.5 rounded-xl bg-[#07090d]/40 border border-[#0b1930]">
                       <span className="text-[9px] text-[#a8b2c3] block uppercase tracking-wider">Setor / Lote</span>
                       <span className="font-semibold text-[#f6f8fc] block truncate text-xs">{t.sectorName}</span>
-                      <span className="text-[10px] text-[#c9a227]">{t.lotName}</span>
+                      <div className="flex items-center gap-1 flex-wrap mt-0.5">
+                        <span className="text-[10px] text-[#c9a227]">{t.lotName}</span>
+                        {t.couponCode && (
+                          <GlowBadge variant="purple" size="xs">
+                            {t.couponCode}
+                          </GlowBadge>
+                        )}
+                      </div>
                     </div>
 
                     <div className="p-2.5 rounded-xl bg-[#07090d]/40 border border-[#0b1930]">

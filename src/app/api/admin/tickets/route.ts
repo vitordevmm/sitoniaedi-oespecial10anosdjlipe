@@ -33,8 +33,10 @@ export async function GET(req: NextRequest) {
         const matchName = userName.includes(search);
         const matchEmail = userEmail.includes(search);
         const matchCpf = cleanSearchDigits && userCpf.includes(cleanSearchDigits);
+        const matchCoupon = data.couponCode && String(data.couponCode).toLowerCase().includes(search);
+        const matchInfluencer = data.influencerName && String(data.influencerName).toLowerCase().includes(search);
 
-        if (!matchId && !matchName && !matchEmail && !matchCpf) {
+        if (!matchId && !matchName && !matchEmail && !matchCpf && !matchCoupon && !matchInfluencer) {
           return;
         }
       }
@@ -80,6 +82,10 @@ export async function GET(req: NextRequest) {
         paymentMethod: data.paymentMethod || "pix",
         checkedInAt: data.checkedInAt || null,
         checkedInBy: data.checkedInBy || null,
+        couponCode: data.couponCode || null,
+        influencerName: data.influencerName || null,
+        originalPrice: data.originalPrice !== undefined ? Number(data.originalPrice) : null,
+        discountAmount: data.discountAmount !== undefined ? Number(data.discountAmount) : null,
       });
     });
 

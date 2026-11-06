@@ -24,6 +24,8 @@ import {
   LogOut,
   QrCode,
   AlertCircle,
+  Tag,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -48,6 +50,10 @@ export default function Home() {
   // Toast divertido de bloqueio de acesso não autorizado a /admin
   const [espertinhoToast, setEspertinhoToast] = useState(false);
 
+  // Cupom de influenciador via URL (?cupom=CODIGO ou ?ref=CODIGO)
+  const [urlCoupon, setUrlCoupon] = useState<string | null>(null);
+  const [couponToast, setCouponToast] = useState<string | null>(null);
+
   // Configurações dinâmicas de lotes e preços do evento
   const [eventConfig, setEventConfig] = useState<EventConfig>(DEFAULT_EVENT_CONFIG);
 
@@ -58,6 +64,27 @@ export default function Home() {
       window.history.replaceState({}, "", "/");
       const timer = setTimeout(() => setEspertinhoToast(false), 5500);
       return () => clearTimeout(timer);
+    }
+  }, []);
+
+  useEffect(() => {
+    // 2. Detecta cupom de influenciador na URL (?cupom= ou ?ref= ou ?c=)
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const rawParam = params.get("cupom") || params.get("ref") || params.get("c");
+      if (rawParam) {
+        const cleanCode = rawParam.trim().toUpperCase();
+        sessionStorage.setItem("sintonia_cupom", cleanCode);
+        setUrlCoupon(cleanCode);
+        setCouponToast(cleanCode);
+        const timer = setTimeout(() => setCouponToast(null), 7000);
+        return () => clearTimeout(timer);
+      } else {
+        const stored = sessionStorage.getItem("sintonia_cupom");
+        if (stored) {
+          setUrlCoupon(stored);
+        }
+      }
     }
   }, []);
 
@@ -861,6 +888,31 @@ export default function Home() {
         initialTab={termsInitialTab}
       />
 
+      {/* TOAST DE CUPOM ATIVADO VIA LINK */}
+      {couponToast && (
+        <div className="fixed top-24 right-4 sm:right-6 z-50 max-w-sm p-4 rounded-2xl bg-[#0b1930]/95 border-2 border-[#c9a227] shadow-[0_0_30px_rgba(201,162,39,0.35)] backdrop-blur-md animate-slideDown flex items-center gap-3 text-[#f6f8fc]">
+          <div className="w-10 h-10 rounded-xl bg-[#c9a227]/20 border border-[#c9a227]/40 flex items-center justify-center flex-shrink-0 text-[#f5e6b8]">
+            <Tag className="w-5 h-5 text-[#c9a227]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-bold text-[#f5e6b8]">
+              Cupom de Influenciador Ativado!
+            </div>
+            <p className="text-xs text-[#a8b2c3] truncate mt-0.5">
+              Cupom <strong className="text-[#f6f8fc] font-mono">{couponToast}</strong> aplicado para o seu checkout.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCouponToast(null)}
+            className="p-1.5 rounded-lg text-[#a8b2c3] hover:text-[#f6f8fc] transition-colors"
+            aria-label="Fechar notificação"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* CHECKOUT MERCADO PAGO MODAL */}
       <CheckoutModal
         isOpen={checkoutModalOpen}
@@ -868,6 +920,7 @@ export default function Home() {
         sector="pista"
         lotName={activePistaLot.name}
         price={activePistaLot.price}
+        initialCoupon={urlCoupon || undefined}
       />
     </div>
   );

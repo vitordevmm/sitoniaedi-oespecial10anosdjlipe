@@ -13,9 +13,12 @@ import {
   Loader2,
   Clock,
   Ticket as TicketIcon,
+  Tag,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { CardPaymentForm } from "./CardPaymentForm";
+import { CouponValidationResponse } from "@/types/coupon";
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -23,6 +26,7 @@ interface CheckoutModalProps {
   sector?: string;
   lotName?: string;
   price?: number;
+  initialCoupon?: string;
 }
 
 export function CheckoutModal({
@@ -31,12 +35,19 @@ export function CheckoutModal({
   sector = "pista",
   lotName = "1º Lote Oficial",
   price = 60.0,
+  initialCoupon,
 }: CheckoutModalProps) {
   const { user, profile } = useAuth();
 
   const [selectedMethod, setSelectedMethod] = useState<"pix" | "card">("pix");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Cupom de Influenciador
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponValidationResponse | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   // PIX Data
   const [paymentId, setPaymentId] = useState<number | null>(null);
@@ -51,6 +62,20 @@ export function CheckoutModal({
 
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Auto-aplica cupom vindo de URL ou SessionStorage ao abrir o modal
+  useEffect(() => {
+    if (isOpen) {
+      const codeFromUrlOrStorage =
+        initialCoupon ||
+        (typeof window !== "undefined" ? sessionStorage.getItem("sintonia_cupom") : null);
+
+      if (codeFromUrlOrStorage && !appliedCoupon) {
+        setCouponInput(codeFromUrlOrStorage);
+        applyCouponCode(codeFromUrlOrStorage);
+      }
+    }
+  }, [isOpen, initialCoupon]);
+
   // Limpa estado ao fechar
   useEffect(() => {
     if (!isOpen) {
@@ -64,9 +89,66 @@ export function CheckoutModal({
       setCopied(false);
       setIsApproved(false);
       setTimeLeft(15 * 60);
+      setCouponError(null);
       if (pollingRef.current) clearInterval(pollingRef.current);
     }
   }, [isOpen]);
+
+  // Função para aplicar cupom
+  const applyCouponCode = async (rawCode?: string) => {
+    const code = (rawCode || couponInput).trim();
+    if (!code) {
+      setCouponError("Informe o código do cupom.");
+      return;
+    }
+
+    setCouponLoading(true);
+    setCouponError(null);
+
+    try {
+      const res = await fetch("/api/checkout/coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          sector,
+          userId: user?.uid,
+          userEmail: user?.email,
+          userName: profile?.nome || user?.displayName,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setCouponError(data.error || "Cupom inválido ou não disponível.");
+        setAppliedCoupon(null);
+      } else {
+        setAppliedCoupon(data);
+        setCouponInput(data.displayCode || data.code);
+        setCouponError(null);
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("sintonia_cupom", data.code);
+        }
+      }
+    } catch (err: any) {
+      setCouponError("Erro de conexão ao validar cupom.");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponError(null);
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("sintonia_cupom");
+    }
+  };
+
+  const effectivePrice = appliedCoupon ? appliedCoupon.finalPrice : price;
+  const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
 
   // Geração client-side do QR Code com pixels 100% opacos e blindagem contra auto-dark mode
   useEffect(() => {
@@ -153,6 +235,7 @@ export function CheckoutModal({
           sector,
           lotName,
           price,
+          couponCode: appliedCoupon?.code || undefined,
         }),
       });
 
@@ -237,6 +320,91 @@ export function CheckoutModal({
               Garanta sua vaga oficial com compensação em tempo real.
             </p>
 
+            {/* SEÇÃO DE CUPOM DE INFLUENCIADOR */}
+            <div className="mb-5 p-3.5 rounded-2xl bg-[#0b1930]/70 border border-[#c9a227]/30">
+              {appliedCoupon ? (
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-[#c9a227]/20 border border-[#c9a227]/40 flex items-center justify-center flex-shrink-0 text-[#f5e6b8]">
+                      <Tag className="w-4 h-4 text-[#c9a227]" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono font-extrabold text-xs text-[#f5e6b8] tracking-wider">
+                          {appliedCoupon.displayCode || appliedCoupon.code}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-500/30">
+                          Cupom Aplicado
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#a8b2c3] truncate mt-0.5">
+                        Influenciador(a): <strong className="text-[#f6f8fc]">{appliedCoupon.influencerName}</strong>
+                        {discountAmount > 0 ? (
+                          <span className="text-emerald-400 font-semibold ml-1.5">
+                            (- R$ {discountAmount.toFixed(2).replace(".", ",")})
+                          </span>
+                        ) : (
+                          <span className="text-[#f5e6b8] ml-1.5">(Apoio Oficial)</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-950/40 border border-red-500/20 transition-all flex-shrink-0"
+                  >
+                    Remover
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label htmlFor="coupon-input" className="text-xs font-bold text-[#f6f8fc] flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5 text-[#c9a227]" />
+                      <span>Possui cupom de influenciador?</span>
+                    </label>
+                    <span className="text-[10px] text-[#a8b2c3]">Opcional</span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      id="coupon-input"
+                      type="text"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          applyCouponCode();
+                        }
+                      }}
+                      placeholder="Ex: LIPE10"
+                      className="flex-1 h-10 px-3 rounded-xl bg-[#101116] border border-[#c9a227]/30 text-xs text-[#f6f8fc] placeholder:text-[#a8b2c3]/60 font-mono tracking-wider focus:outline-none focus:border-[#c9a227] focus:ring-1 focus:ring-[#c9a227]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => applyCouponCode()}
+                      disabled={couponLoading || !couponInput.trim()}
+                      className="h-10 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-[#c9a227] to-[#f5e6b8] text-[#07090d] hover:opacity-95 disabled:opacity-40 transition-all flex items-center justify-center gap-1.5 flex-shrink-0"
+                    >
+                      {couponLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <span>APLICAR</span>
+                      )}
+                    </button>
+                  </div>
+
+                  {couponError && (
+                    <p className="text-[11px] text-red-400 mt-1.5 pl-1">
+                      {couponError}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* SELETOR DE MÉTODO DE PAGAMENTO (TABS DARK & GOLD) */}
             <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-[#0b1930] border border-[#c9a227]/30 mb-5">
               <button
@@ -277,10 +445,21 @@ export function CheckoutModal({
                       <span className="text-xs text-[#f5e6b8] font-medium">{lotName}</span>
                     </div>
                     <div className="text-right">
+                      {discountAmount > 0 && (
+                        <div className="text-xs text-[#a8b2c3] line-through font-semibold mb-0.5">
+                          R$ {price.toFixed(2).replace(".", ",")}
+                        </div>
+                      )}
                       <div className="text-xl sm:text-2xl font-extrabold text-[#f5e6b8] leading-none">
-                        R$ {price.toFixed(2).replace(".", ",")}
+                        R$ {effectivePrice.toFixed(2).replace(".", ",")}
                       </div>
-                      <span className="text-[10px] text-[#a8b2c3]">em 1x sem acréscimo</span>
+                      {discountAmount > 0 ? (
+                        <span className="text-[10px] text-emerald-400 font-bold">
+                          Economia de R$ {discountAmount.toFixed(2).replace(".", ",")}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-[#a8b2c3]">em 1x sem acréscimo</span>
+                      )}
                     </div>
                   </div>
                   <div className="text-[11px] text-[#a8b2c3]">
@@ -291,7 +470,9 @@ export function CheckoutModal({
                 {/* Formulário Oficial do Cartão */}
                 {user ? (
                   <CardPaymentForm
-                    price={price}
+                    key={`${effectivePrice}-${appliedCoupon?.code || "raw"}`}
+                    price={effectivePrice}
+                    couponCode={appliedCoupon?.code}
                     userEmail={user.email || ""}
                     userName={profile?.nome || user.displayName || "Membro Oficial"}
                     userCpf={profile?.cpf || ""}
@@ -317,10 +498,21 @@ export function CheckoutModal({
                       <span className="text-xs text-[#f5e6b8] font-medium">{lotName}</span>
                     </div>
                     <div className="text-right">
+                      {discountAmount > 0 && (
+                        <div className="text-xs text-[#a8b2c3] line-through font-semibold mb-0.5">
+                          R$ {price.toFixed(2).replace(".", ",")}
+                        </div>
+                      )}
                       <div className="text-xl sm:text-2xl font-extrabold text-[#f5e6b8] leading-none">
-                        R$ {price.toFixed(2).replace(".", ",")}
+                        R$ {effectivePrice.toFixed(2).replace(".", ",")}
                       </div>
-                      <span className="text-[10px] text-[#a8b2c3]">Sem taxas extras</span>
+                      {discountAmount > 0 ? (
+                        <span className="text-[10px] text-emerald-400 font-bold">
+                          Economia de R$ {discountAmount.toFixed(2).replace(".", ",")}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-[#a8b2c3]">Sem taxas extras</span>
+                      )}
                     </div>
                   </div>
 

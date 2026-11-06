@@ -4,6 +4,7 @@ import { sendTicketIssuedEmail } from "@/lib/email/resend";
 import { getPaymentClient } from "@/lib/mercadopago/client";
 import { Ticket } from "@/types/ticket";
 import { getActiveLotForSector } from "@/lib/firebase/eventConfig";
+import { FieldValue } from "firebase-admin/firestore";
 
 export interface IssueTicketParams {
   paymentId: string;
@@ -17,7 +18,7 @@ export interface IssueTicketParams {
  * Garante:
  * 1. Idempotência: nunca emite ingressos duplicados para o mesmo paymentId.
  * 2. Numeração atômica sequencial (#0001, #0002...).
- * 3. Transação atômica no Firestore (salva ingresso + atualiza pedido).
+ * 3. Transação atômica no Firestore (salva ingresso + atualiza pedido + rastreamento de cupom).
  * 4. Envio de e-mail oficial com o voucher e QR Code via Resend.
  */
 export async function issueTicketForPayment({
@@ -57,7 +58,7 @@ export async function issueTicketForPayment({
   }
 
   const metadata = data.metadata || {};
-  const userId = metadata.user_id;
+  let userId = metadata.user_id;
   const userEmail = (metadata.user_email || data.payer?.email || "").toLowerCase().trim();
   const userName =
     metadata.user_name ||
@@ -70,6 +71,25 @@ export async function issueTicketForPayment({
     console.error("[Ticket Issuer] Pagamento sem e-mail do comprador:", paymentId);
     return null;
   }
+
+  // Verifica dados do pedido armazenado em pedidos/{paymentId} (recupera cupom caso metadata do MP tenha sido truncado)
+  let pedidoData: any = null;
+  try {
+    const pedidoDoc = await db.collection("pedidos").doc(String(paymentId)).get();
+    if (pedidoDoc.exists) {
+      pedidoData = pedidoDoc.data();
+      if (!userId && pedidoData.userId) {
+        userId = pedidoData.userId;
+      }
+    }
+  } catch (pErr) {
+    console.warn("[Ticket Issuer] Erro ao buscar documento do pedido:", pErr);
+  }
+
+  const couponCode = (metadata.coupon_code || pedidoData?.couponCode || "").toUpperCase().trim();
+  const influencerName = metadata.influencer_name || pedidoData?.influencerName || "";
+  const originalPrice = metadata.original_price !== undefined ? Number(metadata.original_price) : (pedidoData?.originalPrice !== undefined ? Number(pedidoData.originalPrice) : undefined);
+  const discountAmount = metadata.discount_amount !== undefined ? Number(metadata.discount_amount) : (pedidoData?.discountAmount !== undefined ? Number(pedidoData.discountAmount) : undefined);
 
   // 3. Numeração sequencial atômica
   const seq = await getNextTicketSequence(db);
@@ -116,14 +136,20 @@ export async function issueTicketForPayment({
     userAge,
     userBirthDate,
     sector: sector as any,
-    sectorName: metadata.sector_name || activeLot.sectorName || "Pista Geral & Bar Central",
-    lot: Number(metadata.lot) || activeLot.order || 1,
-    lotName: metadata.lot_name || activeLot.name || "1º Lote Oficial",
-    price: data.transaction_amount !== undefined ? Number(data.transaction_amount) : Number(activeLot.price) || 60.0,
+    sectorName: metadata.sector_name || pedidoData?.sectorName || activeLot.sectorName || "Pista Geral & Bar Central",
+    lot: Number(metadata.lot) || pedidoData?.lot || activeLot.order || 1,
+    lotName: metadata.lot_name || pedidoData?.lotName || activeLot.name || "1º Lote Oficial",
+    price: data.transaction_amount !== undefined ? Number(data.transaction_amount) : (pedidoData?.amount !== undefined ? Number(pedidoData.amount) : Number(activeLot.price) || 60.0),
     status: "approved",
     qrPayload,
     purchaseDate: new Date().toISOString(),
     paymentMethod: isCreditCard ? "credit_card" : "pix",
+    ...(couponCode ? {
+      couponCode,
+      influencerName,
+      ...(originalPrice !== undefined ? { originalPrice } : {}),
+      ...(discountAmount !== undefined ? { discountAmount } : {}),
+    } : {}),
   };
 
   // 5. Transação Atômica no Firestore
@@ -154,9 +180,60 @@ export async function issueTicketForPayment({
       },
       { merge: true }
     );
+
+    // Se houver cupom aplicado, atualiza métricas atômicas do cupom e cria registro de compra
+    if (couponCode) {
+      const couponRef = db.collection("cupons").doc(couponCode);
+      transaction.set(
+        couponRef,
+        {
+          soldCount: FieldValue.increment(1),
+          totalRevenue: FieldValue.increment(finalTicket.price),
+          totalDiscountGiven: FieldValue.increment(discountAmount || 0),
+          updatedAt: new Date(),
+        },
+        { merge: true }
+      );
+
+      const purchaseRef = db.collection("cupom_compras").doc(ticketId);
+      transaction.set(purchaseRef, {
+        ticketId,
+        couponCode,
+        influencerName,
+        userId: userId || "",
+        userName,
+        userEmail,
+        userCpf,
+        sector,
+        lot: finalTicket.lot,
+        originalPrice: originalPrice ?? finalTicket.price,
+        finalPrice: finalTicket.price,
+        discountAmount: discountAmount || 0,
+        paymentMethod: finalTicket.paymentMethod,
+        paymentId: String(paymentId),
+        purchasedAt: finalTicket.purchaseDate,
+        status: "approved",
+        createdAt: new Date(),
+      });
+
+      if (userId) {
+        const appRef = db.collection("cupom_aplicacoes").doc(`${couponCode}_${userId}`);
+        transaction.set(
+          appRef,
+          {
+            status: "purchased",
+            ticketId,
+            lastPaymentId: String(paymentId),
+            purchasedAt: finalTicket.purchaseDate,
+            updatedAt: new Date(),
+          },
+          { merge: true }
+        );
+      }
+    }
   });
 
-  console.log(`[Ticket Issuer] Ingresso ${ticketId} emitido com sucesso para ${userEmail}!`);
+  console.log(`[Ticket Issuer] Ingresso ${ticketId} emitido com sucesso para ${userEmail}! ${couponCode ? `(Cupom: ${couponCode})` : ""}`);
 
   // 6. Envio do voucher por e-mail com QR Code em segundo plano
   try {
@@ -165,8 +242,8 @@ export async function issueTicketForPayment({
       userName,
       userCpf,
       ticketId,
-      sectorName: "Pista Geral & Bar Central",
-      lotName: "1º Lote Oficial",
+      sectorName: finalTicket.sectorName,
+      lotName: finalTicket.lotName,
       price: finalTicket.price,
       qrPayload,
     });

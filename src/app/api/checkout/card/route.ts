@@ -3,6 +3,8 @@ import { createCardPayment } from "@/lib/mercadopago/client";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { issueTicketForPayment } from "@/lib/firebase/ticketIssuer";
 import { getActiveLotForSector } from "@/lib/firebase/eventConfig";
+import { validateAndCalculateCoupon } from "@/lib/firebase/coupons";
+import { normalizeCouponCode } from "@/lib/validations/coupon";
 
 function getCardRejectedMessage(statusDetail?: string): string {
   switch (statusDetail) {
@@ -44,6 +46,7 @@ export async function POST(req: NextRequest) {
       userName,
       userCpf,
       sector = "pista",
+      couponCode,
     } = body;
 
     if (!userEmail || !userId) {
@@ -77,14 +80,38 @@ export async function POST(req: NextRequest) {
 
     // 2. Preço oficial do lote ativo (segurança server-side sincronizada com configuracoes/evento)
     const activeLot = await getActiveLotForSector(sector);
-    const amount = Number(activeLot.price) || 60.0;
+    const baseLotPrice = Number(activeLot.price) || 60.0;
     const lotTitle = activeLot.name || "1º Lote Oficial";
     const sectorTitle = activeLot.sectorName || "Pista Geral & Bar Central";
     const lotOrder = activeLot.order || 1;
 
+    // 3. Validação do cupom de desconto/rastreamento no servidor
+    let amount = baseLotPrice;
+    let appliedCouponInfo: any = null;
+
+    if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
+      try {
+        const couponResult = await validateAndCalculateCoupon(db, couponCode, baseLotPrice);
+        amount = couponResult.finalPrice;
+        appliedCouponInfo = {
+          couponCode: couponResult.code,
+          influencerName: couponResult.influencerName,
+          originalPrice: couponResult.originalPrice,
+          discountAmount: couponResult.discountAmount,
+          discountType: couponResult.discountType,
+          discountValue: couponResult.discountValue,
+        };
+      } catch (couponErr: any) {
+        return NextResponse.json(
+          { error: couponErr?.message || "Cupom inválido ou expirado." },
+          { status: 400 }
+        );
+      }
+    }
+
     const safeInstallments = Math.max(1, Math.min(12, Number(installments) || 1));
 
-    // 3. Processa cobrança de cartão no Mercado Pago
+    // 4. Processa cobrança de cartão no Mercado Pago
     // O Mercado Pago calcula e repassa as taxas de parcelamento ao comprador conforme a configuração da conta
     const cardResponse = await createCardPayment({
       transactionAmount: amount,
@@ -106,12 +133,20 @@ export async function POST(req: NextRequest) {
         lot: lotOrder,
         lot_name: lotTitle,
         installments: safeInstallments,
+        ...(appliedCouponInfo
+          ? {
+              coupon_code: appliedCouponInfo.couponCode,
+              influencer_name: appliedCouponInfo.influencerName,
+              original_price: appliedCouponInfo.originalPrice,
+              discount_amount: appliedCouponInfo.discountAmount,
+            }
+          : {}),
       },
     });
 
     const paymentId = String(cardResponse.id);
 
-    // 4. Salva registro do pedido no Firestore
+    // 5. Salva registro do pedido no Firestore
     await db.collection("pedidos").doc(paymentId).set({
       paymentId,
       userId,
@@ -128,11 +163,32 @@ export async function POST(req: NextRequest) {
       paymentMethod: "credit_card",
       paymentMethodId: cardResponse.paymentMethodId,
       installments: cardResponse.installments,
+      ...(appliedCouponInfo || {}),
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
-    // 5. Se aprovado imediatamente, emite o voucher com QR Code e envia e-mail
+    // Atualiza status na aplicação de cupom do usuário
+    if (appliedCouponInfo?.couponCode && userId) {
+      try {
+        const appId = `${appliedCouponInfo.couponCode}_${userId}`;
+        await db
+          .collection("cupom_aplicacoes")
+          .doc(appId)
+          .set(
+            {
+              lastPaymentId: paymentId,
+              status: cardResponse.status === "approved" ? "purchased" : "pending_payment",
+              lastAppliedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+      } catch (trackErr) {
+        console.warn("[Card Coupon Track Error]:", trackErr);
+      }
+    }
+
+    // 6. Se aprovado imediatamente, emite o voucher com QR Code e envia e-mail
     if (cardResponse.status === "approved") {
       const ticket = await issueTicketForPayment({
         paymentId,
@@ -148,6 +204,14 @@ export async function POST(req: NextRequest) {
             user_name: finalName,
             user_cpf: finalCpf,
             sector,
+            ...(appliedCouponInfo
+              ? {
+                  coupon_code: appliedCouponInfo.couponCode,
+                  influencer_name: appliedCouponInfo.influencerName,
+                  original_price: appliedCouponInfo.originalPrice,
+                  discount_amount: appliedCouponInfo.discountAmount,
+                }
+              : {}),
           },
         },
       });

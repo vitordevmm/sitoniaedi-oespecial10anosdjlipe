@@ -11,6 +11,7 @@ interface CardPaymentFormProps {
   userCpf?: string;
   userId: string;
   sector?: string;
+  couponCode?: string;
   onSuccess: (ticketId?: string) => void;
   onProcessingChange?: (processing: boolean) => void;
   onSwitchToPix?: () => void;
@@ -23,6 +24,7 @@ export function CardPaymentForm({
   userCpf,
   userId,
   sector = "pista",
+  couponCode,
   onSuccess,
   onProcessingChange,
   onSwitchToPix,
@@ -199,6 +201,7 @@ export function CardPaymentForm({
           userName,
           userCpf: cleanCpf,
           sector,
+          couponCode: couponCode || undefined,
         }),
       });
 

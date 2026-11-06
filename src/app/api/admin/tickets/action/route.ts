@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { verifyStaffOrAdminRequest } from "@/lib/auth/adminAuth";
 import { sendTicketIssuedEmail } from "@/lib/email/resend";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,6 +46,29 @@ export async function POST(req: NextRequest) {
         ticketData.ticketNumberFormatted ||
         `#${String(ticketData.ticketNumber || "").padStart(4, "0")}`;
 
+      // Reverte contadores do cupom caso o ingresso não estivesse previamente cancelado
+      if (ticketData.couponCode) {
+        if (ticketData.status !== "cancelled") {
+          try {
+            const couponRef = db.collection("cupons").doc(ticketData.couponCode);
+            await couponRef.update({
+              soldCount: FieldValue.increment(-1),
+              totalRevenue: FieldValue.increment(-(Number(ticketData.price) || 0)),
+              totalDiscountGiven: FieldValue.increment(-(Number(ticketData.discountAmount) || 0)),
+              updatedAt: new Date(),
+            });
+          } catch (cErr) {
+            console.warn("[Ticket Action] Erro ao reverter métricas do cupom na exclusão:", cErr);
+          }
+        }
+
+        try {
+          await db.collection("cupom_compras").doc(ticketId).delete();
+        } catch (ccErr) {
+          console.warn("[Ticket Action] Erro ao excluir registro de cupom_compras:", ccErr);
+        }
+      }
+
       await ticketRef.delete();
 
       return NextResponse.json({
@@ -57,6 +81,25 @@ export async function POST(req: NextRequest) {
     // 1. AÇÃO: REVOGAR INGRESSO
     // ==========================================
     if (action === "revoke") {
+      if (ticketData.status !== "cancelled" && ticketData.couponCode) {
+        try {
+          const couponRef = db.collection("cupons").doc(ticketData.couponCode);
+          await couponRef.update({
+            soldCount: FieldValue.increment(-1),
+            totalRevenue: FieldValue.increment(-(Number(ticketData.price) || 0)),
+            totalDiscountGiven: FieldValue.increment(-(Number(ticketData.discountAmount) || 0)),
+            updatedAt: new Date(),
+          });
+
+          await db.collection("cupom_compras").doc(ticketId).update({
+            status: "cancelled",
+            cancelledAt: new Date().toISOString(),
+          });
+        } catch (cErr) {
+          console.warn("[Ticket Action] Erro ao reverter métricas do cupom na revogação:", cErr);
+        }
+      }
+
       await ticketRef.update({
         status: "cancelled",
         cancelledAt: new Date().toISOString(),

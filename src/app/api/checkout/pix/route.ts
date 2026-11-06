@@ -3,11 +3,13 @@ import { createPixPayment } from "@/lib/mercadopago/client";
 import { getAdminDb } from "@/lib/firebase/admin";
 import { sendPendingPaymentEmail } from "@/lib/email/resend";
 import { getActiveLotForSector } from "@/lib/firebase/eventConfig";
+import { validateAndCalculateCoupon } from "@/lib/firebase/coupons";
+import { normalizeCouponCode } from "@/lib/validations/coupon";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, userEmail, userName, userCpf, sector = "pista" } = body;
+    const { userId, userEmail, userName, userCpf, sector = "pista", couponCode } = body;
 
     if (!userEmail || !userId) {
       return NextResponse.json(
@@ -33,12 +35,36 @@ export async function POST(req: NextRequest) {
 
     // 2. Preço oficial do lote ativo (sincronizado com as configurações oficiais de evento)
     const activeLot = await getActiveLotForSector(sector);
-    const amount = Number(activeLot.price) || 60.0;
+    const baseLotPrice = Number(activeLot.price) || 60.0;
     const lotTitle = activeLot.name || "1º Lote Oficial";
     const sectorTitle = activeLot.sectorName || "Pista Geral & Bar Central";
     const lotOrder = activeLot.order || 1;
 
-    // 3. Cria cobrança PIX no Mercado Pago
+    // 3. Validação segura do cupom de desconto/rastreamento no servidor
+    let amount = baseLotPrice;
+    let appliedCouponInfo: any = null;
+
+    if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
+      try {
+        const couponResult = await validateAndCalculateCoupon(db, couponCode, baseLotPrice);
+        amount = couponResult.finalPrice;
+        appliedCouponInfo = {
+          couponCode: couponResult.code,
+          influencerName: couponResult.influencerName,
+          originalPrice: couponResult.originalPrice,
+          discountAmount: couponResult.discountAmount,
+          discountType: couponResult.discountType,
+          discountValue: couponResult.discountValue,
+        };
+      } catch (couponErr: any) {
+        return NextResponse.json(
+          { error: couponErr?.message || "Cupom inválido ou expirado." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 4. Cria cobrança PIX no Mercado Pago
     const pixResponse = await createPixPayment({
       transactionAmount: amount,
       description: `Ingresso ${lotTitle} - Sintonia Edição Especial 10 Anos DJ Lipe`,
@@ -54,12 +80,20 @@ export async function POST(req: NextRequest) {
         sector_name: sectorTitle,
         lot: lotOrder,
         lot_name: lotTitle,
+        ...(appliedCouponInfo
+          ? {
+              coupon_code: appliedCouponInfo.couponCode,
+              influencer_name: appliedCouponInfo.influencerName,
+              original_price: appliedCouponInfo.originalPrice,
+              discount_amount: appliedCouponInfo.discountAmount,
+            }
+          : {}),
       },
     });
 
     const paymentId = String(pixResponse.id);
 
-    // 4. Salva a intenção de pedido no Firestore para rastreabilidade e reconciliação
+    // 5. Salva a intenção de pedido no Firestore para rastreabilidade e reconciliação
     await db.collection("pedidos").doc(paymentId).set({
       paymentId,
       userId,
@@ -75,11 +109,32 @@ export async function POST(req: NextRequest) {
       paymentMethod: "pix",
       qrCode: pixResponse.qrCode,
       dateOfExpiration: pixResponse.dateOfExpiration,
+      ...(appliedCouponInfo || {}),
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
-    // 5. Envia o e-mail de reserva de vaga com o PIX Copia e Cola oficial em segundo plano
+    // Atualiza status na aplicação de cupom do usuário
+    if (appliedCouponInfo?.couponCode && userId) {
+      try {
+        const appId = `${appliedCouponInfo.couponCode}_${userId}`;
+        await db
+          .collection("cupom_aplicacoes")
+          .doc(appId)
+          .set(
+            {
+              lastPaymentId: paymentId,
+              status: "pending_payment",
+              lastAppliedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+      } catch (trackErr) {
+        console.warn("[PIX Coupon Track Error]:", trackErr);
+      }
+    }
+
+    // 6. Envia o e-mail de reserva de vaga com o PIX Copia e Cola oficial em segundo plano
     if (pixResponse.qrCode) {
       try {
         await sendPendingPaymentEmail({

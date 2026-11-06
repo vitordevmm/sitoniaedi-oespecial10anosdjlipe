@@ -1,0 +1,85 @@
+# Sintonia Edição Especial 10 Anos DJ Lipe - Documento Completo de Contexto para Inteligências Artificiais
+
+Este documento reúne todas as informações canônicas, estruturais, organizacionais e técnicas da edição especial do festival de música eletrônica e funk "Sintonia Edição Especial 10 Anos DJ Lipe".
+
+---
+
+## 1. Identificação do Evento
+- **Título Oficial:** Sintonia Edição Especial 10 Anos DJ Lipe
+- **Data do Evento:** 10 de Abril de 2027 (10/04/2027)
+- **Horário de Início:** 22h00 (Horário Oficial de Brasília)
+- **Local:** Capitu, Tupaciguara - Minas Gerais (MG), Brasil
+- **CEP:** 38430-000
+- **Produtoras Oficiais Responsáveis:** GHVE Eventos & RL Produções
+- **Domínio Canônico:** https://sintoniaedicaoespecial.online
+- **E-mail Oficial:** ingressos@sintoniaedicaoespecial.online
+- **Central Oficial de Atendimento e Reservas no WhatsApp:** +55 34 9153-5921
+
+---
+
+## 2. A Atração Principal e Conceito
+- **DJ Lipe:** Artista de destaque celebrando uma década de carreira dedicada à música eletrônica e ao funk, reunindo milhares de fãs e participantes de Minas Gerais e estados vizinhos.
+- **Conceito:** O festival celebra a trajetória musical de 10 anos do artista com um palco frontal monumental equipado com paredes de LED de última geração, iluminação imersiva e efeitos visuais sincronizados.
+- **Avisos Estruturais:** Diferente de edições convencionais que utilizavam arena 360°, esta edição especial conta com um palco frontal de grande magnitude projetado para potencializar a visão de todos os setores.
+
+---
+
+## 3. Setores do Festival e Grade de Ingressos
+1. **Pista Geral & Bar Central:**
+   - Ampla arena principal com visão de frente para o show.
+   - Mega Bar Central estrategicamente posicionado para eliminar filas de atendimento.
+   - Banheiros estruturados e exclusivos do setor.
+   - Venda direta online no site oficial (1º Lote oficial).
+
+2. **Lounge Rosa (Capacidade: 12 Veículos):**
+   - Ala lateral esquerda do festival.
+   - Espaço seguro cercado por gradis separando os veículos e os grupos.
+   - Permite que o comprador entre com seu carro na festa.
+   - Atendimento dedicado e exclusivo por garçons na área privativa.
+   - Reservas e cotações sob consulta direta no canal oficial do WhatsApp (+55 34 9153-5921).
+
+3. **Lounge Azul (Capacidade: 12 Veículos):**
+   - Ala lateral direita do festival.
+   - Espaço seguro cercado por gradis separando os veículos e os grupos.
+   - Permite que o comprador entre com seu carro na festa.
+   - Atendimento dedicado e exclusivo por garçons na área privativa.
+   - Reservas e cotações sob consulta direta no canal oficial do WhatsApp (+55 34 9153-5921).
+
+4. **Camarote no Palco (Apenas 4 Unidades Ultra-Exclusivas):**
+   - Área privativa instalada diretamente em cima do palco monumental, ao lado da mesa de controle do DJ Lipe.
+   - Acesso exclusivo com vista panorâmica do público e proximidade direta com o artista.
+   - Banheiro privativo dedicado para o camarote.
+   - Atendimento de garçons exclusivo.
+   - Entrada prioritária sem filas.
+   - Reservas sob consulta no canal oficial do WhatsApp (+55 34 9153-5921).
+
+---
+
+## 4. Métodos de Pagamento e Emissão de Ingressos
+- **Plataforma de Pagamento:** Processado com tecnologia Mercado Pago, com certificação PCI-DSS.
+- **PIX Instantâneo:** Geração de QR Code dinâmico e código Copia e Cola com confirmação e emissão em segundos.
+- **Cartão de Crédito:** Parcelamento transparente em até 12 vezes com cálculo e repasse automático de taxas conforme regras oficiais.
+- **Voucher Seguro:** Cada ingresso emitido é nominal e intransferível sem autorização oficial, contendo:
+  - Nome completo e CPF do titular.
+  - Numeração sequencial única atômica (ex: #0001).
+  - Hash criptográfico de validação e QR Code legível por catraca eletrônica na portaria do Capitu.
+  - Envio automático para o e-mail cadastrado e disponibilização instantânea no painel do usuário (/perfil).
+
+---
+
+## 5. Regras de Portaria, Faixa Etária e Documentação
+- **Idade Mínima:** Permitida a entrada desacompanhada a partir de 17 anos completos.
+- **Menores de Idade (17 anos):** Devem apresentar obrigatoriamente na portaria:
+  1. Documento oficial original físico com foto (RG, CNH ou Passaporte).
+  2. Termo de Autorização de Menores assinado pelos pais ou responsáveis legais (gerado automaticamente no perfil do usuário no site).
+- **Menores Acompanhados:** Menores acompanhados dos pais ou responsáveis legais com comprovação de parentesco têm entrada liberada.
+- **Segurança da Catraca:** A leitura do QR Code na portaria invalida o ingresso imediatamente impedindo qualquer reentrada ou compartilhamento de prints.
+
+---
+
+## 6. Links e Recursos Canônicos
+- Site Oficial: https://sintoniaedicaoespecial.online
+- Ingressos: https://sintoniaedicaoespecial.online/#ingressos
+- Termos de Serviço e Privacidade: https://sintoniaedicaoespecial.online/termos
+- Validação Oficial de Portaria: https://sintoniaedicaoespecial.online/validar/[ticketId] (restrito à equipe)
+- WhatsApp de Atendimento: https://wa.me/553491535921

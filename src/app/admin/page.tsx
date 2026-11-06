@@ -9,6 +9,7 @@ import { AdminTicketsTab } from "@/components/admin/AdminTicketsTab";
 import { AdminCourtesiesTab } from "@/components/admin/AdminCourtesiesTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
+import { AdminCouponsTab } from "@/components/admin/AdminCouponsTab";
 import {
   BarChart3,
   Ticket,
@@ -16,12 +17,13 @@ import {
   Users,
   Settings,
   ShieldCheck,
+  Tag,
 } from "lucide-react";
 import { EventConfig } from "@/types/config";
 
 const MASTER_ADMIN_EMAIL = "vitorhugonascimentosique@gmail.com";
 
-type AdminMainTab = "geral" | "ingressos" | "cortesias" | "usuarios" | "configuracoes";
+type AdminMainTab = "geral" | "ingressos" | "cupons" | "cortesias" | "usuarios" | "configuracoes";
 
 export default function AdminPage() {
   const { user, profile, loading: authLoading, logout } = useAuth();
@@ -479,7 +481,21 @@ export default function AdminPage() {
             <span className="truncate">Ingressos ({ticketsTotalCount})</span>
           </button>
 
-          {/* Aba 3: Cortesias */}
+          {/* Aba 3: Cupons & Influencers */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("cupons")}
+            className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              activeTab === "cupons"
+                ? "bg-gradient-to-r from-[#c9a227] via-[#f5e6b8] to-[#c9a227] text-[#07090d] shadow-[0_0_15px_rgba(201,162,39,0.3)]"
+                : "text-[#a8b2c3] hover:text-[#f6f8fc] hover:bg-white/5"
+            }`}
+          >
+            <Tag className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">Cupons & Influencers</span>
+          </button>
+
+          {/* Aba 4: Cortesias */}
           <button
             type="button"
             onClick={() => setActiveTab("cortesias")}
@@ -493,7 +509,7 @@ export default function AdminPage() {
             <span className="truncate">Cortesias ({courtesiesTotalCount})</span>
           </button>
 
-          {/* Aba 4: Usuários */}
+          {/* Aba 5: Usuários */}
           <button
             type="button"
             onClick={() => setActiveTab("usuarios")}
@@ -507,7 +523,7 @@ export default function AdminPage() {
             <span className="truncate">Usuários ({usersTotalCount})</span>
           </button>
 
-          {/* Aba 5: Configurações */}
+          {/* Aba 6: Configurações */}
           <button
             type="button"
             onClick={() => setActiveTab("configuracoes")}
@@ -554,6 +570,13 @@ export default function AdminPage() {
             }}
             onAction={handleTicketAction}
             onVerifyScanner={handleVerifyScanner}
+          />
+        )}
+
+        {activeTab === "cupons" && (
+          <AdminCouponsTab
+            getIdToken={getIdToken}
+            showToast={showToast}
           />
         )}
 

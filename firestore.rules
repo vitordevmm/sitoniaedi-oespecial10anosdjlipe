@@ -17,6 +17,28 @@ rules_version = '2';
 //   - createdAt: timestamp (server timestamp)
 //   - updatedAt: timestamp (server timestamp)
 //
+// Collection: /cupons/{code}
+// Document fields:
+//   - code: string (uppercase normalized)
+//   - influencerName: string
+//   - discountType: string ("none" | "percentage" | "fixed")
+//   - discountValue: number
+//   - unlimited: bool
+//   - maxUses: number or null
+//   - active: bool
+//   - soldCount: number
+//   - appliedUsersCount: number
+//   - totalRevenue: number
+//   - totalDiscountGiven: number
+//
+// Collection: /cupom_compras/{ticketId}
+// Document fields:
+//   - ticketId: string
+//   - couponCode: string
+//   - influencerName: string
+//   - userId: string
+//   - amountPaid: number
+//
 // ===============================================================
 
 service cloud.firestore {
@@ -96,6 +118,27 @@ service cloud.firestore {
       allow read: if true;
       // Writing configuration is strictly restricted to authenticated Admins
       allow write: if isAdmin();
+    }
+
+    // Rules for /cupons/{couponId}
+    match /cupons/{couponId} {
+      // Direct reading or listing of coupons is restricted to admins to prevent scraping
+      allow read, write: if isAdmin();
+    }
+
+    // Rules for /cupom_compras/{ticketId}
+    match /cupom_compras/{ticketId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Rules for /cupom_aplicacoes/{appId}
+    match /cupom_aplicacoes/{appId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Rules for /pedidos/{paymentId}
+    match /pedidos/{paymentId} {
+      allow read, write: if isAdmin();
     }
   }
 }

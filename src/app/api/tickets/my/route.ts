@@ -112,6 +112,10 @@ export async function GET(req: NextRequest) {
           isCourtesy,
           checkedInAt: data.checkedInAt,
           checkedInBy: data.checkedInBy,
+          couponCode: data.couponCode,
+          influencerName: data.influencerName,
+          originalPrice: data.originalPrice,
+          discountAmount: data.discountAmount,
         };
       })
     );

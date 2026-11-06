@@ -22,6 +22,10 @@ export interface Ticket {
   paymentId?: string;
   paymentMethod?: "pix" | "credit_card";
   isCourtesy?: boolean;
+  couponCode?: string;
+  influencerName?: string;
+  originalPrice?: number;
+  discountAmount?: number;
   checkedInAt?: string; // ISO date string de validação
   checkedInBy?: string; // Email do fiscal que validou
 }
