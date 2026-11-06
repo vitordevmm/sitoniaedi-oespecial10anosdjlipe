@@ -270,8 +270,8 @@ export function CheckoutModal({
   const displayQr = solidQrUrl || (qrCodeBase64 ? `data:image/png;base64,${qrCodeBase64}` : null);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-lg my-8 max-h-[92vh] overflow-y-auto rounded-3xl bg-[#101116] border-2 border-[#c9a227]/40 shadow-[0_0_50px_rgba(201,162,39,0.25)] p-6 sm:p-8 text-[#f6f8fc]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md">
+      <div className="relative w-full max-w-lg my-auto max-h-[92vh] flex flex-col rounded-3xl bg-[#101116] border-2 border-[#c9a227]/40 shadow-[0_0_50px_rgba(201,162,39,0.25)] overflow-hidden text-[#f6f8fc]">
         {/* Glow de fundo */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#c9a227]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#0b1930]/40 rounded-full blur-3xl pointer-events-none" />
@@ -281,12 +281,14 @@ export function CheckoutModal({
           type="button"
           onClick={onClose}
           aria-label="Fechar"
-          className="absolute top-5 right-5 p-2 rounded-xl bg-[#0b1930] hover:bg-[#c9a227]/20 text-[#a8b2c3] hover:text-[#f6f8fc] border border-[#0b1930] transition-colors z-30"
+          className="absolute top-5 right-5 p-2 rounded-xl bg-[#0b1930] hover:bg-[#c9a227]/20 text-[#a8b2c3] hover:text-[#f6f8fc] border border-[#0b1930] transition-colors z-30 cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* TELA DE SUCESSO QUANDO APROVADO (PIX OU CARTÃO) */}
+        {/* Container interno rolável blindado: scrollbar suave que NUNCA ultrapassa as bordas do card */}
+        <div className="overflow-y-auto overscroll-contain p-6 sm:p-8 custom-scrollbar">
+          {/* TELA DE SUCESSO QUANDO APROVADO (PIX OU CARTÃO) */}
         {isApproved ? (
           <div className="text-center py-6">
             <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-[#c9a227]/20 border-2 border-[#c9a227] flex items-center justify-center shadow-[0_0_30px_rgba(201,162,39,0.5)] animate-bounce">
@@ -721,6 +723,7 @@ export function CheckoutModal({
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

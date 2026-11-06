@@ -187,6 +187,30 @@ input[type="number"] {
   appearance: textfield !important;
 }
 
+/* Custom Scrollbar Dark & Gold para Modais e Containers */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 162, 39, 0.4) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 14px 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(201, 162, 39, 0.4);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 162, 39, 0.7);
+}
+
 /* Blindagem Dark & Gold Total para o CardPayment Brick do Mercado Pago */
 .card-payment-wrapper,
 #cardPaymentBrick_container,
@@ -200,19 +224,15 @@ input[type="number"] {
   --mp-input-valid-border-color: #c9a227 !important;
 }
 
-/* 1. Força background Dark (#0b1930) em TODOS os wrappers, divs, containers e inputs */
+/* 1. Força background Dark (#0b1930) em wrappers de inputs e campos do formulário */
 .card-payment-wrapper form,
 .card-payment-wrapper fieldset,
-.card-payment-wrapper div,
-.card-payment-wrapper div[class*="input"],
-.card-payment-wrapper div[class*="field"],
-.card-payment-wrapper div[class*="container"],
-.card-payment-wrapper div[class*="wrapper"],
-.card-payment-wrapper div[class*="box"],
-.card-payment-wrapper div[class*="control"],
-.card-payment-wrapper div[class*="svelte"],
+.card-payment-wrapper [class*="form-control"],
+.card-payment-wrapper [class*="input-container"],
+.card-payment-wrapper [class*="input-wrapper"],
 .card-payment-wrapper [class*="mp-input"],
-.card-payment-wrapper [class*="form-control"] {
+.card-payment-wrapper [class*="container-input"],
+.card-payment-wrapper [class*="field-container"] {
   background-color: #0b1930 !important;
   background: #0b1930 !important;
   color-scheme: dark !important;
@@ -285,13 +305,7 @@ input[type="number"] {
 .card-payment-wrapper [class*="valid"],
 .card-payment-wrapper [class*="has-success"],
 .card-payment-wrapper [class*="is-valid"],
-.card-payment-wrapper [aria-invalid="false"],
-.card-payment-wrapper [style*="rgb(0, "],
-.card-payment-wrapper [style*="rgb(1, "],
-.card-payment-wrapper [style*="#002b1f"],
-.card-payment-wrapper [style*="#013328"],
-.card-payment-wrapper [style*="#00402b"],
-.card-payment-wrapper [style*="#00a650"] {
+.card-payment-wrapper [aria-invalid="false"] {
   background-color: #0b1930 !important;
   background: #0b1930 !important;
   border-color: #c9a227 !important;
@@ -316,7 +330,7 @@ input[type="number"] {
   opacity: 0.85 !important;
 }
 
-/* 7. Arredondamento harmônico de todos os campos de input e remoção de bordas rosas feias */
+/* 7. Arredondamento harmônico de todos os campos de input */
 .card-payment-wrapper [class*="input-container"],
 .card-payment-wrapper [class*="form-control"] {
   border-radius: 12px !important;
@@ -348,6 +362,30 @@ input[type="number"] {
   background-color: #0b1930 !important;
   color: #f6f8fc !important;
   color-scheme: dark !important;
+}
+
+/* 8. Botão de Pagamento Oficial em Dourado Metálico do Festival */
+.card-payment-wrapper button[type="submit"],
+.card-payment-wrapper [class*="submit"],
+.card-payment-wrapper [class*="pay-button"],
+#cardPaymentBrick_container button[type="submit"] {
+  background: linear-gradient(to right, #c9a227, #f5e6b8, #c9a227) !important;
+  color: #07090d !important;
+  font-weight: 800 !important;
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 0 20px rgba(201, 162, 39, 0.3) !important;
+  height: 48px !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.card-payment-wrapper button[type="submit"]:hover,
+.card-payment-wrapper [class*="submit"]:hover,
+.card-payment-wrapper [class*="pay-button"]:hover,
+#cardPaymentBrick_container button[type="submit"]:hover {
+  opacity: 0.95 !important;
+  box-shadow: 0 0 30px rgba(201, 162, 39, 0.5) !important;
 }
 
 

@@ -59,23 +59,14 @@ export function CardPaymentForm({
   const sanitizeBrickElements = () => {
     if (!containerRef.current) return;
 
-    // 1. Blindagem de iframes (dados sensíveis do cartão) e seus containers
+    // 1. Blindagem de iframes (dados sensíveis do cartão)
     const iframes = containerRef.current.querySelectorAll("iframe");
     iframes.forEach((iframe) => {
       iframe.setAttribute("allowtransparency", "true");
       iframe.style.setProperty("background-color", "#0b1930", "important");
-      iframe.style.setProperty("background", "#0b1930", "important");
       iframe.style.setProperty("color-scheme", "dark", "important");
       iframe.style.setProperty("border-radius", "12px", "important");
       iframe.style.setProperty("border", "none", "important");
-
-      const parent = iframe.parentElement;
-      if (parent) {
-        parent.style.setProperty("background-color", "#0b1930", "important");
-        parent.style.setProperty("background", "#0b1930", "important");
-        parent.style.setProperty("border-radius", "12px", "important");
-        parent.style.setProperty("overflow", "hidden", "important");
-      }
     });
 
     // 2. Trava e estiliza o seletor de documento como prefixo elegante "CPF |" sem abrir dropdown branco nativo
@@ -85,7 +76,6 @@ export function CardPaymentForm({
       sel.style.setProperty("-webkit-appearance", "none", "important");
       sel.style.setProperty("appearance", "none", "important");
       sel.style.setProperty("background-color", "#0b1930", "important");
-      sel.style.setProperty("background", "#0b1930", "important");
       sel.style.setProperty("color", "#f5e6b8", "important");
       sel.style.setProperty("font-weight", "700", "important");
       sel.style.setProperty("font-size", "13px", "important");
@@ -99,8 +89,6 @@ export function CardPaymentForm({
 
       const parent = sel.parentElement;
       if (parent) {
-        parent.style.setProperty("background-color", "#0b1930", "important");
-        parent.style.setProperty("background", "#0b1930", "important");
         parent.style.setProperty("border-radius", "12px", "important");
         parent.style.setProperty("overflow", "hidden", "important");
         parent.style.setProperty("border", "1px solid rgba(201, 162, 39, 0.4)", "important");
@@ -134,57 +122,10 @@ export function CardPaymentForm({
       docInput.style.setProperty("box-shadow", "none", "important");
       docInput.style.setProperty("outline", "none", "important");
       docInput.style.setProperty("background-color", "#0b1930", "important");
-      docInput.style.setProperty("background", "#0b1930", "important");
       docInput.style.setProperty("color", "#f6f8fc", "important");
     }
 
-    // 4. Neutraliza qualquer fundo verde/branco e bordas verdes em todos os containers
-    const allEls = containerRef.current.querySelectorAll<HTMLElement>("*");
-    allEls.forEach((el) => {
-      const bg = el.style.backgroundColor || "";
-      if (
-        bg.includes("255, 255, 255") ||
-        bg === "#ffffff" ||
-        bg === "white" ||
-        bg.includes("0, 43, 31") ||
-        bg.includes("0, 51, 40") ||
-        bg.includes("0, 40") ||
-        bg.includes("1, 51") ||
-        bg.includes("0, 166, 80") ||
-        bg.includes("0, 128") ||
-        bg === "#002b1f" ||
-        bg === "#013328" ||
-        bg === "#00402b"
-      ) {
-        el.style.setProperty("background-color", "#0b1930", "important");
-        el.style.setProperty("background", "#0b1930", "important");
-      }
-
-      const bc = el.style.borderColor || "";
-      if (
-        bc.includes("0, 166, 80") ||
-        bc.includes("0, 43") ||
-        bc.includes("1, 51") ||
-        bc === "#00a650" ||
-        bc === "#002b1f" ||
-        bc === "#013328"
-      ) {
-        el.style.setProperty("border-color", "#c9a227", "important");
-      }
-
-      // Neutraliza containers de input com classe valid ou success
-      if (
-        el.className &&
-        typeof el.className === "string" &&
-        (el.className.includes("success") || el.className.includes("valid"))
-      ) {
-        el.style.setProperty("background-color", "#0b1930", "important");
-        el.style.setProperty("background", "#0b1930", "important");
-        el.style.setProperty("border-color", "#c9a227", "important");
-      }
-    });
-
-    // 5. Centraliza e estiliza o ícone de cartão no código de segurança na cor dourada
+    // 4. Centraliza e estiliza o ícone de cartão no código de segurança na cor dourada
     const icons = containerRef.current.querySelectorAll<HTMLElement>(
       '[class*="icon"], [class*="securityCode"] svg, [class*="cvv"] svg, [class*="securityCode"] img, [class*="cvv"] img'
     );
@@ -195,7 +136,7 @@ export function CardPaymentForm({
       ic.style.setProperty("top", "50%", "important");
     });
 
-    // 6. Preenche o nome do titular com o nome real do comprador caso esteja vazio
+    // 5. Preenche o nome do titular com o nome real do comprador caso esteja vazio
     try {
       const nameInput = containerRef.current.querySelector<HTMLInputElement>(
         'input[name*="cardholderName"], input[id*="cardholderName"]'
@@ -209,26 +150,6 @@ export function CardPaymentForm({
       // Ignora erro silenciosamente
     }
   };
-
-  // Observador de mutações no DOM para interceptar em tempo real validações do SDK
-  useEffect(() => {
-    if (!isReady || !containerRef.current) return;
-
-    sanitizeBrickElements();
-
-    const observer = new MutationObserver(() => {
-      sanitizeBrickElements();
-    });
-
-    observer.observe(containerRef.current, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["style", "class"],
-    });
-
-    return () => observer.disconnect();
-  }, [isReady]);
 
   const handleSubmit = async (cardFormData: any) => {
     setCardError(null);
@@ -297,15 +218,6 @@ export function CardPaymentForm({
 
   return (
     <div className="relative">
-      {/* Skeleton enquanto o iframe do Mercado Pago monta */}
-      {(!initialized || !isReady) && (
-        <div className="flex flex-col items-center justify-center p-8 rounded-2xl bg-[#0b1930]/40 border border-[#c9a227]/20 text-center min-h-[300px]">
-          <Loader2 className="w-8 h-8 text-[#c9a227] animate-spin mb-3" />
-          <p className="text-xs text-[#f5e6b8] font-bold">Carregando gateway seguro...</p>
-          <span className="text-[11px] text-[#a8b2c3] mt-1">Conectando criptografia PCI-DSS</span>
-        </div>
-      )}
-
       {/* Alerta de Erro de Pagamento */}
       {cardError && (
         <div className="mb-4 p-3.5 rounded-xl bg-red-950/60 border border-red-500/50 flex items-start gap-2.5 text-xs text-red-200 animate-fadeIn">
@@ -318,7 +230,16 @@ export function CardPaymentForm({
       )}
 
       {/* Container Oficial do Brick com ref para injeção de estilo dark nos iframes */}
-      <div ref={containerRef} className={`card-payment-wrapper ${!isReady ? "hidden" : "block"}`}>
+      <div ref={containerRef} className="card-payment-wrapper relative min-h-[380px]">
+        {/* Skeleton enquanto o iframe do Mercado Pago monta */}
+        {(!initialized || !isReady) && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 rounded-2xl bg-[#0b1930] border border-[#c9a227]/20 text-center">
+            <Loader2 className="w-8 h-8 text-[#c9a227] animate-spin mb-3" />
+            <p className="text-xs text-[#f5e6b8] font-bold">Carregando gateway seguro...</p>
+            <span className="text-[11px] text-[#a8b2c3] mt-1">Conectando criptografia PCI-DSS</span>
+          </div>
+        )}
+
         {initialized && (
           <CardPayment
             initialization={{
@@ -368,9 +289,8 @@ export function CardPaymentForm({
             onReady={() => {
               setIsReady(true);
               sanitizeBrickElements();
-              setTimeout(sanitizeBrickElements, 200);
-              setTimeout(sanitizeBrickElements, 600);
-              setTimeout(sanitizeBrickElements, 1200);
+              setTimeout(sanitizeBrickElements, 300);
+              setTimeout(sanitizeBrickElements, 800);
             }}
             onError={(err) => {
               console.error("[CardPayment Brick Error]", err);
